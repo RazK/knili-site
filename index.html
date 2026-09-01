@@ -327,18 +327,48 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 .rcp .tot{font:600 calc(var(--u)*38)/1 var(--display);color:var(--acid);letter-spacing:-.015em}
 .rcp .pend{color:var(--acid)}
 /* A button that opens the page you are already on does nothing. The next move
-   is a few hundred pixels to the left, so point at it. */
-.point{display:flex;align-items:center;gap:calc(var(--u)*14);margin-top:calc(var(--u)*16);
+   is a few hundred pixels to the left, so point at it.
+
+   PORTED VERBATIM FROM THE PRODUCT — extension/content/panel.js, the .point
+   block — and converted to the panel's own pixels. The mock had drifted: a
+   `◀` glyph where the product draws a head and a SHAFT, `gap` where the
+   product gives the arrow and a matching tail `flex:1 1 0` so the label sits
+   dead centre and the shaft takes up the slack, and no `white-space:nowrap`,
+   which is why one 33-character run-on became a three-line paragraph wearing
+   a button. The copy is the product's too: two facts, two lines, no em dash
+   welding them together, the second line in --acid-ink mono the way the
+   survivor card's own second line is. A preview that behaves differently from
+   the thing it previews is a lie about the thing. */
+.point{display:flex;align-items:center;margin-top:calc(var(--u)*16);overflow:hidden;
   background:var(--acid);color:var(--ink2);padding:calc(var(--u)*14) calc(var(--u)*16)}
-.point .arrow{font-size:calc(var(--u)*20);line-height:1}
+/* A head with no shaft floats. Giving the arrow a shaft that spans whatever
+   gap is left lets the label sit dead centre — the shaft simply takes up the
+   slack, and an equal tail on the right keeps the centring honest. */
+.point .arrow,.point .tail{flex:1 1 0;min-width:calc(var(--u)*20)}
+.point .arrow{display:flex;align-items:center}
+.point .arrow:before{content:"";flex:0 0 auto;width:0;height:0;
+  border-top:calc(var(--u)*6) solid transparent;
+  border-bottom:calc(var(--u)*6) solid transparent;
+  border-right:calc(var(--u)*9) solid currentColor}
+.point .arrow:after{content:"";flex:1 1 auto;height:calc(var(--u)*2);
+  background:currentColor;margin-right:calc(var(--u)*12)}
+.point .lbl{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;
+  gap:calc(var(--u)*4)}
+.point b{font:600 calc(var(--u)*14)/1.2 var(--display);letter-spacing:.06em;
+  text-transform:uppercase;white-space:nowrap}
+.point i{font:400 calc(var(--u)*10)/1 var(--mono);font-style:normal;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--acid-ink);
+  white-space:nowrap}
+.point i:empty{display:none}
 /* The hero shot is a screenshot, not part of the sequence — it is the first
    thing anyone sees and it should carry the panel's own movement. It was gated
    on a class only the stage ever sets, which is why it stopped. */
-.frame .point .arrow{animation:knudge 1.2s ease-in-out infinite}
-.point b{font:600 calc(var(--u)*14)/1.2 var(--display);letter-spacing:.06em;
-  text-transform:uppercase}
-@keyframes knudge{0%,100%{transform:translateX(0);opacity:1}
-                  50%{transform:translateX(-9px);opacity:.55}}
+.frame .point .arrow{animation:knudge 1.3s ease-in-out infinite}
+/* The product's nudge exactly: 1.3s, six pixels, no opacity flicker — written
+   in the panel's own pixels, because a flat -6px would travel six REAL pixels
+   whether the shot renders at 1.0 or at 0.39. */
+@keyframes knudge{0%,100%{transform:translateX(0)}
+                  50%{transform:translateX(calc(var(--u)*-6))}}
 
 /* ================================================ how it works, on paper */
 .works{background:var(--paper);padding:40px 0 32px;
@@ -391,10 +421,28 @@ h1 em{font-style:normal;color:var(--acid);display:block}
    scale — full width, panel still 309px and legible — because on a large screen
    the point is seeing the panel AND the page together. A phone has no room for
    that, so it zooms per beat as well. Same table, same transform, two windows. */
+/* The frame is a shape, not a number. It was 560px on a wide screen and a
+   flat 360px on every phone — one fixed height serving a 360px screen and a
+   430px one alike, inside a page that otherwise scales. It takes its height
+   from its own width now and stops at the desktop 560, so it is continuous
+   at every width in between rather than stepping at a breakpoint.
+   20/21 is measured, not chosen: the tallest subject the camera has to hold
+   at a width fit is beat 4's seam, ~0.87 high per wide, and a frame a little
+   taller than square clears that at every width with air to spare.
+   The height transition went with the fixed heights — nothing resizes this
+   box any more, and nothing may: see frameBeat below for why. */
 .stagewin{--dw:1400;--avail:1072px;--px:min(calc(var(--avail)/var(--dw)),1px);
-  position:relative;overflow:hidden;height:560px;box-shadow:var(--lift);
-  transition:height .45s cubic-bezier(.3,.8,.3,1)}
-.stage{--u:var(--px);--fz:1;--fx2:0px;--fy2:-178px;
+  position:relative;overflow:hidden;box-shadow:var(--lift);
+  /* width:100% is load-bearing. With both dimensions auto, clamping the
+     height against max-height re-derives the WIDTH from the ratio too, and
+     the window stopped filling its column — 533px inside a 637px one.
+     A definite width leaves the ratio only the height to resolve. */
+  width:100%;aspect-ratio:20/21;height:auto;min-height:320px;max-height:560px}
+/* The camera's identity. Every number that positions it now comes from
+   frameBeat() measuring the composition, including the first one — there is
+   no seeded offset left in this stylesheet. With JavaScript off this is what
+   stands: the composition from its own top-left corner, uncropped across. */
+.stage{--u:var(--px);--fz:1;--fx2:0px;--fy2:0px;
   transform-origin:0 0;box-shadow:none;
   transform:translate(var(--fx2),var(--fy2)) scale(var(--fz));
   transition:transform .45s cubic-bezier(.3,.8,.3,1);
@@ -441,7 +489,23 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 .sbody{display:flex;align-items:stretch;height:calc(var(--px)*920)}
 .stage .page{position:relative;flex:1 1 auto;min-width:0;overflow:hidden;
   background:var(--co-bg)}
-.stage .pnl{flex:0 0 calc(var(--px)*404)}
+/* THE PANEL IS 404 DESIGN PIXELS WIDE, AND SO IS WHAT IS DRAWN IN IT.
+   .pnl{--u:1px} up in the panel block was winning the cascade over
+   .stage{--u:var(--px)}, so the stage's panel was a 404-design-px DESIGN laid
+   out at 404 REAL px inside a box only 404*--px wide — 309px on a 1072px
+   column. Everything inside it was 31% too big for its own frame, and the
+   damage was not cosmetic: measured at a 1000px viewport the content stack
+   came to 716px in a 616px box and .pnl{overflow:hidden} ate the last 100px,
+   which is the PAY ON THE PAGE bar — the element beat 4 exists to frame. The
+   same squeeze crushed that bar's arrow: 213px of label room instead of 308
+   turned a 78.5px shaft into 31px and wrapped a one-line label onto three.
+   With --u tied to --px the panel is a faithful photograph of the extension at
+   whatever scale the column gives it, the content stack always fits its box,
+   and the composition is finally relative within itself all the way down.
+   The trade is type size: 13 design px renders at 10px on a 1072 column rather
+   than 13px. That is what a screenshot of a 404px panel shown at 76% looks
+   like, and it is what the camera comment two blocks up always claimed. */
+.stage .pnl{flex:0 0 calc(var(--px)*404);--u:var(--px)}
 /* the three pieces that move, and the only properties they move with */
 .stage .page{transition:opacity .5s ease-out, transform .7s cubic-bezier(.3,.8,.3,1)}
 .stage .cbar{background:#E3E6EA;border-bottom:calc(var(--px)*1) solid #C8CCD3;
@@ -617,22 +681,46 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 .checkout .co{flex:1;background:#FAFBFC;display:grid;align-content:center;align-items:start;
   grid-template-columns:1fr calc(var(--px)*300);gap:calc(var(--px)*24);
   padding:calc(var(--px)*24)}
-.flab{height:calc(var(--px)*9);width:calc(var(--px)*96);background:#DDE1E6;
-  border-radius:calc(var(--px)*4);margin:calc(var(--px)*2) 0 calc(var(--px)*10);
-  display:block}
-.flab.w{width:calc(var(--px)*130)}
-.fld2{height:calc(var(--px)*34);border:calc(var(--px)*1) solid #DFE3E8;
-  border-radius:calc(var(--px)*4);background:#fff;display:block}
-.frow{display:grid;gap:calc(var(--px)*10);margin-bottom:calc(var(--px)*10)}
-.frow.two{grid-template-columns:1fr 1fr}
-.frow.three{grid-template-columns:1fr 1fr 1fr}
-.opt{display:flex;align-items:center;gap:calc(var(--px)*10);background:#fff;
-  border:calc(var(--px)*1) solid #DFE3E8;border-radius:calc(var(--px)*4);
-  padding:calc(var(--px)*10) calc(var(--px)*12);margin-bottom:calc(var(--px)*8)}
-.opt i{width:calc(var(--px)*12);height:calc(var(--px)*12);border-radius:50%;flex:none;
+/* ==========================================================================
+   THE CHECKOUT, WRITTEN OUT. This column used to be grey placeholder bars —
+   .flab / .fld2 / .frow / .opt — which reads as a page that has not LOADED,
+   when the whole claim is that it has been FILLED. A skeleton cannot carry
+   that claim, so every field now carries its value, in the shop's own type and
+   palette rather than the panel's.
+   The payment section is the one thing deliberately left blank, caret still
+   sitting in the card field. That is not an omission, it is the product: it
+   does the shopping, you do the buying. Everything here is stand-in data —
+   only Jerusalem, Israel is real, because that is what the panel asked for.
+   Design pixels times --px like the rest of the composition, so it scales as
+   one object with everything around it.
+   ========================================================================== */
+.ch{font-size:calc(var(--px)*13);letter-spacing:.08em;text-transform:uppercase;
+  color:var(--co-dim);margin:calc(var(--px)*18) 0 calc(var(--px)*10)}
+.cform > .ch:first-child{margin-top:0}
+.cfld{background:var(--co-card);border:calc(var(--px)*1) solid var(--co-line);
+  border-radius:calc(var(--px)*4);padding:calc(var(--px)*8) calc(var(--px)*12);
+  margin-bottom:calc(var(--px)*8);min-width:0}
+.cfld i{display:block;font-style:normal;font-size:calc(var(--px)*11);
+  color:var(--co-dim);letter-spacing:.04em}
+.cfld span{display:block;font-size:calc(var(--px)*15);color:var(--co-ink);
+  margin-top:calc(var(--px)*3);white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis}
+.crow{display:grid;grid-template-columns:1fr 1fr;gap:calc(var(--px)*10)}
+.copt{display:flex;align-items:center;gap:calc(var(--px)*10);background:var(--co-card);
+  border:calc(var(--px)*1) solid var(--co-line);border-radius:calc(var(--px)*4);
+  padding:calc(var(--px)*11) calc(var(--px)*12);margin-bottom:calc(var(--px)*8);
+  font-size:calc(var(--px)*14);color:var(--co-ink)}
+.copt i{width:calc(var(--px)*14);height:calc(var(--px)*14);border-radius:50%;flex:none;
   border:calc(var(--px)*2) solid #C6CCD4;display:block}
-.opt u{flex:1;height:calc(var(--px)*8);border-radius:calc(var(--px)*4);
-  background:#E4E7EB;display:block}
+.copt.on{border-color:var(--co-btn)}
+.copt.on i{background:var(--co-btn);border-color:var(--co-btn);
+  box-shadow:inset 0 0 0 calc(var(--px)*3) var(--co-card)}
+.copt span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.copt b{font-weight:600;flex:none}
+/* the one field nobody filled — an empty input with the caret still in it */
+.cfld.blank span{height:calc(var(--px)*18);margin-top:calc(var(--px)*4)}
+.cfld.blank u{display:block;width:calc(var(--px)*2);height:calc(var(--px)*15);
+  background:var(--co-ink);opacity:.5}
 .checkout .co-card{padding:calc(var(--px)*20)}
 .checkout .co-item img{width:calc(var(--px)*56);height:calc(var(--px)*56)}
 .scan{position:absolute;inset:0;overflow:hidden;pointer-events:none;opacity:0;
@@ -660,14 +748,17 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 .stage[data-beat="1"] .out,.stage[data-beat="2"] .out,.stage[data-beat="3"] .out{display:none}
 .stage[data-beat="4"] .out{animation:rise .5s ease-out backwards}
 .stage[data-beat="0"] .out{opacity:0;transition:opacity .4s ease-out}
-@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+/* panel pixels, not real ones — same reason as knudge above */
+@keyframes rise{from{opacity:0;transform:translateY(calc(var(--u)*10))}
+                to{opacity:1;transform:none}}
 
 /* The last click is the reader's own, so the cursor arrives from the page's
    space — from off-stage, below and to the left — and never out of the panel.
    Knili filled the checkout; the person buys. */
 .hand{position:absolute;left:var(--hx,40.3%);top:var(--hy,53.1%);width:calc(var(--px)*15);
   height:calc(var(--px)*24);margin:calc(var(--px)*-2) 0 0 calc(var(--px)*-2);
-  pointer-events:none;z-index:3;filter:drop-shadow(0 2px 4px rgba(10,17,64,.45))}
+  pointer-events:none;z-index:3;
+  filter:drop-shadow(0 calc(var(--px)*2) calc(var(--px)*4) rgba(10,17,64,.45))}
 .stage[data-beat="1"] .hand,.stage[data-beat="2"] .hand,
 .stage[data-beat="3"] .hand,.stage[data-beat="0"] .hand{opacity:0}
 /* A beat of stillness first. The thumbnail's flight is 750ms and the form
@@ -752,14 +843,18 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 @keyframes gopulse{0%{transform:scale(1)}34%{transform:scale(1.05)}100%{transform:scale(1)}}
 
 .steps div{transition:opacity .3s ease-out, transform .3s ease-out}
-.stage[data-beat="3"] .steps div{opacity:0;transform:translateY(-5px)}
+/* panel pixels: the last absolute length left inside the composition */
+.stage[data-beat="3"] .steps div{opacity:0;transform:translateY(calc(var(--u)*-5))}
 .stage[data-beat="3"] .steps div.in{opacity:1;transform:none}
 .bars i{transition:width .75s cubic-bezier(.22,.7,.3,1)}
 /* the arrow keeps pointing at the page for as long as the stage is on screen */
 .stage.play .point .arrow{animation:knudge 1.15s ease-in-out infinite}
 
 /* ==================================================== how to install */
-.install{padding:88px 0 104px}
+/* 104 of bottom padding plus the footer's own 24 of top put 128px of nothing
+   between the last card and the rule. The section still opens on 88; it just
+   stops holding a screen open after it has finished talking. */
+.install{padding:88px 0 72px}
 .grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;
   margin-bottom:20px}
 .grid5 .cap{font-size:13px;letter-spacing:.12em;margin-bottom:12px}
@@ -767,6 +862,22 @@ h1 em{font-style:normal;color:var(--acid);display:block}
   color:#202124;overflow:hidden;box-shadow:var(--lift)}
 .mknote{font:400 10.5px/1.45 var(--ui);color:#5F6368;margin-top:10px}
 .mknote b{font-weight:600;color:#3C4043}
+
+/* DESKTOP ONLY, SAID OUT LOUD. It used to be implied — by a collapsed
+   disclosure labelled WHEN YOU ARE AT YOUR COMPUTER — which a reader on a
+   phone can miss entirely and then work through five steps they cannot
+   perform. It is a plain statement now, on the bar's own ink2 plate in the
+   page's mono-label voice, with the monitor drawn inline like every other
+   glyph here: this page makes zero external requests and keeps making zero. */
+.deskonly{display:flex;align-items:flex-start;gap:14px;margin:0 0 24px;
+  padding:16px;background:var(--ink2);
+  font:400 13px/1.5 var(--mono);letter-spacing:.03em;color:var(--body)}
+.deskonly svg{width:24px;height:24px;flex:none;color:var(--acid);margin-top:-1px}
+/* the icon and the sentence, and the sentence is ONE flex item — as three
+   siblings the label and the text wrapped past each other in a phone column */
+.deskonly p{flex:1;min-width:0;margin:0}
+.deskonly b{font-weight:500;color:var(--acid);text-transform:uppercase;
+  letter-spacing:.1em}
 
 .mk1{background:#F1F3F4}
 .dlbtn{display:block;background:var(--acid);color:var(--ink2);text-decoration:none;
@@ -881,7 +992,10 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 .pop .row svg{width:13px;height:13px;margin-left:auto;color:var(--g);flex:none}
 
 /* =============================================================== footer */
-footer{border-top:1px solid var(--rule);padding:24px 0 64px}
+/* 64px below the last line of the spec was 64px of ground with nothing on it
+   and nothing under it — the end of the document, held open. Half of it is
+   the end of the page; the other half was dead. */
+footer{border-top:1px solid var(--rule);padding:24px 0 32px}
 .spec{display:flex;flex-wrap:wrap;gap:8px 24px;justify-content:space-between;
   font:400 12px/1.6 var(--mono);color:var(--dim);letter-spacing:0}
 .spec a{color:var(--acid)}
@@ -897,46 +1011,96 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
   .hero-grid{grid-template-columns:1fr;gap:40px}
   .fit{--avail:min(874px,calc(100vw - 48px))}
 }
-@media (max-width:900px){
-  /* A phone cannot hold the whole composition, and cropping it one way for the
-     whole sequence loses whichever beat is not about the panel. So the window
-     re-frames per beat, onto whatever that beat is actually about: the panel
-     for the ask, the shop for the search, the seam between them for the
-     handoff. Same DOM, same timeline, same driver as desktop — only a
-     transform on the composition changes, so it reads as the frame moving. */
-  /* The composition keeps its desktop scale — pinning --avail is the whole
-     trick. Fitted to 358px of screen it would render 1400 design px into 358
-     and everything in it would be 4px tall; pinned, it stays legible and the
-     window crops instead. Specificity beats the @supports rule below. */
-  .works .stagewin{--avail:1072px}
-  /* The desktop entrance — panel and page sliding in from the left — is what
-     the camera does here instead, and leaving it on put the subject 381px away
-     from where box() measures it, so beats 0 and 1 framed bare cream. Layout
-     space cannot see a transform that is about to be applied; the cure is to
-     not apply one. Any future frame subject must stay untransformed too. */
-  .stage[data-beat="1"] .pnl,.stage[data-beat="0"] .pnl,
-  .stage[data-beat="1"] .page,.stage[data-beat="0"] .page,
-  .stage[data-beat="1"] .cbar,.stage[data-beat="0"] .cbar{transform:none}
-  .stagewin{height:360px;background:var(--co-bg)}
-  .stage{--fz:.672;--fx2:-346px;--fy2:-155px}
-  .beatnav{grid-template-columns:1fr;gap:12px}
+/* ==========================================================================
+   THE TIGHT CAMERA. A screen that cannot hold the whole composition gets it
+   one beat at a time, framed on whatever that beat is actually about: the
+   panel for the ask, the shop for the search, the seam between them for the
+   handoff. Same DOM, same timeline, same driver as a wide screen — only a
+   transform on the composition changes, so it reads as the frame moving.
 
-  /* Wherever the panel is large in frame people will read it, so nothing in it
-     goes below 11px — even where that departs from the extension's exact
-     proportions. Legible beats faithful on a phone. */
-  .stage .icons,.stage .tag,.stage .kv,.stage .foot,
-  .stage .buy-m span,.stage .rcp dt{font-size:11px}
-  .stage h3,.stage .stamp,.stage .starters span,.stage .chip,
-  .stage .bars span{font-size:11.5px}
-  .stage .rcp,.stage .steps div,.stage .now span{font-size:12px}
-  .stage .ask{font-size:13px}
-  /* Two frames zoom out below the panel's own scale, so the things those beats
-     are about get sized for the frame they appear in: the shop's name while
-     the pages flick, and the two labels either side of the seam. */
-  .stage .wm{font-size:calc(var(--px)*26)}
-  .stage .co-pay{font-size:calc(var(--px)*22)}
-  .stage .point b{font-size:calc(var(--u)*22)}
-  .stage .point .arrow{font-size:calc(var(--u)*30)}
+   `.tight` is set by frameBeat() from a MEASURED comparison — does the
+   composition fit the window's width — not by a media query. Everything that
+   only makes sense in that mode hangs off the class, so the mode and its
+   consequences can never disagree with each other, which is what a stylesheet
+   breakpoint and a matchMedia() in the driver were free to do.
+   ========================================================================== */
+/* The desktop entrance — panel and page sliding in from the left — is what
+   the camera does here instead, and leaving it on put the subject 381px away
+   from where box() measures it, so beats 0 and 1 framed bare cream. Layout
+   space cannot see a transform that is about to be applied; the cure is to
+   not apply one. Any future frame subject must stay untransformed too. */
+.stage.tight[data-beat="1"] .pnl,.stage.tight[data-beat="0"] .pnl,
+.stage.tight[data-beat="1"] .page,.stage.tight[data-beat="0"] .page,
+.stage.tight[data-beat="1"] .cbar,.stage.tight[data-beat="0"] .cbar{transform:none}
+/* the ground the window shows wherever the cropped composition does not reach */
+.stagewin.tight{background:var(--co-bg)}
+/* AT THE ASK THERE IS NO BROWSER YET — and the window has to agree with the
+   stage about that. The stage already goes background:transparent and
+   box-shadow:none for beats 0 and 1; the WINDOW around it kept its own lift
+   and its own hairline, and behind a transparent stage sits the works
+   section's white paper. So a panel that is supposed to be floating on the
+   page arrived inside a white rectangle with a shadow round it. Measured
+   before and after the last round's changes and identical in both, so this is
+   older than the camera — but it contradicts the rule three lines up, and the
+   rule is right. :has() rather than a class because the beat lives on the
+   stage and the ground lives on its parent; no JavaScript should have to
+   keep two boxes in step over something the stylesheet can see. */
+.stagewin:has(.stage[data-beat="0"]),
+.stagewin:has(.stage[data-beat="1"]){box-shadow:none;background-color:transparent}
+/* Two frames zoom out below the panel's own scale, so the things those beats
+   are about get sized for the frame they appear in: the shop's name while the
+   pages flick, and the two labels either side of the seam. These are the shot's
+   own units, not pixel floors — they scale with everything around them. */
+/* The address bar has to survive a .49 zoom, so it is drawn larger inside the
+   composition rather than pinned to a pixel size outside it — the same move
+   the shop's wordmark makes two lines down. The pill grows with its type and
+   stays inside the bar's own 44 design px; nothing here is absolute. */
+.stage.tight .omni{height:calc(var(--px)*38);border-radius:calc(var(--px)*19);
+  font-size:calc(var(--px)*28);padding:0 calc(var(--px)*16)}
+.stage.tight .omni svg{width:calc(var(--px)*22);height:calc(var(--px)*22)}
+.stage.tight .lights i{width:calc(var(--px)*16);height:calc(var(--px)*16)}
+.stage.tight .cbar .nav{width:calc(var(--px)*24);height:calc(var(--px)*24)}
+.stage.tight .cbar img{width:calc(var(--px)*30);height:calc(var(--px)*30)}
+.stage.tight .wm{font-size:calc(var(--px)*26)}
+.stage.tight .co-pay{font-size:calc(var(--px)*22)}
+/* The tight camera zooms this bar out, so its two lines are set larger than
+   the product's — but the shaft is what pays for it, and the shaft is the
+   thing that makes the arrow POINT. Measured: the old 22px override left the
+   label 171.4 of the bar's 213.3 of content, gave the arrow its 20px minimum
+   and collapsed the shaft to exactly 0.0px — a floating head, which is the
+   defect the product itself just fixed. 24/17 keeps one line, puts the label
+   at 10.6px effective at 390 (the shop's own Place order lands at 9.7 under
+   the same camera, and the panel should be the louder of the two), and leaves
+   the arrow 39 design px of shaft. */
+.stage.tight .point b{font-size:calc(var(--u)*24)}
+.stage.tight .point i{font-size:calc(var(--u)*17)}
+/* THE FINALE, RE-PROPORTIONED FOR A PORTRAIT FRAME. Written for a landscape
+   screen the block is twice as wide as it is tall, and a portrait window can
+   only letterbox that: measured at 390px it filled the frame edge to edge —
+   clipping the left of the cart — with 96px of empty cobalt above and 97px
+   below. Cropping was never the fix; the proportions were wrong for the frame.
+   So the sentences break here, which makes the block very nearly square (~0.87
+   high per wide, the shape the window is) and lets the type run more than
+   twice the size. The padding is part of the framed box, so the camera fits
+   the AIR as well as the ink and cannot press one against the other.
+   Flush left survives — mark, line one and line two share one edge — and so
+   does the spacing relationship: the mark sits close to the words it belongs
+   to, and the two statements sit further apart than the lines inside either. */
+.stage.tight .fin{width:calc(var(--px)*620);padding:calc(var(--px)*40);
+  gap:calc(var(--px)*14)}
+.stage.tight .finale img{width:58%}
+.stage.tight .finale p{font-size:calc(var(--px)*86);line-height:1.02}
+.stage.tight .finale em{margin-top:calc(var(--px)*30)}
+
+@media (max-width:900px){
+  /* The composition stops shrinking with the column here and holds the scale
+     it had. Fitted instead to 358px of screen it would lay 1400 design px out
+     into 358, everything in it would be rasterised at four or five pixels, and
+     the camera would then magnify that mush. Pinned, the text is laid out
+     large and the camera scales it DOWN, which is the direction that stays
+     crisp. Specificity beats the @supports rule below. */
+  .works .stagewin{--avail:1072px}
+  .beatnav{grid-template-columns:1fr;gap:12px}
 }
 @media (max-width:660px){
   /* One call to action, and one a thumb can actually complete. ADD TO CHROME
@@ -971,23 +1135,70 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
 @media (max-width:720px){
   .hero{padding:32px 0 48px}
   .works{padding:56px 0 48px}
-  .install{padding:56px 0 72px}
+  .install{padding:56px 0 40px}
   .btn{font-size:16px;padding:16px 24px}
 }
+/* ==========================================================================
+   THE SWIPE RAIL. The native scrollbar on a phone is an overlay: it appears
+   while you are ALREADY scrolling, which is the wrong half of the job — the
+   half that matters is telling you the row moves before you touch it. So the
+   native bar goes and this takes its place: how much of the row is on screen,
+   where in the row you are, and one word saying it moves. It is an indicator,
+   never a control — pointer-events:none and aria-hidden — so there is no
+   target here for a thumb to miss and nothing under 44px to answer for.
+   ========================================================================== */
+.swipe{display:none}
+@media (max-width:640px){
+  /* Both mechanisms, because they do not coexist: Chrome 121+ honours the
+     standard scrollbar-width and IGNORES every ::-webkit-scrollbar rule the
+     moment it is set, and older Chrome and Safari only know the pseudo. Each
+     one hides; whichever is in charge, the result is the same. */
+  .grid5{scrollbar-width:none}
+  .grid5::-webkit-scrollbar{display:none}
+  .swipe{display:flex;align-items:center;gap:12px;margin:0 0 20px;
+    pointer-events:none}
+  .swrail{flex:1;min-width:0;height:4px;background:var(--rule);display:block;
+    position:relative;overflow:hidden}
+  .swrail i{position:absolute;left:0;top:0;bottom:0;display:block;
+    background:var(--acid);width:var(--sw,40%);
+    transform:translateX(var(--sx,0px));transition:transform .12s linear}
+  .swipe b{font:500 11px/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;
+    color:var(--acid);white-space:nowrap;transition:opacity .3s ease-out}
+  /* once you have started, the instruction has done its job and steps back —
+     the rail keeps answering the other half of the question */
+  .swipe.moved b{opacity:.4}
+}
+
 @media (max-width:640px){
   /* Five cards, one screen. A swipeable row gives each step its real size and
      costs one screen of height instead of five — and the peek of the next card
      at the right edge is what tells you it moves. Auto-play stops here: a loop
      that advances cards the reader is scrolling by itself would fight them, and
      the swipe is the better interaction. */
+  /* Snapping is OFF until the disclosure is open. A mandatory snap container
+     re-snaps to the element it last snapped to whenever its layout changes,
+     and `<details>` content changes layout the instant it opens — so a row
+     that acquired a snap target while it was closed and unlaid-out came back
+     two cards in. With no snapping there is nothing to come back to, and the
+     driver's reset (see the script) lands on card 01. */
   .grid5{display:flex;grid-template-columns:none;gap:12px;overflow-x:auto;
-    scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
+    scroll-snap-type:none;-webkit-overflow-scrolling:touch;
     margin:0 -16px 16px;padding:0 16px 10px;scroll-padding-left:16px;
     overscroll-behavior-x:contain}
-  .grid5 > figure{flex:0 0 80%;min-width:0;grid-column:auto;scroll-snap-align:start}
-  .mk{height:252px}
-  .mkomni{height:44px}
-  .dlbtn{padding:16px 10px}
+  .whenpc[open] .grid5{scroll-snap-type:x mandatory}
+  /* 80% of the screen per card put 1.2 cards on screen: one card, and a
+     sliver that reads as damage rather than as "there is more". The card is
+     144px now, and the mock inside it is NOT re-laid-out at 144 — it is drawn
+     at its own 200px and zoomed to 0.72, so every part of it shrinks together
+     and it stays a picture of Chrome instead of turning to mush. 144 plus the
+     12px gap is 2.1 cards on a 360px screen and 2.6 on a 430px one: a row you
+     can see is a row. The caption steps down with the card it names.
+     The old .mkomni/.dlbtn touch bumps went with this: they cannot survive a
+     zoom, and this section is now stated to be desktop-only — the controls a
+     phone can actually use are the hero's copy-the-link and nothing here. */
+  .grid5 > figure{flex:0 0 144px;min-width:0;grid-column:auto;scroll-snap-align:start}
+  .grid5 .cap{font-size:11px;letter-spacing:.1em;margin-bottom:8px}
+  .mk{zoom:.72;height:204px}
 }
 @media (max-width:660px){
   /* the only target under 44 in the measured sweep */
@@ -995,31 +1206,19 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
     padding:0}
 }
 @media (max-width:620px){
-  /* The hero shot cannot hold a 404px panel beside a checkout on a phone. The
-     panel is the product, so the checkout half goes and the panel gets the
-     whole frame at very nearly its true size — 358px of 404, ~11.5px type,
-     which is a UI you can read rather than a screenshot of one. */
-  .fit{--dw:404}
-  .fbody .co{display:none}
-  /* The hero is 1.4 screens on a phone and this is where its pixels are: the
-     four folded heads are empty ground in a still image. The ask and the answer
-     both survive. */
-  /* The stage has a camera and a transform; the hero shot has neither, so its
-     design pixels are what render — at 358 of 404 the small labels land near
-     8px and the shot reads as something to squint at. The text that carries
-     meaning gets the same 11px floor the stage has. The text that is only
-     texture — the shop domain, the panel's two icon controls, the starter
-     suggestions — steps back in contrast instead of growing: nobody needs to
-     read `profile`, and making it bigger would only make it shout. */
-  .frame .stamp,.frame h3{font-size:11.5px}
-  .frame .rcp dt{font-size:11px}
-  .frame .rcp,.frame .ask{font-size:12px}
-  .frame .buy-m span,.frame .icons,.frame .starters span{opacity:.55}
-  .frame .zmid{display:none}
+  /* THE HERO SHOT IS ONE OBJECT AND IT SCALES AS ONE. This block used to drop
+     --dw to 404 and hide `.fbody .co`, which amputated the checkout: a Chrome
+     address bar reading shopheathotsauce.com/checkout above a window with no
+     shop in it. It also pinned five absolute font sizes inside the shot, which
+     is the same error in the other direction — a fixed 11px label inside a
+     picture rendered at 0.39 is not part of that picture.
+     Everything in the shot is design pixels times --px, so the whole
+     composition — chrome bar, checkout, panel — shrinks together and stays
+     itself. At 358px of screen that lands near 0.41 and the shot becomes a
+     small crisp PICTURE of a browser rather than a UI you read. That is the
+     intent, and no floor is coming back to "fix" it. */
   .hero{padding:24px 0 32px}
   .hero-grid{gap:28px}
-  .finale img{max-width:72%}
-  .finale p{font-size:calc(var(--px)*38)}
 }
 @media (max-width:560px){
   .wrap{padding:0 16px}
@@ -1033,7 +1232,9 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
   .bar,.btn-sm,.steps div,.bars i,.beatnav li:after{transition:none}
   .stage *,.stage{animation:none!important;transition:none!important}
   .caret,.go.pulse,.mk.live *,.mk.live,
-  .frame .point .arrow{animation:none!important}
+  .point .arrow,.frame .point .arrow{animation:none!important}
+  /* the rail still tracks the row; it just stops easing to the new position */
+  .swrail i,.swipe b{transition:none}
   /* the end of the sequence: the pair composed, the answer in, and the
      reader's cursor resting on the shop's own button */
   .stage .hand{opacity:1;transform:none}
@@ -1079,7 +1280,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
       <p class="lede">One sentence in. A filled checkout out.</p>
       <a class="btn ondesk" href="knili-extension.zip" download>Add to Chrome</a>
       <div class="onphone">
-        <button class="btn" id="copyLink" type="button">Copy the link</button>
+        <button class="btn" id="copyLink" type="button">Copy the link for your computer</button>
         <p class="murl" id="siteUrl">razk.github.io/knili-site</p>
       </div>
       <nav class="jump">
@@ -1158,7 +1359,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
                     <dt>Card</dt><dd class="pend">yours to enter</dd>
                   </dl>
                 </div>
-                <div class="point"><span class="arrow">&#9664;</span><b>Pay on the page &mdash; it is filled in</b></div>
+                <div class="point"><span class="arrow"></span><span class="lbl"><b>Pay on the page</b><i>It is filled in</i></span><span class="tail"></span></div>
               </div>
             </div>
           </div>
@@ -1211,19 +1412,28 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
             <div class="nav"><i></i><i></i><i></i><i></i><i></i></div>
             <div class="cobody">
               <div class="co">
+                <!-- Stand-in data throughout. example.com is the reserved
+                     domain, the street is not one, and the only true value on
+                     the page is the city the panel was asked for. -->
                 <div class="cform">
-                  <i class="flab"></i>
-                  <div class="frow"><i class="fld2"></i></div>
-                  <i class="flab w"></i>
-                  <div class="frow two"><i class="fld2"></i><i class="fld2"></i></div>
-                  <div class="frow"><i class="fld2"></i></div>
-                  <div class="frow three"><i class="fld2"></i><i class="fld2"></i><i class="fld2"></i></div>
-                  <i class="flab"></i>
-                  <div class="opt"><i></i><u></u></div>
-                  <div class="opt"><i></i><u></u></div>
-                  <i class="flab w"></i>
-                  <div class="frow"><i class="fld2"></i></div>
-                  <div class="frow two"><i class="fld2"></i><i class="fld2"></i></div>
+                  <p class="ch">Contact</p>
+                  <div class="cfld"><i>Email</i><span>dana@example.com</span></div>
+                  <p class="ch">Shipping address</p>
+                  <div class="cfld"><i>Name</i><span>Dana Levi</span></div>
+                  <div class="cfld"><i>Address</i><span>1 Example Street, Apt 4</span></div>
+                  <div class="crow">
+                    <div class="cfld"><i>City</i><span>Jerusalem</span></div>
+                    <div class="cfld"><i>Country</i><span>Israel</span></div>
+                  </div>
+                  <p class="ch">Delivery</p>
+                  <div class="copt on"><i></i><span>Standard &middot; 3&ndash;5 days</span><b>Free</b></div>
+                  <div class="copt"><i></i><span>Express &middot; next day</span><b>$12.00</b></div>
+                  <p class="ch">Payment</p>
+                  <div class="cfld blank"><i>Card number</i><span><u></u></span></div>
+                  <div class="crow">
+                    <div class="cfld blank"><i>Expiry</i><span><u></u></span></div>
+                    <div class="cfld blank"><i>CVC</i><span><u></u></span></div>
+                  </div>
                 </div>
                 <div class="csum">
                 <div class="co-card">
@@ -1289,7 +1499,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
                     <dt>Card</dt><dd class="pend">yours to enter</dd>
                   </dl>
                 </div>
-                <div class="point"><span class="arrow">&#9664;</span><b>Pay on the page &mdash; it is filled in</b></div>
+                <div class="point"><span class="arrow"></span><span class="lbl"><b>Pay on the page</b><i>It is filled in</i></span><span class="tail"></span></div>
               </div>
             </div>
           </div>
@@ -1318,6 +1528,12 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
 <section class="install" id="install">
   <div class="wrap">
     <h2>How to install</h2>
+    <div class="deskonly">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+           stroke-linejoin="round" aria-hidden="true"><rect x="2.6" y="4" width="18.8" height="12.6"/><path d="M8.6 20.4h6.8M12 16.6v3.8"/></svg>
+      <p><b>Desktop only.</b> Chrome has no extensions on a phone &mdash; this one
+      needs a computer.</p>
+    </div>
     <details class="whenpc" id="stepsBox" open>
       <summary>When you are at your computer</summary>
     <div class="grid5" id="steps">
@@ -1400,6 +1616,11 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
         </div>
       </figure>
 
+    </div>
+
+    <div class="swipe" id="swipe" aria-hidden="true">
+      <span class="swrail"><i></i></span>
+      <b>Swipe</b>
     </div>
 
     <a class="btn ondesk" href="knili-extension.zip" download>Add to Chrome</a>
@@ -1526,39 +1747,49 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
   var T = [], raf = null;
 
   /* Where the cursor has to land is a fact about the rendered button, not a
-     number I can derive — so ask the button. offsetLeft/offsetTop ignore the
-     transforms the stage is running, which is exactly what is wanted here. */
+     number I can derive — so ask the button, with box().
+
+     THIS COMMENT USED TO SAY getBoundingClientRect WAS "exactly what is wanted
+     here". It was not; it was the pick ring's bug wearing a different name.
+     .hand, .ripple, .confetti and .placed are all children of .stage and are
+     positioned in the stage's OWN untransformed coordinates through --hx/--hy/
+     --cx, but getBoundingClientRect measures THROUGH the camera. On a wide
+     screen --fz is 1 and the two spaces coincide, so it worked and kept
+     working. On a phone it does not: measured at 390px on beat 4, --fz .653
+     put the cursor's resting point at --hx 366.5 / --hy 279.4 when the button
+     sits at 530 / 428 — the whole set is z times too small. On screen that
+     landed the cursor at (-97, 48) in a 343x360 window: ninety-seven pixels
+     off the left edge of the frame. Nobody was ever going to see that click.
+
+     The inset is the button's own half-height rather than a flat 20px, so the
+     cursor arrives the same distance inside the near edge at every scale. On
+     a wide screen that IS 20px, which is what it always was. */
   function place() {
-    var btn = el.querySelector('.co-pay');
-    if (!btn) return;
-    var r = btn.getBoundingClientRect(), sr = el.getBoundingClientRect();
-    if (!r.width || !sr.width) return;
-    /* the near side of the button, a touch inside it — arriving, not landing
-       dead centre as though it had teleported there */
-    el.style.setProperty('--hx', (r.left - sr.left + 20) + 'px');
-    el.style.setProperty('--cx', (r.left - sr.left + r.width / 2) + 'px');
-    el.style.setProperty('--hy', (r.top - sr.top + r.height / 2) + 'px');
+    var b = box('.co-pay');
+    if (!b) return;
+    el.style.setProperty('--hx', (b.x + b.h / 2) + 'px');
+    el.style.setProperty('--cx', (b.x + b.w / 2) + 'px');
+    el.style.setProperty('--hy', (b.y + b.h / 2) + 'px');
   }
-  place();
-  window.addEventListener('load', place);
-  var rt;
-  window.addEventListener('resize', function () {
-    clearTimeout(rt); rt = setTimeout(place, 150);
-  });
 
   /* The item that was found and the item being bought are the same picture at
      the same size, so moving one onto the other is a pure translate: nothing
      scales, nothing distorts, and the crossover cannot show a seam. */
   function flip() {
-    var from = el.querySelector('.card.pick img'), to = el.querySelector('.co-item img');
-    if (!from || !to) return;
-    var a = from.getBoundingClientRect(), b = to.getBoundingClientRect();
-    if (!a.width || !b.width) return;
+    /* box(), for the third time and the same reason: --fx/--fy are applied as
+       a transform on an element INSIDE the scaled stage, so they have to be
+       written in the stage's own untransformed units. Measured as rects they
+       came back multiplied by --fz and were then applied inside a space that
+       multiplies by --fz again — the thumbnail flew z-squared of the distance
+       it should have, which on a phone is a little under half of it. --fs is a
+       ratio of two widths and was never affected. */
+    var a = box('.card.pick img'), b = box('.co-item img');
+    if (!a || !b) return;
     /* centre on centre, then scale — the tile is large and the summary's image
        is small, and both are square, so one uniform factor covers it. */
-    el.style.setProperty('--fs', (a.width / b.width).toFixed(4));
-    el.style.setProperty('--fx', ((a.left + a.width / 2) - (b.left + b.width / 2)) + 'px');
-    el.style.setProperty('--fy', ((a.top + a.height / 2) - (b.top + b.height / 2)) + 'px');
+    el.style.setProperty('--fs', (a.w / b.w).toFixed(4));
+    el.style.setProperty('--fx', ((a.x + a.w / 2) - (b.x + b.w / 2)) + 'px');
+    el.style.setProperty('--fy', ((a.y + a.h / 2) - (b.y + b.h / 2)) + 'px');
   }
 
   /* ================= mobile framing =================
@@ -1566,7 +1797,6 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
      the composition is already carrying a transform from the previous beat and
      getBoundingClientRect would measure through it. */
   var win = el.parentNode;
-  var narrow = window.matchMedia && window.matchMedia('(max-width: 900px)');
   function box(sel) {
     var n = el.querySelector(sel);
     if (!n || !n.offsetWidth) return null;
@@ -1587,10 +1817,11 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
     });
     return b;
   }
-  /* Per beat: what to frame, how to fit it, and where to anchor it. A portrait
-     subject in a portrait window fits by width; a landscape one — the shop
-     page — covers instead, filling the window and cropping its far side, which
-     keeps the storefronts at a size worth looking at. */
+  /* Per beat: what to frame, how to fit it, and where to anchor it. `contain`
+     is the smaller of the two ratios, so the subject is whole whichever edge
+     binds; `cover` is the larger, filling the window and cropping the
+     subject's far side, which is what keeps the storefronts at a size worth
+     looking at while they flick past. */
   /* Per beat: what to frame, how to fit it, where to anchor it — and the
      window takes the height that frame actually needs rather than one height
      trying to serve all of them. A fixed height either crops the composer at
@@ -1599,69 +1830,151 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
      Beat 1 frames the header and the ask, not the whole panel: below them the
      panel is empty at that beat, and framing the empty part is what forced the
      window tall enough to slice the composer. */
-  /* `sel` is what a phone frames — tight, one subject. `dsel` is what a wide
-     screen frames — the same beat, but keeping the panel and the page together,
-     which is the whole point of having the room. */
+  /* `sel` is what the tight camera frames — one subject, filling the window.
+     `dsel` is what a window big enough to hold the whole composition frames —
+     the same beat, but keeping the panel and the page together, which is the
+     whole point of having the room. Beats 4 and 5 have no `dsel`: the seam and
+     the closing card are the same subject either way. */
+  /* `h: 300` used to sit on beats 2 and 3. Nothing ever read it — it was left
+     over from the version of the driver that resized the window per beat, and
+     that version is the one that froze the sequence (see below). A hardcoded
+     height that does nothing is worse than one that does something wrong,
+     because it reads as an explanation. It is gone. */
+  /* The margin every contained frame keeps between its subject and its edges,
+     as a fraction of the window's short side. 4.5% is measured, not picked: at
+     the narrowest width the page supports it is 14px, which is the smallest
+     gap that still reads as air rather than as a rounding error, and at 1440
+     it is 25px, which is proportionally the same. */
+  var AIR = 0.045;
+  /* Beats 2 and 3 frame the chrome bar along with the page on a phone too now.
+     The address bar is the thing that proves this is a browser on a real shop
+     — the same point the hero shot makes — and a phone was seeing a panel, a
+     grid of products and a checkout with no browser anywhere around them.
+     Measured, it costs 4.5%: the cover fit goes from .511 to .488 at 390px and
+     the bar lands 16.6px tall with the domain inside the visible 703 design px.
+     Beat 4 cannot have it. Its subject already spans 541x556 of a 1072x738
+     composition; adding the chrome bar makes that 1072x722 and the contain fit
+     falls from .579 to .292 — the panel would render 90px wide and the pay bar
+     4.7px. Half the zoom to put a strip of grey at the top is not a trade, and
+     it is reported rather than taken.
+     The seam frames .out, not .point: .point is a bar INSIDE the answer card,
+     so framing it put the card's own edge past the frame while its contents
+     stopped exactly at it. The card is the object; frame the object. */
   var FRAME = {
     1: { sel: ['.hd', '.ztop'],    dsel: ['.cbar', '.ztop'],
-         fit: 'width', ax: 0.5, ay: 0 },
-    2: { sel: ['.page'],           dsel: ['.cbar', '.page'],
-         fit: 'cover', ax: 0,   ay: 0, h: 300 },
-    3: { sel: ['.page'],           dsel: ['.cbar', '.page'],
-         fit: 'cover', ax: 0,   ay: 0, h: 300 },
-    4: { sel: ['.csum', '.point'], fit: 'width', ax: 0.5, ay: 0.5 },
-    5: { sel: ['.fin'],            fit: 'width', ax: 0.5, ay: 0.5 }
+         fit: 'contain', ax: 0.5, ay: 0 },
+    2: { sel: ['.cbar', '.page'],  dsel: ['.cbar', '.page'],
+         fit: 'cover',   ax: 0,   ay: 0 },
+    3: { sel: ['.cbar', '.page'],  dsel: ['.cbar', '.page'],
+         fit: 'cover',   ax: 0,   ay: 0 },
+    4: { sel: ['.csum', '.out'],   fit: 'contain', ax: 0.5, ay: 0.5 },
+    5: { sel: ['.fin'],            fit: 'contain', ax: 0.5, ay: 0.5 }
   };
-  /* The window is a fixed size the CSS owns — 560 on a wide screen, 360 on a
-     phone. The driver used to resize it per beat, which resized the very box
-     the IntersectionObserver was watching: the height change flipped the
+  /* The window is a size the CSS owns, and the driver MUST NOT touch it. An
+     earlier version resized it per beat, which resized the very box the
+     IntersectionObserver was watching: the height change flipped the
      intersection, rest() fired, play() restarted, and the sequence sat on beat
      one for ever. It also dragged everything below the stage up and down. The
-     camera moves; the frame does not. */
+     camera moves; the frame does not.
+
+     Wide or tight is now a MEASURED fact, not a breakpoint: the wide framing —
+     panel and page together, natural scale, vertical pan only — is used
+     exactly when the composition fits the window's width, and below that it
+     cannot be used at all. It used to ask matchMedia('(max-width: 900px)'),
+     which is a guess at the same question that the geometry can answer
+     directly, and which let the stylesheet and the driver hold different
+     opinions about which mode was running. The class goes on both boxes so
+     everything that only makes sense in one mode can hang off it. */
   function frameBeat(n) {
     var f = FRAME[n] || FRAME[1];
-    var wide = !narrow || !narrow.matches;
+    var wide = el.offsetWidth <= win.clientWidth + 1;
+    el.classList.toggle('tight', !wide);
+    win.classList.toggle('tight', !wide);
     var b = union(wide ? (f.dsel || f.sel) : f.sel);
     if (!b) return;
 
     if (wide) {
-      /* Vertical pan only: full width, natural scale, so the panel stays at
-         309px and 10px type. The window is fixed at its tallest beat so the
-         page below never moves as the camera does. */
-      var CH = el.offsetHeight, H2 = win.clientHeight;
-      var ty2 = -b.y + (b.h < H2 ? (H2 - b.h) * f.ay : 0);
-      ty2 = Math.min(0, Math.max(ty2, H2 - CH));
-      el.style.setProperty('--fz', 1);
-      el.style.setProperty('--fx2', '0px');
+      /* Vertical pan at natural scale: full width, the panel at its own size,
+         because on a screen this size the point is seeing the panel AND the
+         page together. The window is fixed at its tallest beat so the page
+         below never moves as the camera does.
+         The one exception is a subject taller than the window. Panning cannot
+         reveal it — the pan is clamped to the composition's own foot — so it
+         simply fell off the bottom: measured at 1000px, beat 4's seam is 588
+         tall in a 560 window and 85px of it, the shop's Place order included,
+         was below the frame. Where that happens the camera zooms out by
+         exactly as much as it takes and no more, so 1100 and 1440 stay at 1.
+         Not for the cover beats: those are meant to run past the frame. */
+      var CH = el.offsetHeight, CW = el.offsetWidth, W2 = win.clientWidth,
+          H2 = win.clientHeight;
+      var z1 = f.fit === 'cover' ? 1 : Math.min(1, H2 / b.h);
+      var ty2 = -b.y * z1 + (b.h * z1 < H2 ? (H2 - b.h * z1) * f.ay : 0);
+      ty2 = Math.min(0, Math.max(ty2, H2 - CH * z1));
+      el.style.setProperty('--fz', z1);
+      el.style.setProperty('--fx2', Math.round((W2 - CW * z1) / 2) + 'px');
       el.style.setProperty('--fy2', Math.round(ty2) + 'px');
       return;
     }
     var W = win.clientWidth, H = win.clientHeight;
     if (!W || !H || !b.w || !b.h) return;
-    var z = f.fit === 'cover' ? Math.max(W / b.w, H / b.h)
-                              : Math.min(W / b.w, 1.6);
+    /* THE FRAME BREATHES. A contain fit that exactly fits is still a frame with
+       its subject jammed against all four edges, and that reads as a crop, not
+       as a fit: at 390px beat 4 put .point's right edge, the bill's $6.00 and
+       the last letter of the product's name all at x=343 of a 343px window, and
+       what a reader sees there is a word cut in half. So the subject is fitted
+       to an INNER frame inset by a fraction of the window's short side — a
+       fraction, so it is the same optical margin at 360px and at 1440px rather
+       than a pixel value that is generous on one and invisible on the other.
+       cover keeps the whole window: it is meant to fill and crop, because a
+       storefront shrunk to leave a margin is a storefront nobody can read. */
+    var cover = f.fit === 'cover';
+    var m = cover ? 0 : Math.round(Math.min(W, H) * AIR);
+    var IW = W - m * 2, IH = H - m * 2;
+    var z = cover ? Math.max(W / b.w, H / b.h)
+                  : Math.min(IW / b.w, IH / b.h);
     el.style.setProperty('--fz', z);
-    el.style.setProperty('--fx2', (-b.x * z + (W - b.w * z) * f.ax) + 'px');
-    el.style.setProperty('--fy2', (-b.y * z + (b.h * z < H ? (H - b.h * z) * f.ay : 0)) + 'px');
+    el.style.setProperty('--fx2', (m - b.x * z + (IW - b.w * z) * f.ax) + 'px');
+    el.style.setProperty('--fy2', (m - b.y * z + (b.h * z < IH ? (IH - b.h * z) * f.ay : 0)) + 'px');
   }
+  /* Beat 4 is the resting frame: with no data-beat the markup draws the
+     finished state — the pair composed, the answer in, the cursor on the
+     shop's own button — and that is the seam beat 4 frames. */
+  function reframe() {
+    frameBeat(parseInt(el.getAttribute('data-beat'), 10) || 4);
+  }
+  /* The first frame is computed, not seeded. The stylesheet used to carry
+     --fz:.672 / --fx2:-346px / --fy2:-155px, three numbers true of exactly one
+     viewport, and every other viewport wore them anyway. Once on load as well,
+     because the lockup and the product shot decide two of these heights and
+     they are not measurable until they have arrived. */
+  reframe();
+  place();
+  window.addEventListener('load', function () { reframe(); place(); });
   var ft;
   window.addEventListener('resize', function () {
     clearTimeout(ft);
-    ft = setTimeout(function () {
-      frameBeat(parseInt(el.getAttribute('data-beat'), 10) || 1);
-    }, 150);
+    /* the ring and the cursor are both pinned to boxes that move with the
+       layout, so they are re-measured with the camera rather than left where
+       the last width put them */
+    ft = setTimeout(function () { reframe(); ring(); place(); }, 150);
   });
 
-  /* where the sweep settles */
+  /* Where the sweep settles. box(), never getBoundingClientRect(): .pickring
+     is a child of .stage and is positioned in the stage's OWN untransformed
+     coordinates, but getBoundingClientRect measures through the camera's
+     translate+scale. On a wide screen --fz is 1, the two spaces coincide, and
+     the bug could not show. On a phone --fz is that beat's zoom, so every
+     offset and every dimension came back multiplied by it — measured at 390px
+     with --fz .511, ring() was handed 9.4,56.1 at 183x113 for a tile that
+     actually sits at 18,110 at 358x221. Half the position and half the size
+     is how a ring meant for the bottles ended up over the shop's header. */
   function ring() {
-    var tile = el.querySelector('.card.pick');
-    if (!tile) return;
-    var a = tile.getBoundingClientRect(), sr = el.getBoundingClientRect();
-    if (!a.width) return;
-    el.style.setProperty('--rx', (a.left - sr.left) + 'px');
-    el.style.setProperty('--ry', (a.top - sr.top) + 'px');
-    el.style.setProperty('--rw', a.width + 'px');
-    el.style.setProperty('--rh', a.height + 'px');
+    var b = box('.card.pick');
+    if (!b) return;
+    el.style.setProperty('--rx', b.x + 'px');
+    el.style.setProperty('--ry', b.y + 'px');
+    el.style.setProperty('--rw', b.w + 'px');
+    el.style.setProperty('--rh', b.h + 'px');
   }
 
   function at(ms, fn) { T.push(setTimeout(fn, ms)); }
@@ -1712,6 +2025,10 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
       var u = li.querySelector('u');
       if (u) { u.style.transitionDuration = '0ms'; u.style.transform = 'scaleX(1)'; }
     });
+    /* the resting picture gets framed too, so a reader who has asked for less
+       motion — or who has scrolled past and back — sees a composed frame
+       rather than whatever corner the last beat left the camera pointing at */
+    reframe();
   }
 
   function play() {
@@ -1868,10 +2185,12 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
     var url = location.href.split('#')[0];
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(url).then(
-        function () { say('Copied'); },
-        function () { say('Press and hold the link'); });
+        /* the confirmation says what to do next, not that a mechanism ran:
+           "Copied" answers a question nobody asked */
+        function () { say('Copied \u2014 now open it on a computer'); },
+        function () { say('Press and hold the link below'); });
     } else {
-      say('Press and hold the link');
+      say('Press and hold the link below');
     }
   });
 })();
@@ -1885,9 +2204,68 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
   if (!d) return;
   var mq = window.matchMedia && window.matchMedia('(max-width: 660px)');
   if (mq && mq.matches) d.removeAttribute('open');
+  /* Back to the first card, every time the disclosure opens. `<details>`
+     content has no layout worth scrolling while it is closed, so a reset that
+     runs once at load cannot stick — it has to run on `toggle`. And it has to
+     run again on the next two frames, because the layout that matters here
+     happens after the event fires and a mandatory snap container re-snaps
+     itself to whatever it last snapped to once that layout lands. (Snapping is
+     off until [open] in the stylesheet so there is nothing for it to go back
+     to; this is the belt to that pair of braces.) On a real phone the row
+     opened on cards 02 and 03 with 01 sliced off past the left edge — a peek
+     at the right edge says "there is more", a slice at the left says "you
+     lost something", and only one of those is wanted. */
+  /* THE RAIL. Two numbers, both read off the scroller itself: how much of the
+     row fits (the thumb's width) and how far along it you are (its offset).
+     Written as CSS custom properties so the paint is the stylesheet's job and
+     this only ever measures. Passive listener and one rAF per frame, because
+     it runs under a thumb on a phone. */
+  var rail = document.getElementById('swipe');
+  if (grid && rail) {
+    var track = rail.querySelector('.swrail'), thumb = rail.querySelector('i');
+    var pending = false;
+    var railUpdate = function () {
+      pending = false;
+      var tw = track.clientWidth;
+      if (!tw || !grid.scrollWidth) return;
+      var frac = Math.min(1, grid.clientWidth / grid.scrollWidth);
+      var max = grid.scrollWidth - grid.clientWidth;
+      rail.style.setProperty('--sw', (frac * 100).toFixed(2) + '%');
+      rail.style.setProperty('--sx',
+        (max > 0 ? (grid.scrollLeft / max) * (tw * (1 - frac)) : 0).toFixed(1) + 'px');
+      rail.classList.toggle('moved', grid.scrollLeft > 8);
+    };
+    var railTick = function () {
+      if (pending) return;
+      pending = true;
+      requestAnimationFrame(railUpdate);
+    };
+    grid.addEventListener('scroll', railTick, { passive: true });
+    window.addEventListener('resize', railTick);
+    d.addEventListener('toggle', railTick);
+    railUpdate();
+    window.addEventListener('load', railUpdate);
+  }
+
   if (grid) {
-    grid.scrollLeft = 0;
-    d.addEventListener('toggle', function () { if (d.open) grid.scrollLeft = 0; });
+    var first = function () {
+      grid.scrollLeft = 0;
+      if (grid.scrollTo) {
+        try { grid.scrollTo({ left: 0, behavior: 'instant' }); } catch (e) { }
+      }
+    };
+    first();
+    d.addEventListener('toggle', function () {
+      if (!d.open) return;
+      first();
+      requestAnimationFrame(function () {
+        first();
+        requestAnimationFrame(function () {
+          first();
+          if (railTick) railTick();
+        });
+      });
+    });
   }
 })();
 </script>
