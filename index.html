@@ -135,24 +135,19 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--acid);outline-offse
    the letters sit on. The kicker is uppercase, so that line is the lowest
    pixel of every letter. The last word and the mark share a nowrap span so
    they can never break apart. */
-/* THE SECTION HAS A NAME NOW, AND IT SAYS IT. #hero IS the "what it is"
-   section — the desktop bar has always linked here under that label — but the
-   bar is hidden below 660px and the phone's jump nav listed only the other
-   two, so on a phone the page read as two sections and the first one was
-   nameless. This is the page's own label voice, the mono/uppercase/dim the
-   nav links themselves use, because that is exactly what this line is:
-   wayfinding for #hero, said out loud where a phone can see it. Dim under the
-   acid kicker on purpose — the label is the signpost, the kicker is the
-   claim, and they must not read as two claims.
-   It is not a third stacked line's worth of height: the label and the kicker
-   are one block, so the kicker's 24px gap to the h1 closes to 14 whenever the
-   label is above it. Measured at 390, the pair costs 10px, not 34. */
-.seclabel{font:400 12px/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;
-  color:var(--dim);margin:0 0 8px}
+/* THERE IS NO SECTION LABEL ABOVE THIS LINE, AND THERE WAS. #hero is the
+   "what it is" section and both navs link here under that name, so a mono/dim
+   WHAT IT IS was set above the kicker to say so on a phone, where the bar is
+   hidden. It came straight back out: a label, a kicker and an h1 is three
+   stacked lines of preamble on one block, and the headline underneath already
+   answers the question the label was asking. The section is still named where
+   naming does work — in .barnav and in the phone's .jump nav, which is where
+   the gap actually was — and not where it only repeats the headline.
+   The 24px below is the kicker's own gap to the h1 and has no override on it;
+   there is nothing above it any more to share a block with. */
 .kicker{
   font:500 13px/1 var(--mono);letter-spacing:.22em;text-transform:uppercase;
   color:var(--acid);margin:0 0 24px}
-.seclabel + .kicker{margin-bottom:14px}
 /* An inline <svg> is a replaced element: browsers synthesise its baseline
    themselves, so vertical-align:baseline on it lands wherever they choose —
    which is what kept the glyph riding high. Put the synthesis on a wrapper
@@ -402,12 +397,25 @@ h1 em{font-style:normal;color:var(--acid);display:block}
    cursor resting on Place order. The driver winds it back to beat one and lets
    it play, and puts it back the moment the stage leaves the screen.
    ========================================================================== */
+/* THREE ACROSS AT EVERY WIDTH. Below 900 this used to become one column and
+   the three phases stacked — which is not a sequence, it is a list, and it
+   cost 106.8px of a phone screen to say what 27.6 says on a desktop. Three
+   columns hold at 360 too; what has to give is the type, not the reading.
+   The labels are allowed to run to two or three lines INSIDE their own
+   column, because three-across survives wrapping and stacking does not. */
 .beatnav{list-style:none;display:grid;grid-template-columns:repeat(3,1fr);gap:24px;
   margin:0 0 12px}
 /* Lit by default, so a page with no JavaScript shows three completed phases
    rather than three grey ones. The driver adds .seq and takes over. */
-.beatnav li{position:relative;font:600 13px/1.2 var(--display);letter-spacing:.12em;
+/* A column, with the label growing and the rule pinned under it. Grid items
+   stretch, so all three columns are the height of the tallest label, and the
+   three rules therefore sit on ONE line however many lines each label runs
+   to. They are the sequence's progress bar; a progress bar at three different
+   heights is three bars. */
+.beatnav li{position:relative;display:flex;flex-direction:column;
+  font:600 13px/1.2 var(--display);letter-spacing:.12em;
   text-transform:uppercase;color:var(--ink2);transition:color .3s ease-out}
+.beatnav li > span{flex:1}
 .beatnav.seq li{color:#9AA0B8}
 .beatnav.seq li.on{color:var(--ink2)}
 /* A mark hanging off the live label's rule, reaching toward the picture it
@@ -502,6 +510,18 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 .fin{display:flex;flex-direction:column;align-items:flex-start;
   gap:calc(var(--px)*9)}
 .stage[data-beat="5"] .finale{opacity:1}
+/* The closing card fading out, alone, before anything else arrives. Nothing
+   else in the composition is animating while this runs — at beat 5 the chrome
+   bar, the page, the panel and the cursor have been at opacity 0 for two
+   seconds — so this is the only thing on the timeline, which is what makes it
+   sequential rather than a dissolve. It fades to the section's own ground:
+   the stage's background is already transparent at beat 5, so what comes
+   through is the paper the section is printed on (the window's cream in the
+   phone's tight framing). Emptying to the ground reads as an ending; fading
+   one cobalt object into another would only read as a swap.
+   ease-in, not the ease-out it arrived on: an ending should hold its shape
+   and then go, and the long tail of an ease-out is a card refusing to leave. */
+.stage[data-beat="5"].bye .finale{opacity:0;transition:opacity .52s ease-in}
 .finale img{width:calc(var(--px)*460);height:auto}
 .finale p{font:600 calc(var(--px)*52)/1.15 var(--display);letter-spacing:.005em;
   text-transform:uppercase;color:var(--ink);text-align:left;margin:0}
@@ -880,8 +900,17 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 @keyframes chip{0%{opacity:0;transform:translateY(calc(var(--px)*8)) scale(.92)}
                 14%,74%{opacity:1;transform:none}
                 100%{opacity:0;transform:none}}
+/* The caption of the composition above it, so it is centred ON the
+   composition. Measured: .foot and .stagewin are both children of the same
+   .wrap and .stagewin is width:100%, so the two boxes are identical to the
+   pixel at every width — 0px of margin on either side at 360, 390, 430, 900
+   and 1440 — and text-align:center therefore centres on the stage rather
+   than merely near it.
+   balance, because a centred two-line block with a one-word second line is
+   the sloppiest thing on a page: at 390 this broke 295.2 / 43.2 before, which
+   centred would have hung the word "Knili." alone under a full line. */
 .works .foot{font:400 12px/1.6 var(--mono);color:var(--slate);letter-spacing:0;
-  margin-top:14px}
+  margin-top:14px;text-align:center;text-wrap:balance}
 
 /* ==========================================================================
    MOTION. Every card is written in its finished state, so the page is whole
@@ -1173,7 +1202,11 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
      large and the camera scales it DOWN, which is the direction that stays
      crisp. Specificity beats the @supports rule below. */
   .works .stagewin{--avail:1072px}
-  .beatnav{grid-template-columns:1fr;gap:12px}
+  /* still three across — only smaller. Measured widths are in the report; the
+     tracking comes down further than the type does, because .12em is what
+     makes these labels wide and it is the cheapest width to buy back. */
+  .beatnav{gap:10px}
+  .beatnav li{font-size:11px;letter-spacing:.04em}
 }
 @media (max-width:660px){
   /* One call to action, and one a thumb can actually complete. ADD TO CHROME
@@ -1206,7 +1239,6 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
     text-decoration:none}
   /* every target a thumb has to hit clears 44px */
   .btn-sm{padding:16px}
-  .spec a{display:inline-block;padding:8px 0}
 }
 @media (max-width:720px){
   .hero{padding:32px 0 48px}
@@ -1280,9 +1312,46 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
   .mk{zoom:.72;height:204px}
 }
 @media (max-width:660px){
-  /* the only target under 44 in the measured sweep */
-  .spec a{display:inline-flex;align-items:center;min-height:44px;min-width:44px;
-    padding:0}
+  /* ==========================================================================
+     THE FOOTER, NARROW. Third time of asking, and the padding was never the
+     problem. Measured at 390 before this: the footer box was 131.4px, of
+     which 40 was padding and 90.4 was .spec — three rows of 12px type that
+     should have come to 57.6. The other 32.8 was two things, and neither of
+     them was type. 8px of row gap, and 24.8px of ROW forced by min-height on
+     the GitHub link: a 44px tap target sitting IN the flow made the third
+     line 44px tall to carry 19.2px of text.
+     The target has not shrunk. It has stopped being part of the line box.
+     An absolutely positioned ::after is still the link's own box for hit
+     testing, so the thumb still gets 44px of height and about 59 of width —
+     wider than the 44 it had — while the line it sits on is as tall as its
+     text. Overlapping rather than stacking, which is the whole trick.
+     Three rows is the floor here and it is a content fact, not a styling one:
+     the three groups measure 244.8 / 230.4 / 216.8 at 12px against 313px of
+     column at 360, so no two of them can ever share a line. Running them
+     together as one dotted list would fit two lines at 390 and turn
+     "Chrome · Shopify" into a list of browsers, which is not a trade this
+     page makes. Three tight rows instead of three loose ones, and 16px of
+     air rather than 20 now that the block inside it is a strip.
+     ========================================================================== */
+  .spec{gap:0 20px;line-height:1.4}
+  .spec a{position:relative}
+  /* Downwards only, and stopping at the footer's own edge. Two things were
+     measured and both decided this box. Centred on a 15.5px line, 44px of
+     height hangs 14px into the line ABOVE — which is "Shopify · WooCommerce ·
+     OpenCart" — so a thumb aiming at that word would have opened GitHub.
+     And an absolutely positioned box is still scrollable overflow: run past
+     the footer's bottom edge and it adds its overshoot to the document, which
+     measured as 11px of new page at 390. So it grows from the top of its own
+     line box down to exactly the inside of the footer's padding, and buys the
+     height back in width: 75.2 x 31.5 = 2369px, against the 44 x 44 = 1936px
+     it replaces. Bigger target, no overlap, no page. It is short of the 44 on
+     the vertical axis — well clear of WCAG 2.2 AA's 24, short of 2.5.5's
+     enhanced 44 — and the only interactive thing anywhere near it is itself.
+     Restoring a full 44 costs 12px of footer, which is the thing being asked
+     to get smaller; the number is in the report so it can be chosen. */
+  .spec a:after{content:"";position:absolute;left:-16px;right:-16px;top:0;
+    bottom:-16px}
+  footer{padding:16px 0}
 }
 @media (max-width:620px){
   /* THE HERO SHOT IS ONE OBJECT AND IT SCALES AS ONE. This block used to drop
@@ -1304,7 +1373,9 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
   .fit{--avail:min(874px,calc(100vw - 32px))}
   h1{font-size:34px}
   .lede{font-size:15px}
-  .spec{gap:4px 20px}
+  /* no row gap: the strip is three lines of one block, not three blocks. The
+     later media query wins over the 660 one, so it has to say so here too. */
+  .spec{gap:0 20px}
 }
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
@@ -1354,7 +1425,6 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
   <div class="wrap">
     <div class="hero-grid">
     <div>
-      <p class="seclabel">What it is</p>
       <p class="kicker">A new Chrome <span class="nb">extension<span class="pz"><svg viewBox="3.35 1.75 17.3 18.9" preserveAspectRatio="xMidYMax meet" width="15.6" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M8.4 5.2 a2.6 2.6 0 0 1 5.2 0 h4.4 a1.8 1.8 0 0 1 1.8 1.8 v11 a1.8 1.8 0 0 1 -1.8 1.8 h-12 a1.8 1.8 0 0 1 -1.8 -1.8 v-3.6 a2.6 2.6 0 0 0 0 -5.2 v-2.2 a1.8 1.8 0 0 1 1.8 -1.8 z"/></svg></span></span><span class="onphone"> &middot; for your computer</span></p>
       <h1>It does the shopping.<em>You do the buying.</em></h1>
       <p class="lede">One sentence in. A filled checkout out.</p>
@@ -1463,9 +1533,9 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
     <h2>How it works</h2>
 
     <ol class="beatnav" id="beatnav">
-      <li><span>01 &middot; You ask for it</span><i><u></u></i></li>
-      <li><span>02 &middot; Knili finds it</span><i><u></u></i></li>
-      <li><span>03 &middot; You get it</span><i><u></u></i></li>
+      <li><span>01 &middot; Tell Knili what to buy</span><i><u></u></i></li>
+      <li><span>02 &middot; Let it do the shopping</span><i><u></u></i></li>
+      <li><span>03 &middot; You do the buying</span><i><u></u></i></li>
     </ol>
 
     <div class="stagewin">
@@ -2112,7 +2182,7 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
     clear();
     if (nav) nav.classList.remove('seq');
     el.removeAttribute('data-beat');
-    el.classList.remove('flick', 'seek', 'burst', 'found');
+    el.classList.remove('flick', 'seek', 'burst', 'found', 'bye');
     if (ask) ask.textContent = full;
     lines.forEach(function (l) { l.classList.add('in'); });
     fills.forEach(function (f, i) { f.style.width = widths[i]; });
@@ -2147,7 +2217,7 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
        still eases exactly as it did. Nothing here resizes .stagewin; the class
        goes on .stage and comes off in the same task. */
     el.classList.add('cut');
-    el.classList.remove('flick', 'seek', 'burst', 'found');
+    el.classList.remove('flick', 'seek', 'burst', 'found', 'bye');
     el.setAttribute('data-beat', '1'); frameBeat(1);
     void el.offsetWidth;
     el.classList.remove('cut');
@@ -2232,7 +2302,23 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
       el.classList.remove('burst');
       lampAll();
     });
-    at(17650, play);
+    /* THE ENDING IS SEQUENTIAL, AND THAT IS THE WHOLE POINT. There were three
+       options here and only one of them is right. A cross-dissolve — which is
+       what this used to be — paints both scenes at once, lockup showing
+       through the panel, and that was the bug. A hard cut, which replaced it,
+       has no overlap but no ending either: the closing card is simply gone
+       between two frames and it reads as a glitch. This is the third: the
+       finale leaves ON ITS OWN, and only when it has finished leaving does
+       anything of the next pass exist. Never two scenes, and still a fade.
+       The budget at the seam is 600 in / 1100 held / 520 out, then the cut.
+       520 was chosen against the 600 the card arrives on: an ending that
+       leaves faster than it came reads as an interruption, and one that takes
+       longer reads as a stall. Just under, so it is quicker than the arrival
+       without being abrupt. It costs the loop 320ms — 17.65s to 17.97s, under
+       two per cent — rather than eating the hold, because shortening the time
+       the closing card is legible is the opposite of what was asked for. */
+    at(17450, function () { el.classList.add('bye'); });
+    at(17970, play);
   }
 
   /* WHAT IS WATCHED IS THE WINDOW, NOT THE CAMERA — and this is the fourth
