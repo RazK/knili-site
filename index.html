@@ -399,8 +399,8 @@ h1 em{font-style:normal;color:var(--acid);display:block}
   white-space:nowrap}
 .doms b.final{opacity:1;color:#202124}
 .stage.flick .doms b.final{opacity:0}
-.stage.flick .doms b:not(.final):not(.home){animation:flick .85s steps(1,end) infinite;
-  animation-delay:calc(var(--i) * -170ms)}
+.stage.flick .doms b:not(.final):not(.home){animation:flick 1.6s steps(1,end) infinite;
+  animation-delay:calc(var(--i) * -320ms)}
 /* the pill follows the winner: its own address while it sits there, then its
    checkout once the page navigates */
 .doms b.home{opacity:0}
@@ -434,8 +434,8 @@ h1 em{font-style:normal;color:var(--acid);display:block}
    saw the shop that gets bought from flash past three times during the search
    and then again as the result — the same shop, many times. Five go by; the
    sixth is what the search lands on, once. */
-.stage.flick .shop:not(.s6){animation:flick .85s steps(1,end) infinite;
-  animation-delay:calc(var(--i) * -170ms)}
+.stage.flick .shop:not(.s6){animation:flick 1.6s steps(1,end) infinite;
+  animation-delay:calc(var(--i) * -320ms)}
 .stage.flick .shop.s6{opacity:0}
 @keyframes flick{0%,20%{opacity:1}20.01%,100%{opacity:0}}
 /* Six storefronts going by. Deliberately quiet — one grey, one wordmark size,
@@ -503,9 +503,9 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 .row2.chosen img{width:calc(var(--px)*56);height:calc(var(--px)*56);
   object-fit:contain;flex:none}
 .stage[data-beat="4"] .row2.chosen img{opacity:0}
-.stage[data-beat="4"] .shop.s6 .body{opacity:0;transform:scale(.985);
-  transition:opacity .4s ease-out, transform .55s ease-out}
-.stage[data-beat="4"] .co-item img{animation:travel .6s cubic-bezier(.2,.75,.3,1)}
+.stage[data-beat="4"] .shop.s6 .body{opacity:0;transform:scale(.99);
+  transition:opacity .25s ease-out, transform .4s ease-out}
+.stage[data-beat="4"] .co-item img{animation:travel .75s cubic-bezier(.2,.75,.3,1)}
 @keyframes travel{from{transform:translate(var(--fx,0),var(--fy,0))}
                   to{transform:none}}
 .row2 div{flex:1}
@@ -518,8 +518,15 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 .shops{z-index:1}
 .checkout{z-index:2;transition:opacity .3s ease-out}
 .stage[data-beat="2"] .checkout,.stage[data-beat="3"] .checkout{opacity:0}
-.cobody{flex:1;min-height:0;display:flex;transition:opacity .4s ease-out .12s}
-.stage[data-beat="2"] .cobody,.stage[data-beat="3"] .cobody{opacity:0}
+/* The body itself no longer fades. It used to, which meant the thumbnail spent
+   the first third of its journey invisible and the change read as a swap. The
+   summary is simply there the moment the page is, the item flies into it, and
+   only the form column paints in behind — one thing moving, and it is the one
+   carrying the meaning. */
+.cobody{flex:1;min-height:0;display:flex}
+.cform{transition:opacity .4s ease-out .16s, transform .4s ease-out .16s}
+.stage[data-beat="2"] .cform,.stage[data-beat="3"] .cform{opacity:0;
+  transform:translateY(calc(var(--px)*12))}
 .checkout .co > *{max-width:none}
 .checkout .co{flex:1;background:#FAFBFC;display:grid;align-content:start;align-items:start;
   grid-template-columns:1fr calc(var(--px)*300);gap:calc(var(--px)*24);
@@ -1138,7 +1145,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
       </figure>
 
       <figure>
-        <figcaption class="cap">04 &middot; Drag it in</figcaption>
+        <figcaption class="cap">04 &middot; Load the folder</figcaption>
         <div class="mk mk4">
           <span class="zip">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h7l2 3h7v13H4z"/><path d="M11 7v10M9 9h4M9 13h4"/></svg>
@@ -1407,7 +1414,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
     at(3800, function () {
       if (ask) ask.textContent = full;
       el.setAttribute('data-beat', '2');
-      lamp(1, 6400);
+      lamp(1, 6100);
     });
 
     /* 03 — shops flick past while the log fills, then the rejects are counted */
@@ -1417,13 +1424,13 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
       el.classList.add('flick');
     });
     lines.forEach(function (l, n) {
-      at(5300 + n * 600, function () {
+      at(5400 + n * 970, function () {
         l.classList.add('in');
         if (band) band.textContent = l.textContent;
       });
     });
-    at(7700, function () { el.classList.remove('flick'); });
-    at(7900, function () {
+    at(8300, function () { el.classList.remove('flick'); });
+    at(8400, function () {
       fills.forEach(function (f, n) { f.style.width = widths[n]; });
       var t0 = null;
       raf = requestAnimationFrame(function cnt(ts) {
@@ -1437,18 +1444,18 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
     /* 04 — the answer lands, and the reader's own cursor comes in from
        off-stage to buy it. Knili filled the checkout; the person clicks. */
     /* the winner is held, bars settled, before the page navigates */
-    at(10200, function () { place(); flip(); el.setAttribute('data-beat', '4'); lamp(2, 3200); });
-    at(12000, function () { el.classList.add('burst'); });
+    at(9900, function () { place(); flip(); el.setAttribute('data-beat', '4'); lamp(2, 3800); });
+    at(11700, function () { el.classList.add('burst'); });
 
     /* the contraction back to a lone panel is the loop seam */
     /* everything goes, and the argument is left on its own for a beat — which
        is a calmer loop seam than contracting the furniture back to a panel */
-    at(13400, function () {
+    at(13700, function () {
       el.setAttribute('data-beat', '5');
       el.classList.remove('burst');
       lampAll();
     });
-    at(15300, play);
+    at(15600, play);
   }
 
   var live = false;
