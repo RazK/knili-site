@@ -371,7 +371,12 @@ h1 em{font-style:normal;color:var(--acid);display:block}
    panel is 404 design px and needs ~640 of height for its three zones and the
    result card, so its aspect is not negotiable — scaling the frame is the only
    way the section fits a screen. The shop page gets the width that buys. */
-.stage{--dw:1400;--avail:1072px;--px:min(calc(var(--avail)/var(--dw)),1px);--u:var(--px);
+/* The window the composition is seen through. On desktop it is exactly the
+   composition's size and does nothing; on a phone it is the frame, and the
+   composition moves behind it. */
+.stagewin{--dw:1400;--avail:1072px;--px:min(calc(var(--avail)/var(--dw)),1px);
+  position:relative}
+.stage{--u:var(--px);
   position:relative;width:calc(var(--px)*var(--dw));height:calc(var(--px)*684);
   background:var(--co-bg);box-shadow:var(--lift);overflow:hidden;
   transition:background-color .5s ease-out, box-shadow .5s ease-out}
@@ -864,35 +869,40 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
   .fit{--avail:min(874px,calc(100vw - 48px))}
 }
 @media (max-width:900px){
-  /* On a phone the panel IS the composition — 404 design px against 390 of
-     screen. So it plays alone for the ask and the search, and the shop slides
-     in over it only for the handoff, which is the one beat whose subject is
-     the shop's own button. The height is fixed to the tallest state so the
-     page below never jumps between beats. */
-  .stage{--dw:404;height:calc(var(--px)*824)}
-  .stage .cbar{display:none}
-  .stage .sbody{position:relative;height:100%;overflow:hidden}
-  .stage .pnl{flex:1 1 auto}
-  .stage[data-beat="1"] .pnl,.stage[data-beat="0"] .pnl{transform:none}
-  .stage .page{position:absolute;inset:0;z-index:4;opacity:0;
-    transform:translateX(100%);
-    transition:transform .55s cubic-bezier(.3,.8,.3,1), opacity .3s ease-out}
-  .stage[data-beat="4"] .page{opacity:1;transform:none}
-  /* nothing flicks past on a phone — the checkout is what arrives */
-  .stage .shops,.stage .scan,.stage .pickring{display:none}
-  .checkout .co{grid-template-columns:1fr;align-content:center}
-  .cform{display:none}
+  /* A phone cannot hold the whole composition, and cropping it one way for the
+     whole sequence loses whichever beat is not about the panel. So the window
+     re-frames per beat, onto whatever that beat is actually about: the panel
+     for the ask, the shop for the search, the seam between them for the
+     handoff. Same DOM, same timeline, same driver as desktop — only a
+     transform on the composition changes, so it reads as the frame moving. */
+  /* The composition keeps its desktop scale — pinning --avail is the whole
+     trick. Fitted to 358px of screen it would render 1400 design px into 358
+     and everything in it would be 4px tall; pinned, it stays legible and the
+     window crops instead. Specificity beats the @supports rule below. */
+  .works .stagewin{--avail:1072px}
+  .stagewin{overflow:hidden;height:300px;background:var(--co-bg);
+    box-shadow:var(--lift)}
+  .stage{box-shadow:none;transform-origin:0 0;
+    transform:translate(var(--fx2,-346px),var(--fy2,-67px)) scale(var(--fz,.672));
+    transition:transform .45s cubic-bezier(.3,.8,.3,1)}
   .beatnav{grid-template-columns:1fr;gap:12px}
 
-  /* The panel is a screenshot at desktop and nearly full width here, so people
-     will read it. Nothing in it goes below 11px, even where that departs from
-     the extension's exact proportions: legible beats faithful on a phone. */
+  /* Wherever the panel is large in frame people will read it, so nothing in it
+     goes below 11px — even where that departs from the extension's exact
+     proportions. Legible beats faithful on a phone. */
   .stage .icons,.stage .tag,.stage .kv,.stage .foot,
   .stage .buy-m span,.stage .rcp dt{font-size:11px}
-  .stage h3,.stage .stamp{font-size:11.5px}
-  .stage .starters span,.stage .chip,.stage .bars span{font-size:11.5px}
+  .stage h3,.stage .stamp,.stage .starters span,.stage .chip,
+  .stage .bars span{font-size:11.5px}
   .stage .rcp,.stage .steps div,.stage .now span{font-size:12px}
   .stage .ask{font-size:13px}
+  /* Two frames zoom out below the panel's own scale, so the things those beats
+     are about get sized for the frame they appear in: the shop's name while
+     the pages flick, and the two labels either side of the seam. */
+  .stage .wm{font-size:calc(var(--px)*26)}
+  .stage .co-pay{font-size:calc(var(--px)*22)}
+  .stage .point b{font-size:calc(var(--u)*22)}
+  .stage .point .arrow{font-size:calc(var(--u)*30)}
 }
 @media (max-width:660px){
   /* Three links plus the lockup plus the CTA stop fitting. The lockup and the
@@ -977,7 +987,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
 .wrap{container-type:inline-size}
 @supports (container-type:inline-size){
   .fit{--avail:min(596px,100cqw)}
-  .stage{--avail:min(1072px,100cqw)}
+  .stagewin{--avail:min(1072px,100cqw)}
 }
 </style>
 </head>
@@ -1106,6 +1116,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
       <li><span>03 &middot; You get it</span><i><u></u></i></li>
     </ol>
 
+    <div class="stagewin">
     <div class="stage screen" id="stage" data-anim="stage">
       <div class="cbar">
         <span class="lights"><i></i><i></i><i></i></span>
@@ -1230,6 +1241,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
       <div class="ripple" aria-hidden="true"><i></i></div>
       <div class="confetti" aria-hidden="true"><i style="--x:-99;--y:-53;--r:-166deg;--c:var(--acid);animation-delay:50ms"></i><i style="--x:-107;--y:-83;--r:-246deg;--c:#FFFFFF;animation-delay:68ms"></i><i style="--x:-66;--y:-71;--r:276deg;--c:var(--g);animation-delay:7ms"></i><i style="--x:-85;--y:-128;--r:-101deg;--c:#3B2C25;animation-delay:4ms"></i><i style="--x:-39;--y:-88;--r:108deg;--c:var(--acid);animation-delay:8ms"></i><i style="--x:-26;--y:-104;--r:244deg;--c:#FFFFFF;animation-delay:54ms"></i><i style="--x:-8;--y:-94;--r:259deg;--c:var(--g);animation-delay:15ms"></i><i style="--x:13;--y:-156;--r:276deg;--c:var(--acid);animation-delay:7ms"></i><i style="--x:32;--y:-126;--r:86deg;--c:#FFFFFF;animation-delay:6ms"></i><i style="--x:64;--y:-145;--r:-273deg;--c:var(--g);animation-delay:71ms"></i><i style="--x:83;--y:-125;--r:-24deg;--c:#3B2C25;animation-delay:53ms"></i><i style="--x:68;--y:-73;--r:-200deg;--c:var(--acid);animation-delay:73ms"></i><i style="--x:88;--y:-68;--r:-135deg;--c:#FFFFFF;animation-delay:13ms"></i><i style="--x:115;--y:-61;--r:-128deg;--c:var(--g);animation-delay:47ms"></i></div>
       <div class="placed" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M4 13l5 5L20 6"/></svg>Order placed</div>
+    </div>
     </div>
 
     <p class="foot">Orders are placed on the shop, not inside Knili.</p>
@@ -1480,6 +1492,69 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
     el.style.setProperty('--fy', ((a.top + a.height / 2) - (b.top + b.height / 2)) + 'px');
   }
 
+  /* ================= mobile framing =================
+     Each beat is framed on its own subject. Offsets rather than rects, because
+     the composition is already carrying a transform from the previous beat and
+     getBoundingClientRect would measure through it. */
+  var win = el.parentNode;
+  var narrow = window.matchMedia && window.matchMedia('(max-width: 900px)');
+  function box(sel) {
+    var n = el.querySelector(sel);
+    if (!n || !n.offsetWidth) return null;
+    var x = 0, y = 0, q = n;
+    while (q && q !== el) { x += q.offsetLeft; y += q.offsetTop; q = q.offsetParent; }
+    if (q !== el) return null;
+    return { x: x, y: y, w: n.offsetWidth, h: n.offsetHeight };
+  }
+  function union(sels) {
+    var b = null;
+    sels.forEach(function (sel) {
+      var r = box(sel);
+      if (!r) return;
+      if (!b) { b = { x: r.x, y: r.y, w: r.w, h: r.h }; return; }
+      var x1 = Math.max(b.x + b.w, r.x + r.w), y1 = Math.max(b.y + b.h, r.y + r.h);
+      b.x = Math.min(b.x, r.x); b.y = Math.min(b.y, r.y);
+      b.w = x1 - b.x; b.h = y1 - b.y;
+    });
+    return b;
+  }
+  /* Per beat: what to frame, how to fit it, and where to anchor it. A portrait
+     subject in a portrait window fits by width; a landscape one — the shop
+     page — covers instead, filling the window and cropping its far side, which
+     keeps the storefronts at a size worth looking at. */
+  var FRAME = {
+    1: { sel: ['.pnl'],            fit: 'width', ax: 0.5, ay: 0 },
+    2: { sel: ['.page'],           fit: 'cover', ax: 0,   ay: 0 },
+    3: { sel: ['.page'],           fit: 'cover', ax: 0,   ay: 0 },
+    4: { sel: ['.csum', '.point'], fit: 'width', ax: 0.5, ay: 0.5 },
+    5: { sel: ['.fin'],            fit: 'width', ax: 0.5, ay: 0.5 }
+  };
+  function frameBeat(n) {
+    if (!narrow || !narrow.matches) {
+      el.style.setProperty('--fz', 1);
+      el.style.setProperty('--fx2', '0px');
+      el.style.setProperty('--fy2', '0px');
+      return;
+    }
+    var f = FRAME[n] || FRAME[1];
+    var b = union(f.sel);
+    if (!b) return;
+    var W = win.clientWidth, H = win.clientHeight;
+    if (!W || !H || !b.w || !b.h) return;
+    var z = f.fit === 'cover' ? Math.max(W / b.w, H / b.h)
+                              : Math.min(W / b.w, 1.6);
+    el.style.setProperty('--fz', z);
+    el.style.setProperty('--fx2', (-b.x * z + (W - b.w * z) * f.ax) + 'px');
+    el.style.setProperty('--fy2', (-b.y * z + (H - b.h * z) * f.ay) + 'px');
+  }
+  var ft;
+  window.addEventListener('resize', function () {
+    clearTimeout(ft);
+    ft = setTimeout(function () {
+      frameBeat(parseInt(el.getAttribute('data-beat'), 10) || 1);
+    }, 150);
+  });
+
   /* where the sweep settles */
   function ring() {
     var tile = el.querySelector('.card.pick');
@@ -1544,7 +1619,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
   function play() {
     clear();
     el.classList.remove('flick', 'seek', 'burst', 'found');
-    el.setAttribute('data-beat', '1');
+    el.setAttribute('data-beat', '1'); frameBeat(1);
     lines.forEach(function (l) { l.classList.remove('in'); });
     fills.forEach(function (f) { f.style.width = '0%'; });
     counts.forEach(function (c) { c.textContent = '0'; });
@@ -1572,14 +1647,14 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
     /* the sentence finishes and sits there before anything else moves */
     at(3800, function () {
       if (ask) ask.textContent = full;
-      el.setAttribute('data-beat', '2');
+      el.setAttribute('data-beat', '2'); frameBeat(2);
       lamp(1, 7000);
     });
 
     /* 03 — shops flick past while the log fills, then the rejects are counted */
     /* the window has arrived and is allowed to settle before the search starts */
     at(5100, function () {
-      el.setAttribute('data-beat', '3');
+      el.setAttribute('data-beat', '3'); frameBeat(3);
       el.classList.add('flick');
     });
     lines.forEach(function (l, n) {
@@ -1614,7 +1689,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
          true once it has landed — measure again after the move. */
       at(700, place);
       el.classList.remove('found');
-      el.setAttribute('data-beat', '4'); lamp(2, 4950);
+      el.setAttribute('data-beat', '4'); frameBeat(4); lamp(2, 4950);
     });
     at(13750, function () { el.classList.add('burst'); });
 
@@ -1622,7 +1697,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
     /* everything goes, and the argument is left on its own for a beat — which
        is a calmer loop seam than contracting the furniture back to a panel */
     at(15750, function () {
-      el.setAttribute('data-beat', '5');
+      el.setAttribute('data-beat', '5'); frameBeat(5);
       el.classList.remove('burst');
       lampAll();
     });
