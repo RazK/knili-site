@@ -103,6 +103,14 @@ h2{font:600 clamp(28px,4vw,44px)/1.08 var(--display);letter-spacing:.01em;
 /* When the bar cannot hold the links, they are not simply lost: they appear
    once under the hero's CTA instead. Three sections, so two destinations. */
 .jump{display:none}
+/* Chrome has no extensions on Android or iOS, and unpacked ones additionally
+   need Developer mode, which is desktop-only. Nobody can install this from a
+   phone. So the phone's job is not conversion — it is understand it, want it,
+   and get the link to a computer. These two classes carry that difference. */
+.onphone{display:none}
+.murl{font:400 13px/1.4 var(--mono);color:var(--body);letter-spacing:0;
+  margin-top:12px;word-break:break-all}
+.whenpc > summary{display:none}
 .barnav a{font:400 12px/1 var(--mono);letter-spacing:.04em;color:var(--dim);
   text-decoration:none}
 .barnav a:hover{color:var(--acid)}
@@ -931,9 +939,21 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
   .stage .point .arrow{font-size:calc(var(--u)*30)}
 }
 @media (max-width:660px){
-  /* Three links plus the lockup plus the CTA stop fitting. The lockup and the
-     CTA are not negotiable, so the links move out of the bar and appear once,
-     under the hero's CTA — navigation kept, no height spent on a menu. */
+  /* One call to action, and one a thumb can actually complete. ADD TO CHROME
+     led nowhere from a phone and the page showed it three times. */
+  .ondesk{display:none}
+  .onphone{display:block}
+  .bar .btn-sm{display:none}
+  /* The install steps stay — they are the truth about how it works, and a
+     curious reader may want them — but they are instructions for a screen the
+     reader is not holding, so they cost one line instead of a screen. */
+  .whenpc > summary{display:block;cursor:pointer;list-style:none;
+    font:600 14px/1.3 var(--display);letter-spacing:.12em;text-transform:uppercase;
+    color:var(--acid);padding:14px 0;min-height:44px}
+  .whenpc > summary::-webkit-details-marker{display:none}
+  .whenpc > summary:after{content:" +";color:var(--dim)}
+  .whenpc[open] > summary:after{content:" \2013"}
+  /* the links move out of the bar and appear once under the hero */
   .barnav{display:none}
   .jump{display:flex;gap:20px;flex-wrap:wrap;margin-top:16px}
   .jump a{display:inline-flex;align-items:center;min-height:44px;
@@ -1038,10 +1058,14 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
   <div class="wrap">
     <div class="hero-grid">
     <div>
-      <p class="kicker">A new Chrome <span class="nb">extension<span class="pz"><svg viewBox="3.35 1.75 17.3 18.9" preserveAspectRatio="xMidYMax meet" width="15.6" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M8.4 5.2 a2.6 2.6 0 0 1 5.2 0 h4.4 a1.8 1.8 0 0 1 1.8 1.8 v11 a1.8 1.8 0 0 1 -1.8 1.8 h-12 a1.8 1.8 0 0 1 -1.8 -1.8 v-3.6 a2.6 2.6 0 0 0 0 -5.2 v-2.2 a1.8 1.8 0 0 1 1.8 -1.8 z"/></svg></span></span></p>
+      <p class="kicker">A new Chrome <span class="nb">extension<span class="pz"><svg viewBox="3.35 1.75 17.3 18.9" preserveAspectRatio="xMidYMax meet" width="15.6" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M8.4 5.2 a2.6 2.6 0 0 1 5.2 0 h4.4 a1.8 1.8 0 0 1 1.8 1.8 v11 a1.8 1.8 0 0 1 -1.8 1.8 h-12 a1.8 1.8 0 0 1 -1.8 -1.8 v-3.6 a2.6 2.6 0 0 0 0 -5.2 v-2.2 a1.8 1.8 0 0 1 1.8 -1.8 z"/></svg></span></span><span class="onphone"> &middot; for your computer</span></p>
       <h1>It does the shopping.<em>You do the buying.</em></h1>
       <p class="lede">One sentence in. A filled checkout out.</p>
-      <a class="btn" href="knili-extension.zip" download>Add to Chrome</a>
+      <a class="btn ondesk" href="knili-extension.zip" download>Add to Chrome</a>
+      <div class="onphone">
+        <button class="btn" id="copyLink" type="button">Copy the link</button>
+        <p class="murl" id="siteUrl">razk.github.io/knili-site</p>
+      </div>
       <nav class="jump">
         <a href="#works">How it works</a>
         <a href="#install">How to install</a>
@@ -1278,6 +1302,8 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
 <section class="install" id="install">
   <div class="wrap">
     <h2>How to install</h2>
+    <details class="whenpc" id="stepsBox" open>
+      <summary>When you are at your computer</summary>
     <div class="grid5" id="steps">
 
       <figure>
@@ -1360,7 +1386,8 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
 
     </div>
 
-    <a class="btn" href="knili-extension.zip" download>Add to Chrome</a>
+    <a class="btn ondesk" href="knili-extension.zip" download>Add to Chrome</a>
+    </details>
   </div>
 </section>
 
@@ -1569,7 +1596,12 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
     4: { sel: ['.csum', '.point'], fit: 'width', ax: 0.5, ay: 0.5 },
     5: { sel: ['.fin'],            fit: 'width', ax: 0.5, ay: 0.5 }
   };
-  var HMIN = 180, HMAX = 470, DESK_H = 560;
+  /* The window is a fixed size the CSS owns — 560 on a wide screen, 360 on a
+     phone. The driver used to resize it per beat, which resized the very box
+     the IntersectionObserver was watching: the height change flipped the
+     intersection, rest() fired, play() restarted, and the sequence sat on beat
+     one for ever. It also dragged everything below the stage up and down. The
+     camera moves; the frame does not. */
   function frameBeat(n) {
     var f = FRAME[n] || FRAME[1];
     var wide = !narrow || !narrow.matches;
@@ -1580,8 +1612,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
       /* Vertical pan only: full width, natural scale, so the panel stays at
          309px and 10px type. The window is fixed at its tallest beat so the
          page below never moves as the camera does. */
-      var CH = el.offsetHeight, H2 = Math.min(DESK_H, CH);
-      win.style.height = H2 + 'px';
+      var CH = el.offsetHeight, H2 = win.clientHeight;
       var ty2 = -b.y + (b.h < H2 ? (H2 - b.h) * f.ay : 0);
       ty2 = Math.min(0, Math.max(ty2, H2 - CH));
       el.style.setProperty('--fz', 1);
@@ -1589,18 +1620,10 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
       el.style.setProperty('--fy2', Math.round(ty2) + 'px');
       return;
     }
-    var W = win.clientWidth;
-    if (!W || !b.w || !b.h) return;
-    var z, H;
-    if (f.fit === 'cover') {
-      H = f.h;                       /* cover: the height is the frame, z follows */
-      z = Math.max(W / b.w, H / b.h);
-    } else {
-      z = Math.min(W / b.w, 1.6);    /* width: z is the frame, the height follows */
-      H = b.h * z;
-    }
-    H = Math.max(HMIN, Math.min(HMAX, Math.round(H)));
-    win.style.height = H + 'px';
+    var W = win.clientWidth, H = win.clientHeight;
+    if (!W || !H || !b.w || !b.h) return;
+    var z = f.fit === 'cover' ? Math.max(W / b.w, H / b.h)
+                              : Math.min(W / b.w, 1.6);
     el.style.setProperty('--fz', z);
     el.style.setProperty('--fx2', (-b.x * z + (W - b.w * z) * f.ax) + 'px');
     el.style.setProperty('--fy2', (-b.y * z + (b.h * z < H ? (H - b.h * z) * f.ay : 0)) + 'px');
@@ -1771,7 +1794,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
     var ok = seen && !(reduce && reduce.matches);
     if (ok && !live) { live = true; play(); }
     else if (!ok && live) { live = false; rest(); }
-  }, { threshold: 0.3 }).observe(el);
+  }, { threshold: 0.05 }).observe(el);
 })();
 </script>
 
@@ -1804,6 +1827,52 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
       cards.forEach(function (c) { c.classList.remove('live'); });
     }
   }, { threshold: 0.3 }).observe(grid);
+})();
+</script>
+
+<script>
+/* Getting the link off the phone, since installing on one is not possible.
+   Chrome supports no extensions on Android or iOS, and an unpacked one needs
+   Developer mode besides — which is desktop only. */
+(function () {
+  var out = document.getElementById('siteUrl');
+  if (out && location.host) {
+    out.textContent = (location.host + location.pathname)
+      .replace(/index\.html$/, '').replace(/\/$/, '');
+  }
+  var btn = document.getElementById('copyLink');
+  if (!btn) return;
+  var label = btn.textContent, t;
+  function say(w) {
+    btn.textContent = w;
+    clearTimeout(t);
+    t = setTimeout(function () { btn.textContent = label; }, 2200);
+  }
+  btn.addEventListener('click', function () {
+    var url = location.href.split('#')[0];
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(
+        function () { say('Copied'); },
+        function () { say('Press and hold the link'); });
+    } else {
+      say('Press and hold the link');
+    }
+  });
+})();
+
+/* The steps carry `open` in the markup, so with no JavaScript — and on any
+   screen that can actually run the thing — they are simply there. A phone
+   folds them away, because they describe a screen it is not. */
+(function () {
+  var d = document.getElementById('stepsBox');
+  var grid = document.getElementById('steps');
+  if (!d) return;
+  var mq = window.matchMedia && window.matchMedia('(max-width: 660px)');
+  if (mq && mq.matches) d.removeAttribute('open');
+  if (grid) {
+    grid.scrollLeft = 0;
+    d.addEventListener('toggle', function () { if (d.open) grid.scrollLeft = 0; });
+  }
 })();
 </script>
 
