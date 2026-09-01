@@ -378,9 +378,18 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 /* The window the composition is seen through. On desktop it is exactly the
    composition's size and does nothing; on a phone it is the frame, and the
    composition moves behind it. */
+/* One camera, both widths. The stage is the composition at its true size; the
+   window is shorter than it, and moves. Desktop pans vertically at natural
+   scale — full width, panel still 309px and legible — because on a large screen
+   the point is seeing the panel AND the page together. A phone has no room for
+   that, so it zooms per beat as well. Same table, same transform, two windows. */
 .stagewin{--dw:1400;--avail:1072px;--px:min(calc(var(--avail)/var(--dw)),1px);
-  position:relative}
-.stage{--u:var(--px);
+  position:relative;overflow:hidden;height:560px;box-shadow:var(--lift);
+  transition:height .45s cubic-bezier(.3,.8,.3,1)}
+.stage{--u:var(--px);--fz:1;--fx2:0px;--fy2:-178px;
+  transform-origin:0 0;box-shadow:none;
+  transform:translate(var(--fx2),var(--fy2)) scale(var(--fz));
+  transition:transform .45s cubic-bezier(.3,.8,.3,1);
   /* 924 = 44 chrome bar + 920 body. The body was 640, which is shorter than a
      finished panel's own content stack — header, ask, and a result card with an
      image, a bill and the CTA come to roughly 880 design px. The overflow was
@@ -453,7 +462,7 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 .stage[data-beat="1"] .page,.stage[data-beat="0"] .page{opacity:0;
   transform:translateX(calc(var(--px)*-498))}
 .stage[data-beat="1"] .pnl,.stage[data-beat="0"] .pnl{
-  transform:translate(calc(var(--px)*-498),calc(var(--px)*-22))}
+  transform:translateX(calc(var(--px)*-498))}
 
 /* the shops, flicking past. Invented names, skeleton contents — pages going by
    too fast to read is what a search across 34 listings actually looks like. */
@@ -900,11 +909,8 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
   .stage[data-beat="1"] .pnl,.stage[data-beat="0"] .pnl,
   .stage[data-beat="1"] .page,.stage[data-beat="0"] .page,
   .stage[data-beat="1"] .cbar,.stage[data-beat="0"] .cbar{transform:none}
-  .stagewin{overflow:hidden;height:360px;background:var(--co-bg);
-    box-shadow:var(--lift);transition:height .45s cubic-bezier(.3,.8,.3,1)}
-  .stage{box-shadow:none;transform-origin:0 0;
-    transform:translate(var(--fx2,-346px),var(--fy2,-155px)) scale(var(--fz,.672));
-    transition:transform .45s cubic-bezier(.3,.8,.3,1)}
+  .stagewin{height:360px;background:var(--co-bg)}
+  .stage{--fz:.672;--fx2:-346px;--fy2:-155px}
   .beatnav{grid-template-columns:1fr;gap:12px}
 
   /* Wherever the panel is large in frame people will read it, so nothing in it
@@ -1137,7 +1143,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
     </ol>
 
     <div class="stagewin">
-    <div class="stage screen" id="stage" data-anim="stage">
+    <div class="stage" id="stage" data-anim="stage">
       <div class="cbar">
         <span class="lights"><i></i><i></i><i></i></span>
         <svg class="nav" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 5 8 12l7 7"/></svg>
@@ -1550,25 +1556,39 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
      Beat 1 frames the header and the ask, not the whole panel: below them the
      panel is empty at that beat, and framing the empty part is what forced the
      window tall enough to slice the composer. */
+  /* `sel` is what a phone frames — tight, one subject. `dsel` is what a wide
+     screen frames — the same beat, but keeping the panel and the page together,
+     which is the whole point of having the room. */
   var FRAME = {
-    1: { sel: ['.hd', '.ztop'],    fit: 'width', ax: 0.5, ay: 0 },
-    2: { sel: ['.page'],           fit: 'cover', ax: 0,   ay: 0, h: 300 },
-    3: { sel: ['.page'],           fit: 'cover', ax: 0,   ay: 0, h: 300 },
+    1: { sel: ['.hd', '.ztop'],    dsel: ['.cbar', '.ztop'],
+         fit: 'width', ax: 0.5, ay: 0 },
+    2: { sel: ['.page'],           dsel: ['.cbar', '.page'],
+         fit: 'cover', ax: 0,   ay: 0, h: 300 },
+    3: { sel: ['.page'],           dsel: ['.cbar', '.page'],
+         fit: 'cover', ax: 0,   ay: 0, h: 300 },
     4: { sel: ['.csum', '.point'], fit: 'width', ax: 0.5, ay: 0.5 },
     5: { sel: ['.fin'],            fit: 'width', ax: 0.5, ay: 0.5 }
   };
-  var HMIN = 180, HMAX = 470;
+  var HMIN = 180, HMAX = 470, DESK_H = 560;
   function frameBeat(n) {
-    if (!narrow || !narrow.matches) {
+    var f = FRAME[n] || FRAME[1];
+    var wide = !narrow || !narrow.matches;
+    var b = union(wide ? (f.dsel || f.sel) : f.sel);
+    if (!b) return;
+
+    if (wide) {
+      /* Vertical pan only: full width, natural scale, so the panel stays at
+         309px and 10px type. The window is fixed at its tallest beat so the
+         page below never moves as the camera does. */
+      var CH = el.offsetHeight, H2 = Math.min(DESK_H, CH);
+      win.style.height = H2 + 'px';
+      var ty2 = -b.y + (b.h < H2 ? (H2 - b.h) * f.ay : 0);
+      ty2 = Math.min(0, Math.max(ty2, H2 - CH));
       el.style.setProperty('--fz', 1);
       el.style.setProperty('--fx2', '0px');
-      el.style.setProperty('--fy2', '0px');
-      win.style.height = '';
+      el.style.setProperty('--fy2', Math.round(ty2) + 'px');
       return;
     }
-    var f = FRAME[n] || FRAME[1];
-    var b = union(f.sel);
-    if (!b) return;
     var W = win.clientWidth;
     if (!W || !b.w || !b.h) return;
     var z, H;
