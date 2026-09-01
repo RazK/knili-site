@@ -100,6 +100,9 @@ h2{font:600 clamp(28px,4vw,44px)/1.08 var(--display);letter-spacing:.01em;
   background:transparent}
 .barnav a[aria-current="true"]{color:var(--acid)}
 .barnav a[aria-current="true"]:after{background:var(--acid)}
+/* When the bar cannot hold the links, they are not simply lost: they appear
+   once under the hero's CTA instead. Three sections, so two destinations. */
+.jump{display:none}
 .barnav a{font:400 12px/1 var(--mono);letter-spacing:.04em;color:var(--dim);
   text-decoration:none}
 .barnav a:hover{color:var(--acid)}
@@ -320,7 +323,10 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 .point{display:flex;align-items:center;gap:calc(var(--u)*14);margin-top:calc(var(--u)*16);
   background:var(--acid);color:var(--ink2);padding:calc(var(--u)*14) calc(var(--u)*16)}
 .point .arrow{font-size:calc(var(--u)*20);line-height:1}
-.play .point .arrow{animation:knudge 1.15s ease-in-out infinite}
+/* The hero shot is a screenshot, not part of the sequence — it is the first
+   thing anyone sees and it should carry the panel's own movement. It was gated
+   on a class only the stage ever sets, which is why it stopped. */
+.frame .point .arrow{animation:knudge 1.2s ease-in-out infinite}
 .point b{font:600 calc(var(--u)*14)/1.2 var(--display);letter-spacing:.06em;
   text-transform:uppercase}
 @keyframes knudge{0%,100%{transform:translateX(0);opacity:1}
@@ -386,12 +392,19 @@ h1 em{font-style:normal;color:var(--acid);display:block}
    own title card entirely. */
 .finale{position:absolute;inset:0;z-index:6;pointer-events:none;opacity:0;
   background:var(--g);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:calc(var(--px)*16);transition:opacity .6s ease-out}
+  display:flex;align-items:center;justify-content:center;
+  transition:opacity .6s ease-out}
+/* The block is centred in the stage, but everything inside shares the lockup's
+   left edge — the same flush-left reading as the hero. The gap above the type
+   is deliberately much smaller than the gap between the two lines: that
+   difference is what groups the mark with the words into one object while
+   keeping the two sentences as two statements. */
+.fin{display:flex;flex-direction:column;align-items:flex-start;
+  gap:calc(var(--px)*9)}
 .stage[data-beat="5"] .finale{opacity:1}
 .finale img{width:calc(var(--px)*460);height:auto}
-.finale p{font:600 calc(var(--px)*52)/.94 var(--display);letter-spacing:.005em;
-  text-transform:uppercase;color:var(--ink);text-align:center;margin:0}
+.finale p{font:600 calc(var(--px)*52)/1.15 var(--display);letter-spacing:.005em;
+  text-transform:uppercase;color:var(--ink);text-align:left;margin:0}
 .finale em{font-style:normal;color:var(--acid);display:block}
 .sbody{display:flex;align-items:stretch;height:calc(var(--px)*640)}
 .stage .page{position:relative;flex:1 1 auto;min-width:0;overflow:hidden;
@@ -713,26 +726,9 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 
 /* ==================================================== how to install */
 .install{padding:88px 0 104px}
-.grid5{position:relative;display:grid;grid-template-columns:repeat(5,1fr);gap:12px;
+.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;
   margin-bottom:20px}
-/* One frame travelling the row, driven by the same timeline that plays the
-   cards, so it can never point at the wrong one. It rings the CAPTION, not the
-   card: the cards are light-on-white drawings and an acid box round one would
-   swamp the thing it points at, where a box round four uppercase words is
-   unmistakably a marker. It also makes this the same device as the phase
-   labels above the stage — one gesture, one meaning, used twice.
-
-   Out of flow, so no caption moves as it arrives. A thin outline and nothing
-   else: this marks WHICH STEP, and must not be read as the thicker, tinted
-   frame the stage uses to mark WHICH ITEM was found. */
-.hilite{position:absolute;left:0;top:0;width:0;height:0;pointer-events:none;z-index:2;
-  box-shadow:0 0 0 2px var(--acid);opacity:0;
-  transition:transform .42s cubic-bezier(.3,.8,.3,1),
-             width .42s cubic-bezier(.3,.8,.3,1),
-             height .42s cubic-bezier(.3,.8,.3,1), opacity .25s ease-out}
-.hilite.on{opacity:1}
 .grid5 .cap{font-size:13px;letter-spacing:.12em;margin-bottom:12px}
-.grid5 .cap span{display:inline-block}
 .mk{background:var(--paper);height:220px;padding:16px;font-family:var(--ui);
   color:#202124;overflow:hidden;box-shadow:var(--lift)}
 .mknote{font:400 10.5px/1.45 var(--ui);color:#5F6368;margin-top:10px}
@@ -878,10 +874,17 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
   .beatnav{grid-template-columns:1fr;gap:12px}
 }
 @media (max-width:660px){
-  /* three links plus the lockup plus the CTA stop fitting here. The lockup and
-     the CTA are not negotiable; the links are — the sections are still two
-     scrolls away either side. */
+  /* Three links plus the lockup plus the CTA stop fitting. The lockup and the
+     CTA are not negotiable, so the links move out of the bar and appear once,
+     under the hero's CTA — navigation kept, no height spent on a menu. */
   .barnav{display:none}
+  .jump{display:flex;gap:20px;flex-wrap:wrap;margin-top:16px}
+  .jump a{display:inline-flex;align-items:center;min-height:44px;
+    font:400 12px/1 var(--mono);letter-spacing:.04em;color:var(--acid);
+    text-decoration:none}
+  /* every target a thumb has to hit clears 44px */
+  .btn-sm{padding:16px}
+  .spec a{display:inline-block;padding:8px 0}
 }
 @media (max-width:720px){
   .hero{padding:32px 0 48px}
@@ -890,18 +893,43 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
   .btn{font-size:16px;padding:16px 24px}
 }
 @media (max-width:640px){
-  .grid5{grid-template-columns:1fr}
-  .grid5 > figure:nth-child(n){grid-column:auto}
+  /* Five cards, one screen. A swipeable row gives each step its real size and
+     costs one screen of height instead of five — and the peek of the next card
+     at the right edge is what tells you it moves. Auto-play stops here: a loop
+     that advances cards the reader is scrolling by itself would fight them, and
+     the swipe is the better interaction. */
+  .grid5{display:flex;grid-template-columns:none;gap:12px;overflow-x:auto;
+    scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
+    margin:0 -16px 16px;padding:0 16px 10px;scroll-padding-left:16px;
+    overscroll-behavior-x:contain}
+  .grid5 > figure{flex:0 0 80%;min-width:0;grid-column:auto;scroll-snap-align:start}
+  .mk{height:252px}
+  .mkomni{height:44px}
+  .dlbtn{padding:16px 10px}
+}
+@media (max-width:620px){
+  /* The hero shot cannot hold a 404px panel beside a checkout on a phone. The
+     panel is the product, so the checkout half goes and the panel gets the
+     whole frame at very nearly its true size — 358px of 404, ~11.5px type,
+     which is a UI you can read rather than a screenshot of one. */
+  .fit{--dw:404}
+  .fbody .co{display:none}
+  .finale img{max-width:72%}
+  .finale p{font-size:calc(var(--px)*38)}
 }
 @media (max-width:560px){
   .wrap{padding:0 16px}
   .fit{--avail:min(874px,calc(100vw - 32px))}
+  h1{font-size:34px}
+  .lede{font-size:15px}
+  .spec{gap:4px 20px}
 }
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
-  .bar,.btn-sm,.steps div,.bars i,.beatnav li:after,.hilite{transition:none}
+  .bar,.btn-sm,.steps div,.bars i,.beatnav li:after{transition:none}
   .stage *,.stage{animation:none!important;transition:none!important}
-  .caret,.go.pulse,.mk.live *,.mk.live{animation:none!important}
+  .caret,.go.pulse,.mk.live *,.mk.live,
+  .frame .point .arrow{animation:none!important}
   /* the end of the sequence: the pair composed, the answer in, and the
      reader's cursor resting on the shop's own button */
   .stage .hand{opacity:1;transform:none}
@@ -946,6 +974,10 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
       <h1>It does the shopping.<em>You do the buying.</em></h1>
       <p class="lede">One sentence in. A filled checkout out.</p>
       <a class="btn" href="knili-extension.zip" download>Add to Chrome</a>
+      <nav class="jump">
+        <a href="#works">How it works</a>
+        <a href="#install">How to install</a>
+      </nav>
     </div>
 
     <div class="fit">
@@ -1157,8 +1189,10 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
 
       <svg class="hand" viewBox="0 0 12 19" aria-hidden="true"><path d="M0 0v16l4.2-3.6 2.6 6 2.6-1.2-2.5-5.8h4.6z" fill="#fff" stroke="#0A1140" stroke-width="1.1" stroke-linejoin="round"/></svg>
       <div class="finale" aria-hidden="true">
-        <img src="lockup.png" alt="">
-        <p>It does the shopping.<em>You do the buying.</em></p>
+        <div class="fin">
+          <img src="lockup.png" alt="">
+          <p>It does the shopping.<em>You do the buying.</em></p>
+        </div>
       </div>
       <div class="pickring" aria-hidden="true"></div>
       <div class="ripple" aria-hidden="true"><i></i></div>
@@ -1175,10 +1209,9 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
   <div class="wrap">
     <h2>How to install</h2>
     <div class="grid5" id="steps">
-      <span class="hilite" aria-hidden="true"></span>
 
       <figure>
-        <figcaption class="cap"><span>01 &middot; Download</span></figcaption>
+        <figcaption class="cap">01 &middot; Download</figcaption>
         <div class="mk mk1">
           <a class="dlbtn" href="knili-extension.zip" download>Download the zip</a>
           <div class="dl">
@@ -1193,7 +1226,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
       </figure>
 
       <figure>
-        <figcaption class="cap"><span>02 &middot; Open extensions</span></figcaption>
+        <figcaption class="cap">02 &middot; Open extensions</figcaption>
         <div class="mk mk2">
           <button class="mkomni" id="copyBtn" type="button"
                   aria-label="Copy chrome://extensions to the clipboard">
@@ -1213,7 +1246,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
       </figure>
 
       <figure>
-        <figcaption class="cap"><span>03 &middot; Switch it on</span></figcaption>
+        <figcaption class="cap">03 &middot; Switch it on</figcaption>
         <div class="mk mk3">
           <div class="xhead">
             <b>Extensions</b>
@@ -1224,7 +1257,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
       </figure>
 
       <figure>
-        <figcaption class="cap"><span>04 &middot; Load the folder</span></figcaption>
+        <figcaption class="cap">04 &middot; Load the folder</figcaption>
         <div class="mk mk4">
           <span class="zip">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h7l2 3h7v13H4z"/><path d="M11 7v10M9 9h4M9 13h4"/></svg>
@@ -1238,7 +1271,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
       </figure>
 
       <figure>
-        <figcaption class="cap"><span>05 &middot; Pin it</span></figcaption>
+        <figcaption class="cap">05 &middot; Pin it</figcaption>
         <div class="mk mk5">
           <div class="tbar">
             <svg class="puz" viewBox="3.35 1.75 17.3 18.9" preserveAspectRatio="xMidYMax meet" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M8.4 5.2 a2.6 2.6 0 0 1 5.2 0 h4.4 a1.8 1.8 0 0 1 1.8 1.8 v11 a1.8 1.8 0 0 1 -1.8 1.8 h-12 a1.8 1.8 0 0 1 -1.8 -1.8 v-3.6 a2.6 2.6 0 0 0 0 -5.2 v-2.2 a1.8 1.8 0 0 1 1.8 -1.8 z"/></svg>
@@ -1584,37 +1617,22 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
   if (mq && mq.matches) return;
   var cards = [].slice.call(grid.querySelectorAll('.mk'));
   if (!cards.length) return;
-  var hi = grid.querySelector('.hilite');
-  var t = null, i = 0, cur = 0, live = false;
-  /* offsetLeft/Top are already relative to the grid, which is the positioned
-     ancestor — so this is the same measurement whether the row is five across,
-     three-then-two, or a single column. The frame rings the caption's text with
-     a little air, and is out of flow, so nothing in the row ever moves. */
-  var PADX = 7, PADY = 5;
-  function frame(c) {
-    var sp = c && c.parentNode && c.parentNode.querySelector('.cap span');
-    if (!hi || !sp) return;
-    hi.style.width = (sp.offsetWidth + PADX * 2) + 'px';
-    hi.style.height = (sp.offsetHeight + PADY * 2) + 'px';
-    hi.style.transform = 'translate(' + (sp.offsetLeft - PADX) + 'px,'
-                       + (sp.offsetTop - PADY) + 'px)';
-    hi.classList.add('on');
-  }
-  window.addEventListener('resize', function () { if (live) frame(cards[cur]); });
+  var t = null, i = 0, live = false;
   function step() {
     cards.forEach(function (c, n) { c.classList.toggle('live', n === i); });
-    cur = i;
-    frame(cards[i]);
     var last = i === cards.length - 1;
     i = last ? 0 : i + 1;
     t = setTimeout(step, last ? 3000 : 1800);   /* 1.8s each, then a beat off */
   }
+  /* Below the carousel breakpoint the row is swipeable and the reader drives
+     it; an auto-play that advanced cards under their thumb would fight them. */
+  var wide = window.matchMedia && window.matchMedia('(min-width: 641px)');
   new IntersectionObserver(function (e) {
-    if (e[0].isIntersecting) { if (!live) { live = true; i = 0; step(); } }
+    var ok = e[0].isIntersecting && !(wide && !wide.matches);
+    if (ok) { if (!live) { live = true; i = 0; step(); } }
     else if (live) {
       live = false; clearTimeout(t); t = null; i = 0;
       cards.forEach(function (c) { c.classList.remove('live'); });
-      if (hi) hi.classList.remove('on');
     }
   }, { threshold: 0.3 }).observe(grid);
 })();
