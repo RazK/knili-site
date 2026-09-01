@@ -100,9 +100,11 @@ h2{font:600 clamp(28px,4vw,44px)/1.08 var(--display);letter-spacing:.01em;
   background:transparent}
 .barnav a[aria-current="true"]{color:var(--acid)}
 .barnav a[aria-current="true"]:after{background:var(--acid)}
-/* When the bar cannot hold the links, they are not simply lost: they appear
-   once under the hero's CTA instead. Three sections, so two destinations. */
-.jump{display:none}
+/* The hero's jump nav is gone. It existed for one reason — below 660 the bar
+   was display:none and the three section links had nowhere else to be — and
+   that reason went when the bar came back on phones carrying them. Above 660
+   .barnav has always held them. Three links rendered at no width is markup
+   pretending to be a feature. */
 /* Chrome has no extensions on Android or iOS, and unpacked ones additionally
    need Developer mode, which is desktop-only. Nobody can install this from a
    phone. So the phone's job is not conversion — it is understand it, want it,
@@ -110,6 +112,27 @@ h2{font:600 clamp(28px,4vw,44px)/1.08 var(--display);letter-spacing:.01em;
 .onphone{display:none}
 .murl{font:400 13px/1.4 var(--mono);color:var(--body);letter-spacing:0;
   margin-top:12px;word-break:break-all}
+/* ==========================================================================
+   THE DISCLOSURE MUST NEVER BE ABLE TO STRAND ITS OWN CONTENT. Above 660px
+   the summary is not displayed, because there is nothing to disclose — the
+   steps are simply the section. That was true only while `open` was
+   guaranteed, and it was not: a reader who collapsed the steps on a phone and
+   then widened the window got a details with no `open`, whose summary is
+   display:none and whose content is hidden by the UA — measured, .install
+   collapsed from 596.1px to 270.5px at 1440 with no control anywhere to bring
+   it back. A fresh load below 660 reached the same dead end with no
+   interaction at all, because the script removes `open` on load.
+   Two independent guarantees, because one was not enough. This is the
+   structural one: above the breakpoint the content is shown whatever the
+   attribute says, so the state cannot matter. The script below restores the
+   attribute as well, for engines that do not implement ::details-content.
+   ========================================================================== */
+@media (min-width:661px){
+  .whenpc::details-content{content-visibility:visible;
+    /* content-visibility:hidden also suppresses contain-intrinsic-size's
+       replacement box; releasing it needs the size released too */
+    contain-intrinsic-size:none}
+}
 .whenpc > summary{display:none}
 .barnav a{font:400 12px/1 var(--mono);letter-spacing:.04em;color:var(--dim);
   text-decoration:none}
@@ -141,10 +164,17 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--acid);outline-offse
    hidden. It came straight back out: a label, a kicker and an h1 is three
    stacked lines of preamble on one block, and the headline underneath already
    answers the question the label was asking. The section is still named where
-   naming does work — in .barnav and in the phone's .jump nav, which is where
-   the gap actually was — and not where it only repeats the headline.
+   naming does work — in .barnav, which is the nav at every width now that the
+   phone has a bar again — and not where it only repeats the headline.
    The 24px below is the kicker's own gap to the h1 and has no override on it;
-   there is nothing above it any more to share a block with. */
+   there is nothing above it any more to share a block with. On a phone this
+   line is the second half of the identity row instead: see .idrow. */
+/* On a wide screen these two are simply the column's first two children and
+   the wrapper does nothing: display:contents takes it out of the box tree
+   entirely, so desktop layout is byte-for-byte what it was. On a phone it
+   becomes the identity row — mark, then the line — and the mark appears. */
+.idrow{display:contents}
+.heromark{display:none}
 .kicker{
   font:500 13px/1 var(--mono);letter-spacing:.22em;text-transform:uppercase;
   color:var(--acid);margin:0 0 24px}
@@ -183,7 +213,18 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 .fit{--dw:874;--avail:596px}
 .frame{--px:min(calc(var(--avail) / var(--dw)),1px);width:calc(var(--px)*var(--dw));
   display:flex;flex-direction:column;background:var(--co-bg)}
+/* THE SYSTEM UI FACE, BECAUSE THIS IS CHROME'S CHROME AND NOT OURS. It was
+   inheriting the page's display face from body, which is a condensed poster
+   type wearing an address bar. Everything else in the mock browser — the
+   shop, the form, the summary — is already var(--ui) for exactly this reason.
+   It was also the cause of the domain sitting low in its pill: measured at
+   390 on beat 3, that face reports an ascent of 26 against a descent of 6 for
+   a 21.4px em, so metric centring puts the ink 81/19 below the middle, and
+   with body's 1.5 line-height inherited on top the line box came to 18.4px
+   inside a 16.7px pill. The text was not a little low; its ink ended 14.1px
+   BELOW the pill's bottom edge and was being cut off by overflow:hidden. */
 .cbar{display:flex;align-items:center;gap:calc(var(--px)*12);background:#E8EAED;
+  font-family:var(--ui);
   height:calc(var(--px)*44);padding:0 calc(var(--px)*12);
   border-bottom:calc(var(--px)*1) solid #D3D6DB}
 .lights{display:flex;gap:calc(var(--px)*8);flex:none}
@@ -192,10 +233,21 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 .lights i:nth-child(2){background:#FEBC2E}
 .lights i:nth-child(3){background:#28C840}
 .cbar .nav{width:calc(var(--px)*16);height:calc(var(--px)*16);color:#5F6368;flex:none}
+/* line-height:1 is load-bearing, not tidiness. Inherited from body it was
+   1.5, and a 1.5em line box in a pill whose height is set independently will
+   overflow it the moment the type grows — which is exactly what the tight
+   framing does, taking the type to 28 design px inside a 38 design px pill.
+   Tied to the font size, the line box can never be taller than the text, and
+   .doms below can then be exactly as tall as the line it holds.
+   (text-box:trim-both was tried here and does nothing: bare text in a flex
+   container is an anonymous flex item, text-box-trim does not inherit onto
+   one, and there is no box to put it on. Measured, identical numbers with and
+   without. The geometry below is what fixes it.) */
 .omni{flex:1;min-width:0;display:flex;align-items:center;gap:calc(var(--px)*8);
   background:#fff;height:calc(var(--px)*28);border-radius:calc(var(--px)*14);
-  padding:0 calc(var(--px)*14);font-size:calc(var(--px)*12.5);color:#202124;
-  white-space:nowrap;overflow:hidden}
+  padding:0 calc(var(--px)*14);font-size:calc(var(--px)*12.5);line-height:1;
+  color:#202124;white-space:nowrap;overflow:hidden}
+
 .omni svg{width:calc(var(--px)*11);height:calc(var(--px)*11);color:#5F6368;flex:none}
 .omni b{font-weight:400;color:#5F6368}
 .cbar img{width:calc(var(--px)*20);height:calc(var(--px)*20);flex:none}
@@ -557,7 +609,17 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 /* One address at a time, stacked in place. These rules went missing in an
    earlier rewrite of this block, which left every domain rendering at once
    inside the pill. */
-.doms{position:relative;display:block;flex:1;min-width:0;height:1.25em}
+/* 1em, and it has to be 1em: the b's inside are absolutely positioned at
+   top:0, so this box does not wrap the text, it PLACES it — the flex row
+   centres this box and the text hangs from its top edge. At 1.25em it was a
+   quarter of a line taller than the line it holds, which pinned the domain
+   that far above the middle of the pill; back when line-height was 1.5 it was
+   a quarter of a line SHORTER, and the text hung out of the bottom. Same box
+   as the line box, and the only thing left deciding where the letters sit is
+   the font's own ascent and descent. Measured against the pill's centre: the
+   cap box lands +0.23px at 390 and +0.34px at 1440, on pills of 29.1 and
+   21.4 — which is metric centring's own floor, not a number anyone chose. */
+.doms{position:relative;display:block;flex:1;min-width:0;height:1em}
 .doms b{position:absolute;left:0;top:0;font-weight:400;color:#5F6368;opacity:0;
   white-space:nowrap}
 .doms b.final{opacity:1;color:#202124}
@@ -1223,28 +1285,135 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
   .whenpc > summary::-webkit-details-marker{display:none}
   .whenpc > summary:after{content:" +";color:var(--dim)}
   .whenpc[open] > summary:after{content:" \2013"}
-  /* The bar holds the nav and the CTA on a wide screen and earns its place.
-     Here it holds neither — no links, no CTA, no text at all — so it is 47px
-     of permanently occupied screen showing a logo the reader meets again 40px
-     below it. It goes, and the anchors stop compensating for it. */
-  .bar{display:none}
-  section{scroll-margin-top:16px}
-  .barnav{display:none}
-  /* Three destinations, and they have to fit one row at 360px: measured, the
-     three labels come to 277px and 16px gaps put the row at 309 inside 313.
-     A 20px gap wrapped it, and a wrapped row costs a whole second 44px band. */
-  .jump{display:flex;gap:16px;flex-wrap:wrap;margin-top:16px}
-  .jump a{display:inline-flex;align-items:center;min-height:44px;
-    font:400 12px/1 var(--mono);letter-spacing:.04em;color:var(--acid);
-    text-decoration:none}
-  /* every target a thumb has to hit clears 44px */
+  /* ==========================================================================
+     THE PHONE IS ONE SCREEN, AND THIS IS THE WHOLE OF IT: who we are, what it
+     does, and the thing doing it. Everything that was between them has gone
+     somewhere it is worth more. The browser shot goes because the animation
+     below is the same picture, moving. The lede goes because the headline is
+     already the sentence. The copy-link control goes to the install section,
+     where the DESKTOP ONLY banner has just given the reader a reason to want
+     it. The jump nav goes to a bar that arrives after this screen instead of
+     spending three lines of it on navigation nobody needs yet.
+     ========================================================================== */
+  .fit{display:none}
+  .hero .lede{display:none}
+  /* The mark and the line it belongs with, on one row. The wrapper is
+     display:contents everywhere else, so nothing above 660 knows it exists. */
+  .idrow{display:flex;align-items:center;gap:12px;margin:0 0 14px}
+  .heromark{display:block;width:auto;height:30px;flex:none}
+  /* 886px of source into 30px of height is 4.4x the pixels a 3x screen asks
+     for, so it stays crisp with nothing new to download. */
+  .kicker{margin:0;font-size:11px;letter-spacing:.12em;line-height:1.4;
+    flex:1;min-width:0}
+  /* INLINE, not block. .onphone is display:block below 660 for the copy-link
+     card, and that rule was landing on this span too — which is what put the
+     separator at the head of its own line and made a one-line kicker two. */
+  .kicker .onphone{display:inline}
+  /* the control now sits between the banner it answers and the steps it
+     precedes, so it needs a foot as well as a head */
+  .getlink{margin:0 0 10px}
+
+  /* ==========================================================================
+     ONE GROUND, ALL THE WAY DOWN. The section under the hero used to cut to
+     white paper, which on a phone is a hard seam two thirds of the way into
+     the first screen — and the thing the seam framed is a browser window that
+     is already near-white, so the paper was working against it rather than
+     for it. On cobalt the shop reads as a lit object, which is what it is.
+     Everything the paper was carrying has to be re-inked here: the heading,
+     the phase labels and their track, the caption, and the lift — that shadow
+     was tuned as navy-on-white and is nearly invisible on navy, so the acid
+     hairline from the root does the edge instead.
+     ========================================================================== */
+  /* section.hero and .bar .barin, not .hero and .barin: the <=560 block sits
+     further down this stylesheet and a single class there beats a single
+     class here. Specificity is the fix, not source order — moving this block
+     below it would put the phone rules out of breakpoint order. */
+  section.hero{padding:14px 0 0}
+  /* 32, not the 34 the <=560 block sets. Measured at 360: at 34px "It does
+     the shopping." runs to two lines and the headline to three, at 95.9px;
+     at 32px it is two lines and 60.2. Nearly 36px of the one screen, for a
+     6% change in size nobody can see — and a three-line headline whose last
+     line is two words was the worse setting anyway. */
+  .hero h1{font-size:32px;margin-bottom:14px}
+  .works{background:transparent;padding:16px 0 20px;
+    --lift:0 20px 44px -18px rgba(2,4,26,.9), 0 0 0 1px rgba(232,255,58,.34)}
+  .works h2{color:var(--ink);margin:0 0 12px}
+  .works .cap{color:var(--ink)}
+  .works .foot{color:var(--dim);margin-top:12px}
+  .beatnav{margin:0 0 10px}
+  .beatnav li{color:var(--body)}
+  .beatnav.seq li{color:var(--dim)}
+  .beatnav.seq li.on{color:var(--acid)}
+  .beatnav i{background:rgba(211,216,255,.24)}
+  .beatnav u{background:var(--acid)}
+  /* THE ENDING HAD TO BE REBUILT FOR THIS GROUND. Beat 5's closing card is a
+     cobalt plate and it ends by fading to whatever is behind it — which was
+     white paper, and is now cobalt. Fading cobalt into cobalt is nothing
+     leaving nothing: the ending simply stopped existing. The plate takes the
+     page's own deep navy here, so the card is an object on the ground again
+     and its 520ms fade has something to be the disappearance OF. */
+  .stage .finale{background:var(--ink2)}
+
+  /* ==========================================================================
+     THE BAR COMES BACK, AND IT WAITS ITS TURN. It was removed below 660
+     because it carried nothing there — no nav, no CTA, no text. It carries
+     the section nav now, so it has a job; what it must not do is spend any of
+     the first screen on that job. position:fixed rather than sticky is the
+     whole trick: fixed is out of flow, so the bar costs the document zero
+     height and the hero starts at the top of the page. It is translated off
+     the top until the hero has gone past, and slides in after it.
+     Being out of flow is also what makes a plain threshold safe here — a
+     fixed bar cannot move the element the observer is watching, so there is
+     no feedback loop to give hysteresis to. See the stage's observer for what
+     that mistake costs when the box IS in flow.
+     No lockup in it: the hero row carries the mark, and on a screen this
+     narrow two of them within one scroll of each other is one too many. */
+  .bar{position:fixed;left:0;right:0;top:0;padding:0;
+    background-color:var(--ink2);border-bottom-color:var(--rule);
+    box-shadow:0 -16px 0 0 var(--ink2), 0 14px 34px -14px rgba(2,4,26,.9);
+    transform:translateY(-101%);transition:transform .26s ease-out}
+  .bar.past{transform:none}
+  /* Nothing adds .past without JavaScript, so without it the bar would hide
+     for good and a phone would have no navigation at all. Then it simply
+     starts visible: 32px off the first screen is the right price for a page
+     that still works. The media feature answers this in CSS, so there is no
+     head script and no flash of a bar that then slides away. */
+  @media (scripting:none){ .bar{transform:none} }
+  .barin > img{display:none}
+  .bar .barin{padding:10px 16px}
+  .barnav{display:flex;margin-left:0;width:100%;gap:12px;
+    justify-content:space-between}
+  .barnav a{font-size:11px;position:relative}
+  /* The target fills the bar and stops there. Out of the flow like the
+     footer's, so 11px of type does not cost 44px of strip — but bounded to
+     the bar's own 32px rather than centred at 44, because 44 would hang 6px
+     below the bar onto whatever page content is scrolling under it and take
+     taps meant for that. The height comes back as width: 90.4 x 32 for the
+     narrowest of the three, against the 44 x 44 the pattern usually asks for
+     — more target, and all of it inside the thing it belongs to. */
+  .barnav a:after{content:"";position:absolute;left:-10px;right:-10px;
+    top:50%;height:32px;transform:translateY(-50%);background:none;
+    display:block;margin:0}
+  .barnav a[aria-current="true"]:after{background:none}
+  /* the current-section rule cannot live on :after any more, so it moves to a
+     second pseudo that is still reserved at all times and still moves nothing */
+  .barnav a:before{content:"";position:absolute;left:0;right:0;bottom:-5px;
+    height:1px;background:transparent}
+  .barnav a[aria-current="true"]:before{background:var(--acid)}
   .btn-sm{padding:16px}
+  /* the bar is 32px tall on a phone, measured; anchors clear it by 8 */
+  section{scroll-margin-top:40px}
 }
 @media (max-width:720px){
   .hero{padding:32px 0 48px}
-  .works{padding:56px 0 48px}
   .install{padding:56px 0 20px}
   .btn{font-size:16px;padding:16px 24px}
+}
+/* Bounded below, because the phone block sets its own and comes EARLIER in
+   the file: an unbounded max-width:720px rule would win the cascade over it
+   at 390 and put 56px of padding back on top of a one-screen layout. */
+@media (min-width:661px) and (max-width:720px){
+  .works{padding:56px 0 48px}
 }
 /* ==========================================================================
    THE SWIPE RAIL. The native scrollbar on a phone is an overlay: it appears
@@ -1425,19 +1594,13 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
   <div class="wrap">
     <div class="hero-grid">
     <div>
+      <div class="idrow">
+      <img class="heromark" src="lockup.png" alt="Knili" width="886" height="339">
       <p class="kicker">A new Chrome <span class="nb">extension<span class="pz"><svg viewBox="3.35 1.75 17.3 18.9" preserveAspectRatio="xMidYMax meet" width="15.6" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M8.4 5.2 a2.6 2.6 0 0 1 5.2 0 h4.4 a1.8 1.8 0 0 1 1.8 1.8 v11 a1.8 1.8 0 0 1 -1.8 1.8 h-12 a1.8 1.8 0 0 1 -1.8 -1.8 v-3.6 a2.6 2.6 0 0 0 0 -5.2 v-2.2 a1.8 1.8 0 0 1 1.8 -1.8 z"/></svg></span></span><span class="onphone"> &middot; for your computer</span></p>
-      <h1>It does the shopping.<em>You do the buying.</em></h1>
-      <p class="lede">One sentence in. A filled checkout out.</p>
-      <a class="btn ondesk" href="knili-extension.zip" download>Add to Chrome</a>
-      <div class="onphone">
-        <button class="btn" id="copyLink" type="button">Copy the link for your computer</button>
-        <p class="murl" id="siteUrl">razk.github.io/knili-site</p>
       </div>
-      <nav class="jump">
-        <a href="#hero">What it is</a>
-        <a href="#works">How it works</a>
-        <a href="#install">How to install</a>
-      </nav>
+      <h1>It does the shopping.<em>You do the buying.</em></h1>
+      <p class="lede">One sentence in. A filled checkout.</p>
+      <a class="btn ondesk" href="knili-extension.zip" download>Add to Chrome</a>
     </div>
 
     <div class="fit">
@@ -1702,6 +1865,15 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
       <p><b>Desktop only.</b> Chrome has no extensions on a phone &mdash; this one
       needs a computer.</p>
     </div>
+    <!-- The control belongs to this sentence, not to the hero. Up there it was
+         an action with no motive — nobody copies a URL before they know why.
+         Here it answers the question the banner has just put in the reader's
+         head, and it is the same button with the same copied-state feedback;
+         only its position in the document changed. -->
+    <div class="onphone getlink">
+      <button class="btn" id="copyLink" type="button">Copy the link for your computer</button>
+      <p class="murl" id="siteUrl">razk.github.io/knili-site</p>
+    </div>
     <details class="whenpc" id="stepsBox" open>
       <summary>When you are at your computer</summary>
     <div class="grid5" id="steps">
@@ -1820,6 +1992,23 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
     }, { threshold: 0 }).observe(sentinel);
   } else if (bar) {
     bar.classList.add('stuck');
+  }
+
+  /* THE PHONE BAR WAITS FOR THE FIRST SCREEN TO BE OVER. Below 660 the bar is
+     position:fixed and translated off the top; it carries the section nav,
+     and section nav is worth nothing until there are sections behind you.
+     `.past` slides it in once the hero has left the viewport entirely, which
+     on a phone is exactly the moment the reader finishes the first screen.
+     One threshold and no hysteresis is safe HERE and only here: the bar is
+     out of flow, so it cannot move the element being observed and there is no
+     loop to start. The stage's observer is in flow and needs the dead band.
+     Above 660 this class is inert — .bar is static there and nothing reads
+     it — so the listener can run at every width without a media query. */
+  var heroSec = document.getElementById('hero');
+  if (bar && heroSec && 'IntersectionObserver' in window) {
+    new IntersectionObserver(function (e) {
+      bar.classList.toggle('past', !e[0].isIntersecting);
+    }, { threshold: 0 }).observe(heroSec);
   }
 
   /* Which section you are actually in, marked on the link that jumps back to
@@ -2442,6 +2631,19 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
   if (!d) return;
   var mq = window.matchMedia && window.matchMedia('(max-width: 660px)');
   if (mq && mq.matches) d.removeAttribute('open');
+  /* And put it back on the way out. Collapsing the steps is an affordance
+     that exists only while the summary does, which is only below 660px; carry
+     the collapsed state up past that breakpoint and the reader is left with a
+     section that has lost its contents and offers no way to ask for them
+     back. The stylesheet above already forces the content visible there, so
+     this is the second belt rather than the only one — it is what covers an
+     engine without ::details-content. Restoring on the way UP only: narrowing
+     must not re-open what the reader deliberately folded away. */
+  if (mq && mq.addEventListener) {
+    mq.addEventListener('change', function (e) {
+      if (!e.matches) d.setAttribute('open', '');
+    });
+  }
   /* Back to the first card, every time the disclosure opens. `<details>`
      content has no layout worth scrolling while it is closed, so a reset that
      runs once at load cannot stick — it has to run on `toggle`. And it has to
