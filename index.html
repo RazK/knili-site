@@ -41,6 +41,9 @@
   /* the shop beside it: warm, quiet, and clearly not us */
   --co-bg:#F7F3ED; --co-card:#FFFFFF; --co-line:#E5DCD1; --co-ink:#2A211C;
   --co-dim:#8B7B6D; --co-btn:#3B2C25;
+  /* The headline's size is a token because the identity block above it is
+     built from ratios of it — see .heromark. One number, one place. */
+  --h1:clamp(36px,3.8vw,52px);
   --display:KniliDisplay,Impact,Haettenschweiler,sans-serif;
   --mono:KniliMono,ui-monospace,Menlo,monospace;
   --ui:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
@@ -69,24 +72,45 @@ h2{font:600 clamp(28px,4vw,44px)/1.08 var(--display);letter-spacing:.01em;
   color:var(--ink2);margin:0 0 16px}
 
 /* ==================================================== the bar that follows */
-/* The header condenses rather than arrives. At rest it has no plate at all —
-   it is the top of the hero, and only the lockup and the button are there.
-   Past the sentinel it grows its ink2 ground, its hairline and its lift, and
-   the section links come with them. Nothing about its box changes between the
-   two states: the border is reserved as transparent and the shadow list is
-   the same length, so only colours interpolate and the content never shifts.
+/* THE BAR IS NOT PART OF THE FIRST SCREEN, AT ANY WIDTH. It used to be the
+   top of the hero — a 22px lockup and an ADD TO CHROME sitting directly above
+   a hero that then said its own name again and asked again. Two marks and two
+   identical calls to action inside one glance, and the mark the reader met
+   first was the smallest one on the page. The hero introduces the page now,
+   at a size that can carry it (see .heromark), so the bar has nothing left to
+   do up there and it waits until there is something behind the reader to
+   navigate back to.
+   The phone already behaved this way and the reasoning was never about width,
+   so it became the only behaviour rather than being written twice.
+   position:fixed is the whole trick: fixed is out of flow, so the bar costs
+   the document ZERO height and the hero starts at the very top of the page —
+   46px of the first screen handed back on a desktop, which is close to what
+   the larger identity block spends. It is translated off the top until the
+   hero has gone past, and slides in after it.
+   Being out of flow is also what makes a plain threshold safe — a fixed bar
+   cannot move the element the observer is watching, so there is no feedback
+   loop to give hysteresis to. See the stage's observer for what that mistake
+   costs when the box IS in flow.
+   .stuck and the 40px sentinel went with the change, and they were not merely
+   redundant: the bar is off-screen for the whole time the sentinel is on it,
+   so the condensed state was the only state the bar could ever be SEEN in.
+   Two observers were deciding one thing and one of them could never be
+   observed. The plate, the hairline and the lift are simply what the bar
+   looks like now, so nothing interpolates and nothing can shift.
    The first shadow is a solid ink2 band reaching 16px ABOVE the bar's own top
    edge — off-screen when it is flush, and insurance that no strip of cobalt
    can ever show between the viewport top and the plate. */
-.bar{position:sticky;top:0;z-index:20;margin:0;padding:12px 0;
-  background-color:transparent;border-bottom:1px solid transparent;
-  box-shadow:0 -16px 0 0 transparent, 0 14px 34px -14px transparent;
-  transition:background-color .2s ease-out, box-shadow .2s ease-out,
-             border-bottom-color .2s ease-out}
-.bar.stuck{background-color:var(--ink2);border-bottom-color:var(--rule);
-  box-shadow:0 -16px 0 0 var(--ink2), 0 14px 34px -14px rgba(2,4,26,.9)}
-/* Out of flow, so it can never push the bar down by even a pixel. */
-.sentinel{position:absolute;top:0;left:0;width:1px;height:40px;pointer-events:none}
+.bar{position:fixed;left:0;right:0;top:0;z-index:20;margin:0;padding:12px 0;
+  background-color:var(--ink2);border-bottom:1px solid var(--rule);
+  box-shadow:0 -16px 0 0 var(--ink2), 0 14px 34px -14px rgba(2,4,26,.9);
+  transform:translateY(-101%);transition:transform .26s ease-out}
+.bar.past{transform:none}
+/* Nothing adds .past without JavaScript, so without it the bar would hide for
+   good and the page would have no navigation at all. Then it simply starts
+   visible: a strip off the first screen is the right price for a page that
+   still works. The media feature answers this in CSS, so there is no head
+   script and no flash of a bar that then slides away. */
+@media (scripting:none){ .bar{transform:none} }
 .barin{display:flex;align-items:center;gap:20px}
 .barin > img{height:22px;width:auto}
 /* Everything in the bar is there from the first frame — only the plate under
@@ -131,23 +155,27 @@ h2{font:600 clamp(28px,4vw,44px)/1.08 var(--display);letter-spacing:.01em;
    now, on every screen. No attribute, no state, no way to be stranded in one,
    and three guarantees deleted rather than maintained.
    ========================================================================== */
-/* --body, not --dim. At rest the bar has no plate of its own and this link sits
-   straight on the hero's cobalt, where --dim measures 3.43:1 — under the 4.5
-   that 12px of text needs. --body is 5.64:1 there and 12.88:1 once .stuck puts
-   the navy plate behind it, so one value passes in both states. */
+/* --body, not --dim. The bar carries its navy plate at all times now, where
+   --body measures 12.88:1. --dim was chosen against the older two-state bar,
+   where the link also had to sit straight on the hero's cobalt and measured
+   3.43:1 there — under the 4.5 that 12px of text needs. The bar never sits on
+   cobalt any more, but --body is the value that passed on BOTH grounds and
+   there is nothing to buy by loosening it. */
 .barnav a{font:400 12px/1 var(--mono);letter-spacing:.04em;color:var(--body);
   text-decoration:none}
 .barnav a:hover{color:var(--acid)}
-.btn-sm{background:var(--acid);color:var(--ink2);text-decoration:none;
-  font:600 12px/1 var(--display);letter-spacing:.06em;text-transform:uppercase;
-  padding:11px 16px;white-space:nowrap}
+/* ADD TO CHROME APPEARED THREE TIMES ON ONE SCREEN — in the bar, in the hero
+   and again under the install steps — and .btn-sm was the bar's copy of it.
+   The bar keeps the mark and the section link; the hero keeps the one call to
+   action above the fold; the install section's own DOWNLOAD THE ZIP inside
+   card 01 is a real <a download>, not a drawing, so the button beneath the
+   row was a third route to the same file. Both extra routes are gone and this
+   rule had no other user. */
 /* keyboard reachability: an acid outline vanishes on an acid button, so the
    filled controls take the ink and everything else takes the acid */
 a:focus-visible,button:focus-visible{outline:3px solid var(--acid);outline-offset:3px}
-.btn:focus-visible,.btn-sm:focus-visible,.dlbtn:focus-visible{
+.btn:focus-visible,.dlbtn:focus-visible{
   outline:3px solid var(--ink2);outline-offset:2px}
-
-.btn-sm:hover{filter:brightness(1.06)}
 
 /* ================================================================== hero */
 .hero{padding:48px 0 48px}
@@ -173,11 +201,36 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--acid);outline-offse
    the wrapper does nothing: display:contents takes it out of the box tree
    entirely, so desktop layout is byte-for-byte what it was. On a phone it
    becomes the identity row — mark, then the line — and the mark appears. */
-.idrow{display:contents}
-.heromark{display:none}
-.kicker{
+/* THE PAGE INTRODUCES ITSELF WITH ITS MARK, NOT WITH A CORNER LOGO. Above the
+   fold the lockup used to exist only at 22px, in a strip at the very top of
+   the screen, and that strip was the first thing a reader met. The
+   composition that fixes it is one this page had already solved and then
+   deleted: the demo's closing card set the lockup above IT DOES THE SHOPPING.
+   / YOU DO THE BUYING., flush left, with a deliberately small gap between the
+   mark and the type so the two read as ONE object rather than as a logo with
+   a caption. The card is gone from the sequence — it was repeating, ten
+   seconds later, the headline it now sits directly beneath — but its
+   proportions were right and they are lifted here rather than re-derived.
+   The card's own numbers, in its design pixels: type at 86, mark 360 wide, 14
+   between them. So the mark is 4.19x the headline's size and the gap is .163
+   of it. Ratios, not lengths, which is the whole reason the headline's size
+   became a token: every part of the block scales with the headline at every
+   width and the relationship cannot drift. At 1440 that is a 218px mark over
+   a 52px headline; at 661 it is 151px over 36px.
+   .idrow was display:contents on a desktop — a wrapper that took itself out
+   of the box tree so the mark could be hidden and the kicker could act as the
+   column's first child. It is a real block now, and the kicker is ordered
+   above the mark rather than left between the mark and the words, because
+   anything sitting in that gap breaks the one thing the card got right. The
+   DOM keeps the mark first so the phone's identity ROW still reads mark-then-
+   line without reordering the source; see the 660 block, which puts the order
+   back to 0 and the direction back to row. */
+.idrow{display:flex;flex-direction:column;align-items:flex-start}
+.heromark{display:block;width:calc(var(--h1)*4.19);height:auto;
+  margin:0 0 calc(var(--h1)*.163)}
+.kicker{order:-1;
   font:500 13px/1 var(--mono);letter-spacing:.22em;text-transform:uppercase;
-  color:var(--acid);margin:0 0 24px}
+  color:var(--acid);margin:0 0 18px}
 /* An inline <svg> is a replaced element: browsers synthesise its baseline
    themselves, so vertical-align:baseline on it lands wherever they choose —
    which is what kept the glyph riding high. Put the synthesis on a wrapper
@@ -198,7 +251,7 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--acid);outline-offse
   margin-bottom:-1px}
 .pz svg{display:block}
 .nb{white-space:nowrap}
-h1{font:600 clamp(36px,3.8vw,52px)/.94 var(--display);letter-spacing:.005em;
+h1{font:600 var(--h1)/.94 var(--display);letter-spacing:.005em;
   text-transform:uppercase;color:var(--ink);margin:0 0 24px}
 h1 em{font-style:normal;color:var(--acid);display:block}
 .lede{font:400 17px/1.45 var(--mono);color:var(--body);letter-spacing:0;margin:0 0 32px}
@@ -435,48 +488,6 @@ h1 em{font-style:normal;color:var(--acid);display:block}
    cursor resting on Place order. The driver winds it back to beat one and lets
    it play, and puts it back the moment the stage leaves the screen.
    ========================================================================== */
-/* THREE ACROSS AT EVERY WIDTH. Below 900 this used to become one column and
-   the three phases stacked — which is not a sequence, it is a list, and it
-   cost 106.8px of a phone screen to say what 27.6 says on a desktop. Three
-   columns hold at 360 too; what has to give is the type, not the reading.
-   The labels are allowed to run to two or three lines INSIDE their own
-   column, because three-across survives wrapping and stacking does not. */
-.beatnav{list-style:none;display:grid;grid-template-columns:repeat(3,1fr);gap:24px;
-  margin:0 0 12px}
-/* Lit by default, so a page with no JavaScript shows three completed phases
-   rather than three grey ones. The driver adds .seq and takes over. */
-/* A column, with the label growing and the rule pinned under it. Grid items
-   stretch, so all three columns are the height of the tallest label, and the
-   three rules therefore sit on ONE line however many lines each label runs
-   to. They are the sequence's progress bar; a progress bar at three different
-   heights is three bars. */
-/* Inked for cobalt, because the demo is in the hero and the hero is cobalt at
-   every width. Measured on --g: --body 5.64:1 at rest, --dim 3.43:1 for the
-   phases already played, --acid 7.05:1 for the one running. */
-.beatnav li{position:relative;display:flex;flex-direction:column;
-  font:600 13px/1.2 var(--display);letter-spacing:.12em;
-  text-transform:uppercase;color:var(--body);transition:color .3s ease-out}
-.beatnav li > span{flex:1}
-/* Three states, three inks, all of them legible on cobalt: --body at rest for a
-   page with no JavaScript (5.64:1), this for a phase not yet reached, and acid
-   for the one running (7.05:1). #BAC2FA rather than --dim, which is the token
-   that would otherwise say "quieter" here and measures 3.43:1 on --g; this is
-   4.57:1, the first step up the same ramp that clears 4.5. */
-.beatnav.seq li{color:#BAC2FA}
-.beatnav.seq li.on{color:var(--acid)}
-/* A mark hanging off the live label's rule, reaching toward the picture it
-   names. It stops well short of the stage — this points, where the install
-   caption frame and the stage ring enclose. */
-.beatnav li:after{content:"";position:absolute;left:50%;top:100%;width:1px;height:0;
-  background:var(--acid);opacity:0;
-  transition:height .3s ease-out, opacity .3s ease-out}
-.beatnav li.on:after{height:9px;opacity:1}
-.beatnav i{display:block;height:2px;background:rgba(211,216,255,.24);
-  margin-top:10px;overflow:hidden}
-.beatnav u{display:block;height:100%;background:var(--acid);transform:scaleX(1);
-  transform-origin:left}
-.beatnav.seq u{transform:scaleX(0)}
-.beatnav.seq li.done u,.beatnav.seq li.on u{transform:scaleX(1)}
 
 /* The design frame is 1400 wide, not 1072, so at a 1072px column --px lands
    near .77 and the whole stage renders about 524px tall instead of 684. The
@@ -545,12 +556,13 @@ h1 em{font-style:normal;color:var(--acid);display:block}
      the same rule, silently replaced it — measured, getComputedStyle reported
      transitionProperty "background-color, box-shadow" and nothing else. The
      camera therefore CUT on every beat instead of easing, for as long as that
-     second declaration has existed. At the 4 -> 5 seam that cut is what the
-     page was reported to do at the end: the composition is still at full
-     opacity when beat 5 lands, and it snapped 102.9px right and 13.9px down
-     while zooming .598 -> .686 at 390px before it began to fade. Everything
-     the .cut class exists for — killing the ease for exactly one frame at the
-     5 -> 1 wrap — was a no-op until now, and is load-bearing again. */
+     second declaration has existed. It was measured at the old 4 -> 5 seam,
+     where the composition was still at full opacity when the closing card
+     landed and the camera snapped 102.9px right and 13.9px down while zooming
+     .598 -> .686 at 390px. That seam is gone, but the fix is worth more now,
+     not less: everything the .cut class exists for — killing the ease for
+     exactly one frame at the 4 -> 1 wrap — was a no-op until this line was
+     repaired, and the wrap is the only seam left. */
   transition:transform .45s cubic-bezier(.3,.8,.3,1),
              background-color .5s ease-out, box-shadow .5s ease-out}
 /* At the ask there is no browser yet, so the composition paints no ground and
@@ -561,59 +573,14 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 /* One frame with nothing easing anywhere inside the composition. play() adds
    this, sets beat 1 and the camera, forces a reflow so that state is committed
    as the new resting point, and takes it off again — which is what turns the
-   5 -> 1 wrap from a half-second cross-fade into a cut. It is never left on. */
+   4 -> 1 wrap from a half-second cross-fade into a cut. It is never left on.
+   It is the ONLY thing between the last beat and the first now that the
+   closing card is gone, so it carries more than it used to: the page, the
+   chrome bar and the panel are all still painted at beat 4 and every one of
+   them has to be at its beat-1 value in the same frame. `.stage.cut *` is
+   what makes that true for the descendants as well as for the camera. */
 .stage.cut,.stage.cut *{transition:none !important}
-/* the closing frame: everything goes, and the argument is left on its own */
-.stage[data-beat="5"]{background-color:transparent}
-.stage[data-beat="5"] .cbar,.stage[data-beat="5"] .page,.stage[data-beat="5"] .pnl,
-.stage[data-beat="5"] .hand,.stage[data-beat="5"] .confetti,
-.stage[data-beat="5"] .placed{opacity:0}
 .stage .hand{transition:opacity .5s ease-out}
-/* The hero's palette exactly: white and acid on cobalt. This card had it
-   inverted — navy and cobalt on white — which put the finale in a different
-   colour world from the page it closes, and left the brand's acid out of its
-   own title card entirely. */
-.finale{position:absolute;inset:0;z-index:6;pointer-events:none;opacity:0;
-  /* --ink2, not the brand cobalt. The card ends by fading to what is behind it,
-     and behind it is the window's cream with the page's own cobalt all around;
-     navy is legible against both, cobalt against only one. */
-  background:var(--ink2);
-  display:flex;align-items:center;justify-content:center;
-  transition:opacity .6s ease-out}
-/* The block is centred in the stage, but everything inside shares the lockup's
-   left edge — the same flush-left reading as the hero. The gap above the type
-   is deliberately much smaller than the gap between the two lines: that
-   difference is what groups the mark with the words into one object while
-   keeping the two sentences as two statements. */
-.fin{display:flex;flex-direction:column;align-items:flex-start;
-  gap:calc(var(--px)*9)}
-/* AND IT ARRIVES ONLY ONCE THE FRAME HAS STOPPED MOVING. With the camera
-   easing again (450ms) and the outgoing composition fading out (500ms), a
-   finale that starts fading at the same instant is painted while the frame is
-   still travelling: the closing card renders under a camera on its way from
-   beat 4 to beat 5 — off-centre, clipped, and lying over a checkout that has
-   not left yet. The 500ms delay is the longer of those two: by the time the
-   plate is worth any opacity at all the camera has arrived AND the previous
-   scene has reached zero. Sequential in, sequential out, and never two scenes
-   in one frame. .bye re-declares its own transition, so the delay does not
-   follow the card on the way out. */
-.stage[data-beat="5"] .finale{opacity:1;transition:opacity .6s ease-out .5s}
-/* The closing card fading out, alone, before anything else arrives. Nothing
-   else in the composition is animating while this runs — at beat 5 the chrome
-   bar, the page, the panel and the cursor have been at opacity 0 for two
-   seconds — so this is the only thing on the timeline, which is what makes it
-   sequential rather than a dissolve. It fades to the section's own ground:
-   the stage's background is already transparent at beat 5, so what comes
-   through is the paper the section is printed on (the window's cream in the
-   phone's tight framing). Emptying to the ground reads as an ending; fading
-   one cobalt object into another would only read as a swap.
-   ease-in, not the ease-out it arrived on: an ending should hold its shape
-   and then go, and the long tail of an ease-out is a card refusing to leave. */
-.stage[data-beat="5"].bye .finale{opacity:0;transition:opacity .52s ease-in}
-.finale img{width:calc(var(--px)*460);height:auto}
-.finale p{font:600 calc(var(--px)*52)/1.15 var(--display);letter-spacing:.005em;
-  text-transform:uppercase;color:var(--ink);text-align:left;margin:0}
-.finale em{font-style:normal;color:var(--acid);display:block}
 .sbody{display:flex;align-items:stretch;height:calc(var(--px)*920)}
 .stage .page{position:relative;flex:1 1 auto;min-width:0;overflow:hidden;
   background:var(--co-bg)}
@@ -1022,6 +989,47 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 @keyframes chip{0%{opacity:0;transform:translateY(calc(var(--px)*8)) scale(.92)}
                 14%,74%{opacity:1;transform:none}
                 100%{opacity:0;transform:none}}
+/* ONE TRACK FOR THE WHOLE LOOP, AND IT IS THE ONLY THING LEFT THAT NARRATES.
+   Three phase labels used to sit above the window — 01 TELL KNILI WHAT TO BUY
+   / 02 LET IT DO THE SHOPPING / 03 YOU DO THE BUYING — each with its own rule
+   filling over its own beat. They were captioning a picture that says the
+   same thing by moving, and they cost 27.6px of a desktop screen and 38.4 of
+   a phone's to do it. What a reader actually cannot get from the picture is
+   how long until it comes round again, so that is all that is left: one
+   continuous track, start of beat 1 to the wrap, no words.
+   BENEATH THE WINDOW, NOT INSIDE ITS LOWER EDGE, and the reason is ground. A
+   bar painted inside the frame sits on the shot, and the shot has no stable
+   ground: cobalt panel at beat 1, a cream shop page at 2 and 3, a white
+   answer card at 4. Nothing keeps a usable contrast across all three, and at
+   beat 4 the composition's bottom edge is where the PAY ON THE PAGE bar
+   lands — the payoff — so an overlay there covers the one thing the beat is
+   for. Beneath it, the bar sits on the hero's cobalt, which is the same
+   ground at every beat and every width, and the acid measures 7.05:1 on it.
+   These are the beatnav's own two inks and its own track alpha; the reading
+   they were measured for has not changed, only the number of bars.
+   It is exactly the window's width — .stagewin is width:100% of the same
+   parent — so it reads as the object's own edge rather than as a page
+   element. 6px below it, which puts the bar INSIDE the window's drop shadow:
+   that shadow reaches 33px down, and being in it is the point rather than an
+   oversight. It is what attaches the bar to the window instead of leaving it
+   floating on the page, and the darkened ground under it is where the acid
+   gains contrast — 7.05:1 on bare cobalt and more than that here. The track's
+   alpha is the one number that had to go up for the same reason: .24 was
+   measured above the window, on cobalt the shadow does not reach, and at that
+   value the unfilled remainder disappeared into the shadow — which turns a
+   bar you can read a fraction off into a line that just grows.
+   Full by default: the markup draws the sequence's LAST state, so with no
+   JavaScript, or for a reader who asked for less motion, a complete track is
+   the honest reading of a finished picture. The driver winds it back to zero
+   and runs it. Same principle the three labels were lit by. */
+.loopbar{height:2px;background:rgba(211,216,255,.42);margin-top:6px;
+  overflow:hidden}
+/* The duration is the ONE thing JavaScript sets here, and it comes from the
+   driver's own LOOP constant rather than being copied into this stylesheet,
+   where it would silently stop matching the first time a beat moves. */
+.loopbar i{display:block;height:100%;background:var(--acid);
+  transform:scaleX(1);transform-origin:left;transition:transform 0s linear}
+
 /* The caption of the composition above it, so it is centred ON the
    composition. Measured: .foot and .stagewin are both children of the same
    .wrap and .stagewin is width:100%, so the two boxes are identical to the
@@ -1309,38 +1317,13 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
    the arrow 39 design px of shaft. */
 .stage .point b{font-size:calc(var(--u)*24)}
 .stage .point i{font-size:calc(var(--u)*17)}
-/* THE FINALE, RE-PROPORTIONED FOR A PORTRAIT FRAME. Written for a landscape
-   screen the block is twice as wide as it is tall, and a portrait window can
-   only letterbox that: measured at 390px it filled the frame edge to edge —
-   clipping the left of the cart — with 96px of empty cobalt above and 97px
-   below. Cropping was never the fix; the proportions were wrong for the frame.
-   So the sentences break here, which makes the block very nearly square (~0.87
-   high per wide, the shape the window is) and lets the type run more than
-   twice the size. The padding is part of the framed box, so the camera fits
-   the AIR as well as the ink and cannot press one against the other.
-   Flush left survives — mark, line one and line two share one edge — and so
-   does the spacing relationship: the mark sits close to the words it belongs
-   to, and the two statements sit further apart than the lines inside either. */
-.stage .fin{width:calc(var(--px)*620);padding:calc(var(--px)*40);
-  gap:calc(var(--px)*14)}
-.stage .finale img{width:58%}
-.stage .finale p{font-size:calc(var(--px)*86);line-height:1.02}
-.stage .finale em{margin-top:calc(var(--px)*30)}
 
-@media (max-width:900px){
-  /* still three across — only smaller. Measured widths are in the report; the
-     tracking comes down further than the type does, because .12em is what
-     makes these labels wide and it is the cheapest width to buy back. */
-  .beatnav{gap:10px}
-  .beatnav li{font-size:11px;letter-spacing:.04em}
-}
 @media (max-width:660px){
   /* No call to action at all. ADD TO CHROME led nowhere from a phone and the
      page showed it three times; COPY THE LINK replaced it and led nowhere
      either, because nothing a thumb presses here can put a URL on a computer.
      A phone reader leaves with the argument, and that is the whole ask. */
   .ondesk{display:none}
-  .bar .btn-sm{display:none}
   /* ==========================================================================
      THE PHONE IS ONE SCREEN, AND THIS IS THE WHOLE OF IT: who we are, what it
      does, and the thing doing it. Everything that was between them has gone
@@ -1362,11 +1345,12 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
      to take the remaining width and wrap inside it if a translation or a
      narrower screen ever needs it to — space-between with an unflexed child
      would push it off the edge instead. */
-  .idrow{display:flex;align-items:center;gap:12px;margin:0 0 14px}
-  .heromark{display:block;width:auto;height:30px;flex:none}
+  .idrow{display:flex;flex-direction:row;align-items:center;gap:12px;
+    margin:0 0 14px}
+  .heromark{display:block;width:auto;height:30px;flex:none;margin:0}
   /* 886px of source into 30px of height is 4.4x the pixels a 3x screen asks
      for, so it stays crisp with nothing new to download. */
-  .kicker{margin:0;font-size:11px;letter-spacing:.12em;line-height:1.4;
+  .kicker{order:0;margin:0;font-size:11px;letter-spacing:.12em;line-height:1.4;
     flex:1;min-width:0;text-align:right}
   /* The kicker is "A new Chrome extension" and stops there. It used to add
      "· for your computer", which cost a second line beside a 30px mark and
@@ -1386,35 +1370,16 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
      line is two words was the worse setting anyway. */
   .hero h1{font-size:32px;margin-bottom:14px}
   /* The demo is the whole point of the screen, so it gets the room the copy
-     gives up: no lede, and the labels sit tighter to the window. */
-  .beatnav{margin:0 0 10px}
+     gives up: no lede, and the caption sits tighter to the window. */
   .foot{margin-top:12px}
 
-  /* ==========================================================================
-     THE BAR COMES BACK, AND IT WAITS ITS TURN. It was removed below 660
-     because it carried nothing there — no nav, no CTA, no text. It carries
-     the section nav now, so it has a job; what it must not do is spend any of
-     the first screen on that job. position:fixed rather than sticky is the
-     whole trick: fixed is out of flow, so the bar costs the document zero
-     height and the hero starts at the top of the page. It is translated off
-     the top until the hero has gone past, and slides in after it.
-     Being out of flow is also what makes a plain threshold safe here — a
-     fixed bar cannot move the element the observer is watching, so there is
-     no feedback loop to give hysteresis to. See the stage's observer for what
-     that mistake costs when the box IS in flow.
+  /* THE BAR'S WAITING IS THE BASE BEHAVIOUR NOW — see .bar at the top of this
+     stylesheet, which is where the position:fixed, the plate and the .past
+     slide moved to when the desktop stopped opening with a bar too. All that
+     is left here is the phone's own trim.
      No lockup in it: the hero row carries the mark, and on a screen this
      narrow two of them within one scroll of each other is one too many. */
-  .bar{position:fixed;left:0;right:0;top:0;padding:0;
-    background-color:var(--ink2);border-bottom-color:var(--rule);
-    box-shadow:0 -16px 0 0 var(--ink2), 0 14px 34px -14px rgba(2,4,26,.9);
-    transform:translateY(-101%);transition:transform .26s ease-out}
-  .bar.past{transform:none}
-  /* Nothing adds .past without JavaScript, so without it the bar would hide
-     for good and a phone would have no navigation at all. Then it simply
-     starts visible: 32px off the first screen is the right price for a page
-     that still works. The media feature answers this in CSS, so there is no
-     head script and no flash of a bar that then slides away. */
-  @media (scripting:none){ .bar{transform:none} }
+  .bar{padding:0}
   .barin > img{display:none}
   .bar .barin{padding:10px 16px}
   .barnav{display:flex;margin-left:0;width:100%;gap:12px;
@@ -1430,7 +1395,6 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
   .barnav a:after{content:"";position:absolute;left:-10px;right:-10px;
     top:50%;height:32px;transform:translateY(-50%);background:none;
     display:block;margin:0}
-  .btn-sm{padding:16px}
 
   /* the bar is 32px tall on a phone, measured; anchors clear it by 8 */
   section{scroll-margin-top:40px}
@@ -1576,7 +1540,7 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
 }
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
-  .bar,.btn-sm,.steps div,.bars i,.beatnav li:after,.grid5 .cap{transition:none}
+  .bar,.steps div,.bars i,.grid5 .cap{transition:none}
   .stage *,.stage{animation:none!important;transition:none!important}
   .caret,.go.pulse,.mk.live *,.mk.live,.point .arrow{animation:none!important}
   /* the rail still tracks the row; it just stops easing to the new position */
@@ -1584,20 +1548,17 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
   /* the end of the sequence: the pair composed, the answer in, and the
      reader's cursor resting on the shop's own button */
   .stage .hand{opacity:1;transform:none}
-  /* every phase complete, in the same ink the running sequence rests at */
-  .beatnav li{color:var(--body)}
-  .beatnav u{transform:scaleX(1)}
+  /* the sequence never runs, so the loop track stays at the full it is drawn
+     at — a finished picture under a finished track */
+  .loopbar i{transition:none;transform:scaleX(1)}
 }
 </style>
 </head>
 <body>
 
-<div class="sentinel" id="sentinel" aria-hidden="true"></div>
-
 <header class="bar" id="bar">
   <div class="wrap barin">
     <img src="lockup.png" alt="Knili">
-    <a class="btn-sm" href="knili-extension.zip" download>Add to Chrome</a>
     <nav class="barnav">
       <a href="#install">How to install</a>
     </nav>
@@ -1619,12 +1580,6 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
     </div>
 
     <div class="demo">
-    <ol class="beatnav" id="beatnav">
-      <li><span>01 &middot; Tell Knili what to buy</span><i><u></u></i></li>
-      <li><span>02 &middot; Let it do the shopping</span><i><u></u></i></li>
-      <li><span>03 &middot; You do the buying</span><i><u></u></i></li>
-    </ol>
-
     <div class="stagewin">
     <div class="stage" id="stage" data-anim="stage">
       <div class="cbar">
@@ -1762,12 +1717,6 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
       </div>
 
       <svg class="hand" viewBox="0 0 12 19" aria-hidden="true"><path d="M0 0v16l4.2-3.6 2.6 6 2.6-1.2-2.5-5.8h4.6z" fill="#fff" stroke="#0A1140" stroke-width="1.1" stroke-linejoin="round"/></svg>
-      <div class="finale" aria-hidden="true">
-        <div class="fin">
-          <img src="lockup.png" alt="">
-          <p>It does the shopping.<em>You do the buying.</em></p>
-        </div>
-      </div>
       <div class="pickring" aria-hidden="true"></div>
       <div class="ripple" aria-hidden="true"><i></i></div>
       <div class="confetti" aria-hidden="true"><i style="--x:-99;--y:-53;--r:-166deg;--c:var(--acid);animation-delay:50ms"></i><i style="--x:-107;--y:-83;--r:-246deg;--c:#FFFFFF;animation-delay:68ms"></i><i style="--x:-66;--y:-71;--r:276deg;--c:var(--g);animation-delay:7ms"></i><i style="--x:-85;--y:-128;--r:-101deg;--c:#3B2C25;animation-delay:4ms"></i><i style="--x:-39;--y:-88;--r:108deg;--c:var(--acid);animation-delay:8ms"></i><i style="--x:-26;--y:-104;--r:244deg;--c:#FFFFFF;animation-delay:54ms"></i><i style="--x:-8;--y:-94;--r:259deg;--c:var(--g);animation-delay:15ms"></i><i style="--x:13;--y:-156;--r:276deg;--c:var(--acid);animation-delay:7ms"></i><i style="--x:32;--y:-126;--r:86deg;--c:#FFFFFF;animation-delay:6ms"></i><i style="--x:64;--y:-145;--r:-273deg;--c:var(--g);animation-delay:71ms"></i><i style="--x:83;--y:-125;--r:-24deg;--c:#3B2C25;animation-delay:53ms"></i><i style="--x:68;--y:-73;--r:-200deg;--c:var(--acid);animation-delay:73ms"></i><i style="--x:88;--y:-68;--r:-135deg;--c:#FFFFFF;animation-delay:13ms"></i><i style="--x:115;--y:-61;--r:-128deg;--c:var(--g);animation-delay:47ms"></i></div>
@@ -1775,6 +1724,7 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
     </div>
     </div>
 
+    <div class="loopbar" aria-hidden="true"><i id="loopfill"></i></div>
     <p class="foot">Orders are placed on the shop, not inside Knili.</p>
     </div>
     </div>
@@ -1878,7 +1828,6 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
       <b>Swipe</b>
     </div>
 
-    <a class="btn ondesk" href="knili-extension.zip" download>Add to Chrome</a>
   </div>
 </section>
 
@@ -1894,30 +1843,19 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
 
 <script>
 (function () {
-  /* One class drives the whole condensed state: the plate, the hairline, the
-     lift and the section links. The trigger is a 40px sentinel pinned to the
-     top of the document — once it has scrolled out of view the header stops
-     being part of the hero and becomes a bar. */
+  /* THE BAR WAITS FOR THE FIRST SCREEN TO BE OVER, AT EVERY WIDTH. The bar is
+     position:fixed and translated off the top; it carries the mark and the
+     section link, and neither is worth anything until there is something
+     behind you. `.past` slides it in once the hero has left the viewport
+     entirely, which is exactly the moment the reader finishes the first
+     screen. One observer, one threshold, one behaviour — this listener always
+     ran at every width; what changed is that the class is no longer inert
+     above 660, so the second observer that used to drive a `.stuck` state up
+     there could be deleted rather than kept in sync with this one.
+     No hysteresis is safe HERE and only here: the bar is out of flow, so it
+     cannot move the element being observed and there is no loop to start. The
+     stage's observer is in flow and needs the dead band. */
   var bar = document.getElementById('bar');
-  var sentinel = document.getElementById('sentinel');
-  if (bar && sentinel && 'IntersectionObserver' in window) {
-    new IntersectionObserver(function (entries) {
-      bar.classList.toggle('stuck', !entries[0].isIntersecting);
-    }, { threshold: 0 }).observe(sentinel);
-  } else if (bar) {
-    bar.classList.add('stuck');
-  }
-
-  /* THE PHONE BAR WAITS FOR THE FIRST SCREEN TO BE OVER. Below 660 the bar is
-     position:fixed and translated off the top; it carries the section nav,
-     and section nav is worth nothing until there are sections behind you.
-     `.past` slides it in once the hero has left the viewport entirely, which
-     on a phone is exactly the moment the reader finishes the first screen.
-     One threshold and no hysteresis is safe HERE and only here: the bar is
-     out of flow, so it cannot move the element being observed and there is no
-     loop to start. The stage's observer is in flow and needs the dead band.
-     Above 660 this class is inert — .bar is static there and nothing reads
-     it — so the listener can run at every width without a media query. */
   var heroSec = document.getElementById('hero');
   if (bar && heroSec && 'IntersectionObserver' in window) {
     new IntersectionObserver(function (e) {
@@ -1983,8 +1921,14 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
   var counts = [].slice.call(el.querySelectorAll('.bars b'));
   var widths = fills.map(function (f) { return f.style.width; });
   var totals = counts.map(function (c) { return parseInt(c.textContent, 10) || 0; });
-  var nav = document.getElementById('beatnav');
-  var items = nav ? [].slice.call(nav.children) : [];
+  var prog = document.getElementById('loopfill');
+  /* THE LOOP'S LENGTH, DECLARED ONCE. Everything else in play() is scheduled
+     against beats; this is the number the pass ends on, and the loop track
+     under the window is driven from it (see progress()) so the bar and the
+     wrap cannot disagree. It is 16750 because the last thing that moves — the
+     ORDER PLACED chip — settles at 15650 and beat 4 is then held for 1100ms;
+     see the note beside at(LOOP, play) for why that hold is 1100. */
+  var LOOP = 16750;
   var T = [], raf = null;
 
   /* Where the cursor has to land is a fact about the rendered button, not a
@@ -2086,6 +2030,23 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
      gap that still reads as air rather than as a rounding error, and at 1440
      it is 25px, which is proportionally the same. */
   var AIR = 0.045;
+  /* AND BEAT 1 IS THE ONE FIT THAT WANTS NONE OF IT. AIR exists because a
+     contained subject jammed against all four edges reads as a crop — true of
+     beat 4, whose subject is two cards cut out of the middle of a wider shot.
+     Beat 1's subject is the panel's own header and ask, i.e. the panel, and a
+     panel inset from its frame does not read as a fitted picture: it reads as
+     a panel sitting on a mat. Measured at 1440 the mat was 23px on the left,
+     the right and the top of a 512px window — 4.5% of the short side, exactly
+     AIR — and what showed in it was .stagewin's own ground, which is the
+     shop's cream (#F7F3ED), because at beat 1 the stage paints nothing. The
+     owner's word for it was "this white frame around Knili", and the reading
+     is right: a cream border round a cobalt panel is a mat, not a fit.
+     Flush is the CORRECT answer here and only here. A panel that fills its
+     frame edge to edge reads as a screen, and the window already has the
+     three-layer shadow that separates it from the hero's cobalt, so the
+     object still has an outline — the shadow draws it, not a band of cream.
+     Per-beat rather than global: beat 4 still needs its margin for the same
+     reason it always did. */
   /* Beats 2 and 3 frame the chrome bar along with the page on a phone too now.
      The address bar is the thing that proves this is a browser on a real shop
      — the same point the hero shot makes — and a phone was seeing a panel, a
@@ -2104,11 +2065,11 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
     /* bare: there is no browser at the ask, so the stage paints no ground and
        has nothing to keep against the frame's edges — the lone panel stays
        centred rather than being clamped. Beat 0 falls through to this one. */
-    1: { sel: ['.hd', '.ztop'],   fit: 'contain', ax: 0.5, ay: 0, bare: true },
+    1: { sel: ['.hd', '.ztop'],   fit: 'contain', ax: 0.5, ay: 0, bare: true,
+         air: 0 },
     2: { sel: ['.cbar', '.page'], fit: 'cover',   ax: 0,   ay: 0 },
     3: { sel: ['.cbar', '.page'], fit: 'cover',   ax: 0,   ay: 0 },
-    4: { sel: ['.csum', '.out'],   fit: 'contain', ax: 0.5, ay: 0.5 },
-    5: { sel: ['.fin'],            fit: 'contain', ax: 0.5, ay: 0.5 }
+    4: { sel: ['.csum', '.out'],   fit: 'contain', ax: 0.5, ay: 0.5 }
   };
   /* The window is a size the CSS owns, and the driver MUST NOT touch it. An
      earlier version resized it per beat, which resized the very box the
@@ -2142,7 +2103,7 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
        cover keeps the whole window: it is meant to fill and crop, because a
        storefront shrunk to leave a margin is a storefront nobody can read. */
     var cover = f.fit === 'cover';
-    var m = cover ? 0 : Math.round(Math.min(W, H) * AIR);
+    var m = cover ? 0 : Math.round(Math.min(W, H) * (f.air == null ? AIR : f.air));
     var IW = W - m * 2, IH = H - m * 2;
     var z = cover ? Math.max(W / b.w, H / b.h)
                   : Math.min(IW / b.w, IH / b.h);
@@ -2192,8 +2153,8 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
   window.addEventListener('load', function () { reframe(); place(); });
   /* AND AGAIN WHEN THE TYPE ARRIVES. The two calls above run against fallback
      metrics: the faces are font-display:swap and `load` fires before they have
-     necessarily swapped in, so every box the camera measures — .csum, .out,
-     .fin — is the wrong size when it is measured. Measured at 390px, the
+     necessarily swapped in, so every box the camera measures — .hd, .ztop,
+     .csum, .out — is the wrong size when it is measured. Measured at 390px, the
      resting frame came out at --fz .5743 against the .5982 the same call
      produces once Oswald is in, and nothing ever recomputed it: the camera the
      reader sees first was framed for a font the page does not use. That is 15px
@@ -2247,48 +2208,40 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
     if (raf) cancelAnimationFrame(raf);
     raf = null;
   }
-  /* the labels double as the progress bar: the live one fills over its beat */
-  function lamp(i, dur) {
-    items.forEach(function (li, n) {
-      li.classList.toggle('on', n === i);
-      li.classList.toggle('done', n < i);
-      var u = li.querySelector('u');
-      if (!u) return;
-      if (n > i) { u.style.transitionDuration = '0ms'; u.style.transform = 'scaleX(0)'; }
-      if (n === i) {
-        u.style.transitionDuration = '0ms';
-        u.style.transform = 'scaleX(0)';
-        void u.offsetWidth;                       /* commit before timing it */
-        u.style.transitionDuration = dur + 'ms';
-        u.style.transform = 'scaleX(1)';
-      }
-    });
-  }
-
-  /* the sequence is finished, so every label is: complete */
-  function lampAll() {
-    items.forEach(function (li) {
-      li.classList.add('on', 'done');
-      var u = li.querySelector('u');
-      if (u) { u.style.transitionDuration = '0ms'; u.style.transform = 'scaleX(1)'; }
-    });
+  /* HOW LONG UNTIL IT COMES ROUND AGAIN, and nothing else. This replaced
+     lamp()/lampAll(), which lit three phase labels one at a time and filled a
+     rule under each over that beat's own duration — three bars saying which
+     third you were in, above a picture that already shows it. One track over
+     LOOP says the thing the picture cannot.
+     LOOP is the driver's own wrap time, passed in rather than written into
+     the stylesheet, so the bar cannot drift from the sequence when a beat
+     moves. The 0ms/reflow/duration dance is how a transition is restarted
+     from a committed zero rather than reversed from wherever it had got to —
+     without the forced reflow the two writes coalesce and nothing animates.
+     Called from play() AFTER the .cut frame, so it restarts with everything
+     else at the wrap and never eases across the seam. */
+  function progress(ms) {
+    if (!prog) return;
+    prog.style.transitionDuration = '0ms';
+    prog.style.transform = 'scaleX(0)';
+    void prog.offsetWidth;                        /* commit before timing it */
+    prog.style.transitionDuration = ms + 'ms';
+    prog.style.transform = 'scaleX(1)';
   }
 
   function rest() {
     clear();
-    if (nav) nav.classList.remove('seq');
     el.removeAttribute('data-beat');
-    el.classList.remove('flick', 'seek', 'burst', 'found', 'bye');
+    el.classList.remove('flick', 'seek', 'burst', 'found');
     if (ask) ask.textContent = full;
     lines.forEach(function (l) { l.classList.add('in'); });
     fills.forEach(function (f, i) { f.style.width = widths[i]; });
     counts.forEach(function (c, i) { c.textContent = totals[i]; });
     if (band && lines.length) band.textContent = lines[lines.length - 1].textContent;
-    items.forEach(function (li) {
-      li.classList.remove('on'); li.classList.add('done');
-      var u = li.querySelector('u');
-      if (u) { u.style.transitionDuration = '0ms'; u.style.transform = 'scaleX(1)'; }
-    });
+    /* A finished picture under a finished track. rest() paints the sequence's
+       last state, so the loop is over by definition; an empty or a part-full
+       bar under it would be describing a sequence that is not running. */
+    if (prog) { prog.style.transitionDuration = '0ms'; prog.style.transform = 'scaleX(1)'; }
     /* the resting picture gets framed too, so a reader who has asked for less
        motion — or who has scrolled past and back — sees a composed frame
        rather than whatever corner the last beat left the camera pointing at */
@@ -2297,15 +2250,15 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
 
   function play() {
     clear();
-    if (nav) nav.classList.add('seq');
-    /* THE LOOP SEAM IS A CUT, NOT A DISSOLVE. Coming back from beat 5 the
-       finale fades out over 600ms while .cbar, .page and .pnl fade in over
-       500ms, so for half a second the closing card and the whole composition
-       were painted through each other — the lockup showing through the panel,
-       the two finale lines running across it. And the camera jumps from
-       FRAME[5] to FRAME[1] in the same instant, so the finale is still on
-       screen when its frame moves under it: measured at 1440 the camera goes
-       from --fy2 -88px to 0, which is the title dropping 88px as it fades.
+    /* THE LOOP SEAM IS A CUT, NOT A DISSOLVE, and it is now the wrap from the
+       filled checkout straight back to the ask. Everything the seam has to
+       undo is bigger than it was: at beat 4 the chrome bar, the shop page and
+       the panel are all on screen at full opacity, the camera is at FRAME[4],
+       and beat 1 wants the page gone, the panel back at its own scale and the
+       camera at FRAME[1]. Every one of those has a transition on it, so
+       without the cut the restart would be a half-second cross-fade of the
+       checkout into the ask — two scenes in one frame, which is the bug this
+       mechanism has always existed to prevent.
        A restart is a new scene, not a later state of the old one.
        Transitions are killed for exactly one frame, the beat and the camera
        are set, a forced reflow commits that as the new starting point, and
@@ -2313,7 +2266,7 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
        still eases exactly as it did. Nothing here resizes .stagewin; the class
        goes on .stage and comes off in the same task. */
     el.classList.add('cut');
-    el.classList.remove('flick', 'seek', 'burst', 'found', 'bye');
+    el.classList.remove('flick', 'seek', 'burst', 'found');
     el.setAttribute('data-beat', '1'); frameBeat(1);
     void el.offsetWidth;
     el.classList.remove('cut');
@@ -2321,7 +2274,7 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
     fills.forEach(function (f) { f.style.width = '0%'; });
     counts.forEach(function (c) { c.textContent = '0'; });
     if (band && lines.length) band.textContent = lines[0].textContent;
-    lamp(0, 3800);
+    progress(LOOP);
 
     /* 01 — the sentence types itself. An even rate reads as a machine typing,
        which is the wrong story, so the interval jitters and the comma breathes. */
@@ -2358,7 +2311,6 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
       if (ask) ask.textContent = full;
       el.setAttribute('data-beat', '2'); frameBeat(2);
       el.classList.add('flick');
-      lamp(1, 7000);
     });
 
     /* 03 — shops flick past while the log fills, then the rejects are counted */
@@ -2397,38 +2349,30 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
          true once it has landed — measure again after the move. */
       at(700, place);
       el.classList.remove('found');
-      el.setAttribute('data-beat', '4'); frameBeat(4); lamp(2, 4950);
+      el.setAttribute('data-beat', '4'); frameBeat(4);
     });
     at(13750, function () { el.classList.add('burst'); });
 
-    /* the contraction back to a lone panel is the loop seam */
-    /* everything goes, and the argument is left on its own for a beat — which
-       is a calmer loop seam than contracting the furniture back to a panel */
-    at(15750, function () {
-      el.setAttribute('data-beat', '5'); frameBeat(5);
-      el.classList.remove('burst');
-      lampAll();
-    });
-    /* THE ENDING IS SEQUENTIAL, AND THAT IS THE WHOLE POINT. There were three
-       options here and only one of them is right. A cross-dissolve — which is
-       what this used to be — paints both scenes at once, lockup showing
-       through the panel, and that was the bug. A hard cut, which replaced it,
-       has no overlap but no ending either: the closing card is simply gone
-       between two frames and it reads as a glitch. This is the third: the
-       finale leaves ON ITS OWN, and only when it has finished leaving does
-       anything of the next pass exist. Never two scenes, and still a fade.
-       The budget at the seam is 500 waited / 600 in / 1100 held / 520 out,
-       then the cut. The 500 is new and it is the price of the finale waiting
-       for the camera (see .stage[data-beat="5"] .finale): the hold was not
-       shortened to pay for it, so the loop runs 17.97s -> 18.47s.
-       520 was chosen against the 600 the card arrives on: an ending that
-       leaves faster than it came reads as an interruption, and one that takes
-       longer reads as a stall. Just under, so it is quicker than the arrival
-       without being abrupt. It costs the loop 320ms — 17.65s to 17.97s, under
-       two per cent — rather than eating the hold, because shortening the time
-       the closing card is legible is the opposite of what was asked for. */
-    at(17950, function () { el.classList.add('bye'); });
-    at(18470, play);
+    /* THE ENDING IS THE PAYOFF, HELD — and it used to be a title card. Beat 5
+       faded a plate carrying the lockup and IT DOES THE SHOPPING. / YOU DO THE
+       BUYING. over the top for 2.72s. Since the demo became half of the hero
+       it sits DIRECTLY BENEATH that exact sentence, set at 52px: the sequence
+       was spending a tenth of its length repeating, ten seconds later, the
+       headline the reader had already read. The lockup earns its size on the
+       page now (see .heromark) and the sequence ends on the thing only the
+       sequence can show — a checkout with the order in it.
+       So beat 4 keeps the ending instead, and the budget moves rather than
+       being deleted. .burst lands at 13750 and the ORDER PLACED chip's `chip`
+       animation runs 1.9s, so the last thing that MOVES stops at 15650.
+       Then 1100ms of nothing — the same hold the closing card was given,
+       because the reader needs a beat on the filled bill and the pay bar, and
+       an ending that cuts on the frame the motion stops reads as a dropped
+       shot rather than as an ending. 15650 + 1100 = 16750, and the loop runs
+       18.47s -> 16.75s.
+       There is no fade left at the seam and there must not be one: with the
+       card gone the only honest transition from a finished checkout back to an
+       empty ask is a cut, and .cut above is what makes it one. */
+    at(LOOP, play);
   }
 
   /* WHAT IS WATCHED IS THE WINDOW, NOT THE CAMERA — and this is the fourth
@@ -2444,8 +2388,8 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
      beat 1 zoomed in, the ratio fell under the threshold, the observer
      reported it gone, rest() fired, the camera went back, the ratio rose, and
      play() started it again — a loop that needs no input to keep running,
-     repainting the stage's background, its lift shadow and the whole finale
-     several times a second. That is the flashing at the section's edge, and
+     repainting the stage's background, its lift shadow and the whole
+     composition several times a second. That is the flashing at the section's edge, and
      the band it happens in is 38px to 124px of window showing.
      .stagewin carries no transform and never changes size, so its ratio
      answers the only question worth asking: how much of the section is on
