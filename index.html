@@ -322,25 +322,36 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 
 .stage{--dw:1072;--avail:1072px;--px:min(calc(var(--avail)/var(--dw)),1px);--u:var(--px);
   position:relative;width:calc(var(--px)*1072);height:calc(var(--px)*684);
-  background:var(--co-bg);overflow:hidden}
+  background:var(--co-bg);box-shadow:var(--lift);overflow:hidden;
+  transition:background-color .5s ease-out, box-shadow .5s ease-out}
+/* At the ask there is no browser yet — no ground, no frame, no shadow. The
+   window arrives with the shop, and the panel carries its own lift so it reads
+   as an object on the page rather than a hole in one. */
+.stage[data-beat="1"],.stage[data-beat="0"]{background-color:transparent;box-shadow:none}
+.stage .pnl{box-shadow:var(--lift)}
 .sbody{display:flex;align-items:stretch;height:calc(var(--px)*640)}
 .stage .page{position:relative;flex:1 1 auto;min-width:0;overflow:hidden;
   background:var(--co-bg)}
 .stage .pnl{flex:0 0 calc(var(--px)*404)}
 /* the three pieces that move, and the only properties they move with */
 .stage .page{transition:opacity .5s ease-out, transform .7s cubic-bezier(.3,.8,.3,1)}
-/* The browser is there from the first frame — it is where the panel lives,
-   and without it the lone panel floated under a strip of dead stage. */
-.stage .cbar{background:#E3E6EA;border-bottom:calc(var(--px)*1) solid #C8CCD3}
+.stage .cbar{background:#E3E6EA;border-bottom:calc(var(--px)*1) solid #C8CCD3;
+  transition:opacity .5s ease-out, transform .7s cubic-bezier(.3,.8,.3,1)}
+/* the chrome bar is part of what arrives, not part of what was waiting */
+.stage[data-beat="1"] .cbar,.stage[data-beat="0"] .cbar{opacity:0;
+  transform:translateX(calc(var(--px)*-334))}
 .stage .omni{box-shadow:inset 0 0 0 calc(var(--px)*1) #D6D9DE}
-.doms b.blank{opacity:0;color:#8A8F98}
-.stage[data-beat="1"] .doms b.blank,.stage[data-beat="0"] .doms b.blank{opacity:1}
-.stage[data-beat="1"] .doms b.final,.stage[data-beat="0"] .doms b.final{opacity:0}
+/* the pill follows the winner: its own address while it sits there, then its
+   checkout once the page navigates */
+.doms b.home{opacity:0}
+.stage[data-beat="3"] .doms b.home{opacity:1}
+.stage[data-beat="3"] .doms b.final{opacity:0}
+.stage.flick .doms b.home{opacity:0}
 .stage .pnl{transition:transform .7s cubic-bezier(.3,.8,.3,1)}
 .stage[data-beat="1"] .page,.stage[data-beat="0"] .page{opacity:0;
   transform:translateX(calc(var(--px)*-334))}
 .stage[data-beat="1"] .pnl,.stage[data-beat="0"] .pnl{
-  transform:translateX(calc(var(--px)*-334))}
+  transform:translate(calc(var(--px)*-334),calc(var(--px)*-22))}
 
 /* the shops, flicking past. Invented names, skeleton contents — pages going by
    too fast to read is what a search across 34 listings actually looks like. */
@@ -348,20 +359,21 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 .shops{opacity:0}
 .stage[data-beat="2"] .shops,.stage[data-beat="3"] .shops{opacity:1}
 .stage[data-beat="2"] .checkout,.stage[data-beat="3"] .checkout{opacity:0}
-.shop{position:absolute;inset:0;opacity:0;background:#fff;color:#6B7280;
-  display:flex;flex-direction:column;font-family:var(--ui)}
+.shop,.checkout{position:absolute;inset:0;background:#fff;color:#6B7280;
+  display:flex;flex-direction:column;font-family:var(--ui);overflow:hidden}
+.shop{opacity:0}
 .stage[data-beat="2"] .shop:first-child,
 .stage[data-beat="3"] .shop:last-child{opacity:1}
 .stage.flick .shop{animation:flick 1.02s steps(1,end) infinite;
   animation-delay:calc(var(--i) * -170ms)}
 @keyframes flick{0%,16.6%{opacity:1}16.61%,100%{opacity:0}}
-/* Six storefronts going by. They are deliberately quiet — one grey, one
-   wordmark size, one type — because the only thing on this stage allowed to
-   be loud is the panel. What separates them is the shape of the page: a
-   banner, a wide row, a dense grid, a sidebar, two big tiles, a list. That is
-   what actually differs between real shops at a glance. */
+/* Six storefronts going by. Deliberately quiet — one grey, one wordmark size,
+   one type — because the only thing on this stage allowed to be loud is the
+   panel. What separates them is the shape of the page. Each one runs past the
+   bottom of the frame and is cut off by it, the way a real page is: a shop
+   that stops halfway down reads as half-loaded, not as a shop. */
 .hdr{display:flex;align-items:center;gap:calc(var(--px)*12);flex:none;
-  padding:calc(var(--px)*20) calc(var(--px)*24) calc(var(--px)*14);
+  padding:calc(var(--px)*16) calc(var(--px)*24) calc(var(--px)*12);
   border-bottom:calc(var(--px)*1) solid #E8EAED}
 .mark{width:calc(var(--px)*20);height:calc(var(--px)*20);background:#C9CDD4;flex:none;
   border-radius:calc(var(--px)*4)}
@@ -369,8 +381,17 @@ h1 em{font-style:normal;color:var(--acid);display:block}
   text-transform:uppercase;color:#868D97;white-space:nowrap;line-height:1}
 .pill{margin-left:auto;width:calc(var(--px)*150);height:calc(var(--px)*22);
   border-radius:calc(var(--px)*11);background:#F1F3F4;flex:none}
-.body{flex:1;min-height:0;padding:calc(var(--px)*20) calc(var(--px)*24);
-  display:grid;gap:calc(var(--px)*14);align-content:start}
+.nav{display:flex;gap:calc(var(--px)*18);flex:none;
+  padding:calc(var(--px)*10) calc(var(--px)*24);
+  border-bottom:calc(var(--px)*1) solid #EFF1F4}
+.nav i{display:block;height:calc(var(--px)*8);width:calc(var(--px)*56);
+  border-radius:calc(var(--px)*4);background:#E7EAEE}
+.nav i:nth-child(2n){width:calc(var(--px)*40)}
+.nav i:nth-child(3n){width:calc(var(--px)*68)}
+.body{flex:1;min-height:0;overflow:hidden;display:grid;align-content:start;
+  gap:calc(var(--px)*14);padding:calc(var(--px)*16) calc(var(--px)*24)}
+.sect{grid-column:1/-1;height:calc(var(--px)*10);width:calc(var(--px)*130);
+  border-radius:calc(var(--px)*5);background:#DEE2E7;margin-top:calc(var(--px)*4)}
 .card{border:calc(var(--px)*1) solid #EDEFF2;border-radius:calc(var(--px)*6);
   padding:calc(var(--px)*10)}
 .blk{display:block;background:#EEF0F3;border-radius:calc(var(--px)*4)}
@@ -381,33 +402,47 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 
 .s1 .mark{border-radius:50%}
 .s1 .body{grid-template-columns:repeat(3,1fr)}
-.s1 .banner{grid-column:1/-1;height:calc(var(--px)*132)}
+.s1 .banner{grid-column:1/-1;height:calc(var(--px)*112)}
 .s2 .body{grid-template-columns:repeat(4,1fr)}
-.s2 .card .blk{height:calc(var(--px)*150)}
+.s2 .card .blk{height:calc(var(--px)*106)}
 .s3 .mark{border-radius:calc(var(--px)*10) calc(var(--px)*3)}
-.s3 .chips2{display:flex;gap:calc(var(--px)*8);
+.s3 .chips2{display:flex;gap:calc(var(--px)*8);flex:none;
   padding:calc(var(--px)*12) calc(var(--px)*24) 0}
 .s3 .chips2 span{height:calc(var(--px)*18);width:calc(var(--px)*54);
   border-radius:calc(var(--px)*9);background:#F1F3F4}
 .s3 .body{grid-template-columns:repeat(4,1fr);gap:calc(var(--px)*10)}
-.s3 .card .blk{height:calc(var(--px)*58)}
+.s3 .card .blk{height:calc(var(--px)*56)}
 .s4 .mark{transform:skewX(-14deg)}
 .s4 .body{grid-template-columns:calc(var(--px)*112) 1fr 1fr 1fr}
-.s4 .side{grid-row:span 2;display:flex;flex-direction:column;gap:calc(var(--px)*10)}
+.s4 .side{grid-row:span 4;display:flex;flex-direction:column;gap:calc(var(--px)*10)}
 .s4 .side i{display:block;height:calc(var(--px)*10);border-radius:calc(var(--px)*5);
   background:#EDEFF2}
 .s4 .side i:nth-child(2n){width:70%}
-.s4 .card .blk{height:calc(var(--px)*76)}
-.s5 .body{grid-template-columns:1fr 1fr}
-.s5 .card .blk{height:calc(var(--px)*200)}
+.s4 .side i:nth-child(3n){width:85%}
+.s4 .card .blk{height:calc(var(--px)*74)}
+.s5 .body{grid-template-columns:repeat(4,1fr)}
+.s5 .big{grid-column:span 2}
+.s5 .big .blk{height:calc(var(--px)*150)}
+.s5 .card .blk{height:calc(var(--px)*62)}
 .s6 .mark{border-radius:50% 50% calc(var(--px)*4) calc(var(--px)*4)}
 .s6 .body{grid-template-columns:1fr;gap:calc(var(--px)*10)}
-.s6 .row2{display:flex;align-items:center;gap:calc(var(--px)*14);
+.row2{display:flex;align-items:center;gap:calc(var(--px)*14);
   border-bottom:calc(var(--px)*1) solid #EFF1F4;padding-bottom:calc(var(--px)*10)}
-.s6 .row2 .blk{width:calc(var(--px)*62);height:calc(var(--px)*52);flex:none}
-.s6 .row2 div{flex:1}
-.s6 .row2 u{display:block;width:calc(var(--px)*50);height:calc(var(--px)*12);
+.row2 .blk{width:calc(var(--px)*62);height:calc(var(--px)*50);flex:none}
+.row2 div{flex:1}
+.row2 u{display:block;width:calc(var(--px)*50);height:calc(var(--px)*12);
   border-radius:calc(var(--px)*3);background:#E4E7EB}
+
+/* The winner does not become a different page — it navigates. The header and
+   nav strip are the same elements the shop had, so across the change only the
+   body swaps and the chrome bar never moves: same window, same shop. */
+.checkout{transition:opacity .18s ease-out}
+.stage[data-beat="2"] .checkout,.stage[data-beat="3"] .checkout{opacity:0}
+.cobody{flex:1;min-height:0;display:flex;
+  transition:opacity .35s ease-out .1s, transform .35s ease-out .1s}
+.stage[data-beat="2"] .cobody,.stage[data-beat="3"] .cobody{opacity:0;
+  transform:translateY(calc(var(--px)*14))}
+.checkout .co{flex:1;background:#FAFBFC}
 .scan{position:absolute;inset:0;overflow:hidden;pointer-events:none;opacity:0;
   transition:opacity .3s}
 .stage.flick .scan{opacity:1}
@@ -432,7 +467,7 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 /* The last click is the reader's own, so the cursor arrives from the page's
    space — from off-stage, below and to the left — and never out of the panel.
    Knili filled the checkout; the person buys. */
-.hand{position:absolute;left:var(--hx,31.2%);top:var(--hy,69.9%);width:calc(var(--px)*15);
+.hand{position:absolute;left:var(--hx,31.2%);top:var(--hy,73.8%);width:calc(var(--px)*15);
   height:calc(var(--px)*24);margin:calc(var(--px)*-2) 0 0 calc(var(--px)*-2);
   pointer-events:none;z-index:3;filter:drop-shadow(0 2px 4px rgba(10,17,64,.45))}
 .stage[data-beat="1"] .hand,.stage[data-beat="2"] .hand,
@@ -458,14 +493,14 @@ h1 em{font-style:normal;color:var(--acid);display:block}
   100%{box-shadow:0 0 0 calc(var(--px)*4) rgba(232,255,58,0);transform:scale(1)}
 }
 /* a ring off the click point, so the press is unmistakable */
-.ripple{position:absolute;left:var(--hx,31.2%);top:var(--hy,69.9%);width:0;height:0;
+.ripple{position:absolute;left:var(--hx,31.2%);top:var(--hy,73.8%);width:0;height:0;
   z-index:3;pointer-events:none}
 .ripple i{position:absolute;left:calc(var(--px)*-6);top:calc(var(--px)*-6);
   width:calc(var(--px)*12);height:calc(var(--px)*12);border-radius:50%;
   border:calc(var(--px)*2) solid rgba(59,44,37,.6);opacity:0;display:block}
 .stage.burst .ripple i{animation:ring .6s ease-out forwards}
 @keyframes ring{0%{opacity:.9;transform:scale(.3)}100%{opacity:0;transform:scale(6)}}
-.confetti{position:absolute;left:var(--hx,31.2%);top:var(--hy,69.9%);width:0;height:0;z-index:4}
+.confetti{position:absolute;left:var(--hx,31.2%);top:var(--hy,73.8%);width:0;height:0;z-index:4}
 .confetti i{position:absolute;display:block;width:calc(var(--px)*7);
   height:calc(var(--px)*10);left:calc(var(--px)*-3);top:calc(var(--px)*-5);
   background:var(--c);border-radius:calc(var(--px)*1);opacity:0}
@@ -476,7 +511,7 @@ h1 em{font-style:normal;color:var(--acid);display:block}
   100%{opacity:0;transform:translate(calc(var(--px)*var(--x)),calc(var(--px)*var(--y)))
        rotate(var(--r)) scale(1)}
 }
-.placed{position:absolute;left:var(--hx,31.2%);top:var(--hy,69.9%);z-index:5;
+.placed{position:absolute;left:var(--hx,31.2%);top:var(--hy,73.8%);z-index:5;
   margin:calc(var(--px)*-104) 0 0 calc(var(--px)*-74);width:calc(var(--px)*148);
   display:flex;align-items:center;justify-content:center;gap:calc(var(--px)*7);
   background:#fff;color:#1E7A3C;border:calc(var(--px)*1) solid var(--co-line);
@@ -821,7 +856,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
         <svg class="nav" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg>
         <span class="omni">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
-          <span class="doms"><b style="--i:0">tarjet.example</b><b style="--i:1">wallmarq.example</b><b style="--i:2">ebuy.example</b><b style="--i:3">zonda.example</b><b style="--i:4">bestly.example</b><b style="--i:5">kroga.example</b><b class="final">shopheathotsauce.com/checkout/</b><b class="blank">Search or type a URL</b></span>
+          <span class="doms"><b style="--i:0">tarjet.example</b><b style="--i:1">wallmarq.example</b><b style="--i:2">ebuy.example</b><b style="--i:3">zonda.example</b><b style="--i:4">bestly.example</b><b style="--i:5">shopheathotsauce.com</b><b class="final">shopheathotsauce.com/checkout/</b><b class="home">shopheathotsauce.com</b></span>
         </span>
         <img src="icon.png" alt="Knili">
       </div>
@@ -829,12 +864,12 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
       <div class="sbody">
         <div class="page">
           <div class="shops">
-            <div class="shop s1" style="--i:0"><div class="hdr"><i class="mark"></i><span class="wm">Tarjet</span></div><div class="body"><i class="blk banner"></i><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div></div></div>
-            <div class="shop s2" style="--i:1"><div class="hdr"><i class="mark"></i><span class="wm">Wallmarq</span><i class="pill"></i></div><div class="body"><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div></div></div>
-            <div class="shop s3" style="--i:2"><div class="hdr"><i class="mark"></i><span class="wm">Ebuy</span></div><div class="chips2"><span></span><span></span><span></span><span></span><span></span></div><div class="body"><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div></div></div>
-            <div class="shop s4" style="--i:3"><div class="hdr"><i class="mark"></i><span class="wm">Zonda</span><i class="pill"></i></div><div class="body"><div class="side"><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div></div></div>
-            <div class="shop s5" style="--i:4"><div class="hdr"><i class="mark"></i><span class="wm">Bestly</span></div><div class="body"><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div></div></div>
-            <div class="shop s6" style="--i:5"><div class="hdr"><i class="mark"></i><span class="wm">Kroga</span></div><div class="body"><div class="row2"><i class="blk"></i><div><i class="ln"></i><i class="ln s"></i></div><u></u></div><div class="row2"><i class="blk"></i><div><i class="ln"></i><i class="ln s"></i></div><u></u></div><div class="row2"><i class="blk"></i><div><i class="ln"></i><i class="ln s"></i></div><u></u></div><div class="row2"><i class="blk"></i><div><i class="ln"></i><i class="ln s"></i></div><u></u></div></div></div>
+            <div class="shop s1" style="--i:0"><div class="hdr"><i class="mark"></i><span class="wm">Tarjet</span></div><div class="nav"><i></i><i></i><i></i><i></i><i></i></div><div class="body"><i class="blk banner"></i><i class="sect"></i><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><i class="sect"></i><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div></div></div>
+            <div class="shop s2" style="--i:1"><div class="hdr"><i class="mark"></i><span class="wm">Wallmarq</span><i class="pill"></i></div><div class="nav"><i></i><i></i><i></i><i></i></div><div class="body"><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div></div></div>
+            <div class="shop s3" style="--i:2"><div class="hdr"><i class="mark"></i><span class="wm">Ebuy</span></div><div class="nav"><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="chips2"><span></span><span></span><span></span><span></span><span></span></div><div class="body"><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div></div></div>
+            <div class="shop s4" style="--i:3"><div class="hdr"><i class="mark"></i><span class="wm">Zonda</span><i class="pill"></i></div><div class="nav"><i></i><i></i><i></i><i></i><i></i></div><div class="body"><div class="side"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div></div></div>
+            <div class="shop s5" style="--i:4"><div class="hdr"><i class="mark"></i><span class="wm">Bestly</span></div><div class="nav"><i></i><i></i><i></i><i></i></div><div class="body"><div class="card big"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card big"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><i class="sect"></i><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div></div></div>
+            <div class="shop s6" style="--i:5"><div class="hdr"><i class="mark"></i><span class="wm">Shop Heat Hot Sauce</span></div><div class="nav"><i></i><i></i><i></i><i></i><i></i></div><div class="body"><div class="row2"><i class="blk"></i><div><i class="ln"></i><i class="ln s"></i></div><u></u></div><div class="row2"><i class="blk"></i><div><i class="ln"></i><i class="ln s"></i></div><u></u></div><div class="row2"><i class="blk"></i><div><i class="ln"></i><i class="ln s"></i></div><u></u></div><div class="row2"><i class="blk"></i><div><i class="ln"></i><i class="ln s"></i></div><u></u></div><div class="row2"><i class="blk"></i><div><i class="ln"></i><i class="ln s"></i></div><u></u></div><div class="row2"><i class="blk"></i><div><i class="ln"></i><i class="ln s"></i></div><u></u></div><div class="row2"><i class="blk"></i><div><i class="ln"></i><i class="ln s"></i></div><u></u></div><div class="row2"><i class="blk"></i><div><i class="ln"></i><i class="ln s"></i></div><u></u></div><div class="row2"><i class="blk"></i><div><i class="ln"></i><i class="ln s"></i></div><u></u></div><div class="row2"><i class="blk"></i><div><i class="ln"></i><i class="ln s"></i></div><u></u></div></div></div>
             <div class="scan"><i></i></div>
           </div>
           <div class="checkout">
