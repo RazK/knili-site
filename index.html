@@ -65,7 +65,7 @@ section{scroll-margin-top:76px}
 .btn:hover{filter:brightness(1.06)}
 
 h2{font:600 clamp(28px,4vw,44px)/1.08 var(--display);letter-spacing:.01em;
-  text-transform:uppercase;color:var(--ink);margin:0 0 40px}
+  text-transform:uppercase;color:var(--ink);margin:0 0 28px}
 .cap{font:600 14px/1.2 var(--display);letter-spacing:.14em;text-transform:uppercase;
   color:var(--ink);margin:0 0 16px}
 
@@ -135,6 +135,9 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--acid);outline-offse
    bottom margin edge, which is the glyph's bottom edge. That edge is what
    vertical-align:baseline then puts on the text baseline. */
 .pz{display:inline-block;line-height:0;vertical-align:baseline;margin-left:8px}
+/* The glyph's ink stops 3.35 units short of its 24-unit viewBox, so a box sitting
+   perfectly on the baseline still drew the puzzle 2.4px above it. The viewBox is
+   cropped to the ink instead — box bottom IS ink bottom, no offset, any size. */
 .pz svg{display:block}
 .nb{white-space:nowrap}
 h1{font:600 clamp(36px,3.8vw,52px)/.94 var(--display);letter-spacing:.005em;
@@ -243,7 +246,8 @@ h1 em{font-style:normal;color:var(--acid);display:block}
    block, or it stops matching the real one. */
 .go{background:var(--acid);color:var(--ink2);padding:calc(var(--u)*14) calc(var(--u)*20);
   font:600 calc(var(--u)*15)/1 var(--display);letter-spacing:.06em;text-transform:uppercase;
-  white-space:nowrap;display:grid;place-items:center;min-width:calc(var(--u)*120)}
+  white-space:nowrap;display:grid;place-items:center;min-width:calc(var(--u)*120);
+  font-size:calc(var(--u)*34)}
 .go.busy{background:var(--rule);color:var(--dim)}
 .starters{display:flex;flex-wrap:wrap;gap:calc(var(--u)*4);margin:0 calc(var(--u)*16)}
 .starters span{background:var(--ink2);color:var(--ink);
@@ -316,7 +320,7 @@ h1 em{font-style:normal;color:var(--acid);display:block}
                   50%{transform:translateX(-9px);opacity:.55}}
 
 /* ================================================ how it works, on paper */
-.works{background:var(--paper);padding:80px 0 64px;
+.works{background:var(--paper);padding:56px 0 40px;
   --lift:0 28px 60px -20px rgba(10,17,64,.34), 0 0 0 1px rgba(10,17,64,.16)}
 .works h2,.works .cap{color:var(--ink2)}
 /* ==========================================================================
@@ -333,7 +337,7 @@ h1 em{font-style:normal;color:var(--acid);display:block}
    it play, and puts it back the moment the stage leaves the screen.
    ========================================================================== */
 .beatnav{list-style:none;display:grid;grid-template-columns:repeat(3,1fr);gap:24px;
-  margin:0 0 24px}
+  margin:0 0 16px}
 .beatnav li{font:600 13px/1.2 var(--display);letter-spacing:.12em;text-transform:uppercase;
   color:#9AA0B8;transition:color .3s ease-out}
 .beatnav li.on{color:var(--ink2)}
@@ -342,8 +346,13 @@ h1 em{font-style:normal;color:var(--acid);display:block}
   transform-origin:left}
 .beatnav li.done u{transform:scaleX(1)}
 
-.stage{--dw:1072;--avail:1072px;--px:min(calc(var(--avail)/var(--dw)),1px);--u:var(--px);
-  position:relative;width:calc(var(--px)*1072);height:calc(var(--px)*684);
+/* The design frame is 1400 wide, not 1072, so at a 1072px column --px lands
+   near .77 and the whole stage renders about 524px tall instead of 684. The
+   panel is 404 design px and needs ~640 of height for its three zones and the
+   result card, so its aspect is not negotiable — scaling the frame is the only
+   way the section fits a screen. The shop page gets the width that buys. */
+.stage{--dw:1400;--avail:1072px;--px:min(calc(var(--avail)/var(--dw)),1px);--u:var(--px);
+  position:relative;width:calc(var(--px)*var(--dw));height:calc(var(--px)*684);
   background:var(--co-bg);box-shadow:var(--lift);overflow:hidden;
   transition:background-color .5s ease-out, box-shadow .5s ease-out}
 /* At the ask there is no browser yet — no ground, no frame, no shadow. The
@@ -357,14 +366,19 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 .stage[data-beat="5"] .hand,.stage[data-beat="5"] .confetti,
 .stage[data-beat="5"] .placed{opacity:0}
 .stage .hand{transition:opacity .5s ease-out}
+/* The hero's palette exactly: white and acid on cobalt. This card had it
+   inverted — navy and cobalt on white — which put the finale in a different
+   colour world from the page it closes, and left the brand's acid out of its
+   own title card entirely. */
 .finale{position:absolute;inset:0;z-index:6;pointer-events:none;opacity:0;
+  background:var(--g);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:calc(var(--px)*30);transition:opacity .6s ease-out}
+  gap:calc(var(--px)*28);transition:opacity .6s ease-out}
 .stage[data-beat="5"] .finale{opacity:1}
-.finale img{height:calc(var(--px)*40);width:auto}
-.finale p{font:600 calc(var(--px)*36)/1.14 var(--display);letter-spacing:.005em;
-  text-transform:uppercase;color:var(--ink2);text-align:center;margin:0}
-.finale em{font-style:normal;color:var(--g);display:block}
+.finale img{width:calc(var(--px)*460);height:auto}
+.finale p{font:600 calc(var(--px)*52)/.94 var(--display);letter-spacing:.005em;
+  text-transform:uppercase;color:var(--ink);text-align:center;margin:0}
+.finale em{font-style:normal;color:var(--acid);display:block}
 .sbody{display:flex;align-items:stretch;height:calc(var(--px)*640)}
 .stage .page{position:relative;flex:1 1 auto;min-width:0;overflow:hidden;
   background:var(--co-bg)}
@@ -375,8 +389,18 @@ h1 em{font-style:normal;color:var(--acid);display:block}
   transition:opacity .5s ease-out, transform .7s cubic-bezier(.3,.8,.3,1)}
 /* the chrome bar is part of what arrives, not part of what was waiting */
 .stage[data-beat="1"] .cbar,.stage[data-beat="0"] .cbar{opacity:0;
-  transform:translateX(calc(var(--px)*-334))}
+  transform:translateX(calc(var(--px)*-498))}
 .stage .omni{box-shadow:inset 0 0 0 calc(var(--px)*1) #D6D9DE}
+/* One address at a time, stacked in place. These rules went missing in an
+   earlier rewrite of this block, which left every domain rendering at once
+   inside the pill. */
+.doms{position:relative;display:block;flex:1;min-width:0;height:1.25em}
+.doms b{position:absolute;left:0;top:0;font-weight:400;color:#5F6368;opacity:0;
+  white-space:nowrap}
+.doms b.final{opacity:1;color:#202124}
+.stage.flick .doms b.final{opacity:0}
+.stage.flick .doms b:not(.final):not(.home){animation:flick .85s steps(1,end) infinite;
+  animation-delay:calc(var(--i) * -170ms)}
 /* the pill follows the winner: its own address while it sits there, then its
    checkout once the page navigates */
 .doms b.home{opacity:0}
@@ -385,9 +409,9 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 .stage.flick .doms b.home{opacity:0}
 .stage .pnl{transition:transform .7s cubic-bezier(.3,.8,.3,1), opacity .5s ease-out}
 .stage[data-beat="1"] .page,.stage[data-beat="0"] .page{opacity:0;
-  transform:translateX(calc(var(--px)*-334))}
+  transform:translateX(calc(var(--px)*-498))}
 .stage[data-beat="1"] .pnl,.stage[data-beat="0"] .pnl{
-  transform:translate(calc(var(--px)*-334),calc(var(--px)*-22))}
+  transform:translate(calc(var(--px)*-498),calc(var(--px)*-22))}
 
 /* the shops, flicking past. Invented names, skeleton contents — pages going by
    too fast to read is what a search across 34 listings actually looks like. */
@@ -406,9 +430,14 @@ h1 em{font-style:normal;color:var(--acid);display:block}
    is drawn OVER a page that is still there rather than over the ground. */
 .stage[data-beat="2"] .shop.s1{opacity:1}
 .stage[data-beat="3"] .shop.s6,.stage[data-beat="4"] .shop.s6{opacity:1}
-.stage.flick .shop{animation:flick 1.02s steps(1,end) infinite;
+/* The winner sits OUT of the rotation. It was in it, which meant the reader
+   saw the shop that gets bought from flash past three times during the search
+   and then again as the result — the same shop, many times. Five go by; the
+   sixth is what the search lands on, once. */
+.stage.flick .shop:not(.s6){animation:flick .85s steps(1,end) infinite;
   animation-delay:calc(var(--i) * -170ms)}
-@keyframes flick{0%,16.6%{opacity:1}16.61%,100%{opacity:0}}
+.stage.flick .shop.s6{opacity:0}
+@keyframes flick{0%,20%{opacity:1}20.01%,100%{opacity:0}}
 /* Six storefronts going by. Deliberately quiet — one grey, one wordmark size,
    one type — because the only thing on this stage allowed to be loud is the
    panel. What separates them is the shape of the page. Each one runs past the
@@ -443,27 +472,27 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 .ln.s{width:45%}
 
 .s1 .mark{border-radius:50%}
-.s1 .body{grid-template-columns:repeat(3,1fr)}
+.s1 .body{grid-template-columns:repeat(4,1fr)}
 .s1 .banner{grid-column:1/-1;height:calc(var(--px)*112)}
-.s2 .body{grid-template-columns:repeat(4,1fr)}
+.s2 .body{grid-template-columns:repeat(5,1fr)}
 .s2 .card .blk{height:calc(var(--px)*106)}
 .s3 .mark{border-radius:calc(var(--px)*10) calc(var(--px)*3)}
 .s3 .chips2{display:flex;gap:calc(var(--px)*8);flex:none;
   padding:calc(var(--px)*12) calc(var(--px)*24) 0}
 .s3 .chips2 span{height:calc(var(--px)*18);width:calc(var(--px)*54);
   border-radius:calc(var(--px)*9);background:#F1F3F4}
-.s3 .body{grid-template-columns:repeat(4,1fr);gap:calc(var(--px)*10)}
+.s3 .body{grid-template-columns:repeat(6,1fr);gap:calc(var(--px)*10)}
 .s3 .card .blk{height:calc(var(--px)*56)}
 .s4 .mark{transform:skewX(-14deg)}
-.s4 .body{grid-template-columns:calc(var(--px)*112) 1fr 1fr 1fr}
+.s4 .body{grid-template-columns:calc(var(--px)*112) 1fr 1fr 1fr 1fr}
 .s4 .side{grid-row:span 4;display:flex;flex-direction:column;gap:calc(var(--px)*10)}
 .s4 .side i{display:block;height:calc(var(--px)*10);border-radius:calc(var(--px)*5);
   background:#EDEFF2}
 .s4 .side i:nth-child(2n){width:70%}
 .s4 .side i:nth-child(3n){width:85%}
 .s4 .card .blk{height:calc(var(--px)*74)}
-.s5 .body{grid-template-columns:repeat(4,1fr)}
-.s5 .big{grid-column:span 2}
+.s5 .body{grid-template-columns:repeat(6,1fr)}
+.s5 .big{grid-column:span 3}
 .s5 .big .blk{height:calc(var(--px)*150)}
 .s5 .card .blk{height:calc(var(--px)*62)}
 .s6 .mark{border-radius:50% 50% calc(var(--px)*4) calc(var(--px)*4)}
@@ -491,8 +520,9 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 .stage[data-beat="2"] .checkout,.stage[data-beat="3"] .checkout{opacity:0}
 .cobody{flex:1;min-height:0;display:flex;transition:opacity .4s ease-out .12s}
 .stage[data-beat="2"] .cobody,.stage[data-beat="3"] .cobody{opacity:0}
+.checkout .co > *{max-width:none}
 .checkout .co{flex:1;background:#FAFBFC;display:grid;align-content:start;align-items:start;
-  grid-template-columns:1fr calc(var(--px)*252);gap:calc(var(--px)*24);
+  grid-template-columns:1fr calc(var(--px)*300);gap:calc(var(--px)*24);
   padding:calc(var(--px)*24)}
 .flab{height:calc(var(--px)*9);width:calc(var(--px)*96);background:#DDE1E6;
   border-radius:calc(var(--px)*4);margin:calc(var(--px)*2) 0 calc(var(--px)*10);
@@ -596,7 +626,7 @@ h1 em{font-style:normal;color:var(--acid);display:block}
                 14%,74%{opacity:1;transform:none}
                 100%{opacity:0;transform:none}}
 .works .foot{font:400 12px/1.6 var(--mono);color:var(--slate);letter-spacing:0;
-  margin-top:20px}
+  margin-top:14px}
 
 /* ==========================================================================
    MOTION. Every card is written in its finished state, so the page is whole
@@ -621,12 +651,13 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 .stage.play .point .arrow{animation:knudge 1.15s ease-in-out infinite}
 
 /* ==================================================== how to install */
-.install{padding:64px 0 80px}
+.install{padding:88px 0 104px}
 .grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px}
 .grid5 .cap{font-size:13px;letter-spacing:.12em;margin-bottom:12px}
-.mk{background:var(--paper);height:172px;padding:16px;font-family:var(--ui);
+.mk{background:var(--paper);height:220px;padding:16px;font-family:var(--ui);
   color:#202124;overflow:hidden;box-shadow:var(--lift)}
-.note{font:400 12px/1.6 var(--mono);color:var(--dim);letter-spacing:0;margin-bottom:40px}
+.mknote{font:400 10.5px/1.45 var(--ui);color:#5F6368;margin-top:10px}
+.mknote b{font-weight:600;color:#3C4043}
 
 .mk1{background:#F1F3F4}
 .dlbtn{display:block;background:var(--acid);color:var(--ink2);text-decoration:none;
@@ -776,7 +807,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
 @media (max-width:720px){
   .hero{padding:32px 0 48px}
   .works{padding:56px 0 48px}
-  .install{padding:48px 0 64px}
+  .install{padding:56px 0 72px}
   .btn{font-size:16px;padding:16px 24px}
 }
 @media (max-width:640px){
@@ -827,7 +858,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
   <div class="wrap">
     <div class="hero-grid">
     <div>
-      <p class="kicker">A new Chrome <span class="nb">extension<span class="pz"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M8.4 5.2 a2.6 2.6 0 0 1 5.2 0 h4.4 a1.8 1.8 0 0 1 1.8 1.8 v11 a1.8 1.8 0 0 1 -1.8 1.8 h-12 a1.8 1.8 0 0 1 -1.8 -1.8 v-3.6 a2.6 2.6 0 0 0 0 -5.2 v-2.2 a1.8 1.8 0 0 1 1.8 -1.8 z"/></svg></span></span></p>
+      <p class="kicker">A new Chrome <span class="nb">extension<span class="pz"><svg viewBox="3.35 1.75 17.3 18.9" width="15.6" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M8.4 5.2 a2.6 2.6 0 0 1 5.2 0 h4.4 a1.8 1.8 0 0 1 1.8 1.8 v11 a1.8 1.8 0 0 1 -1.8 1.8 h-12 a1.8 1.8 0 0 1 -1.8 -1.8 v-3.6 a2.6 2.6 0 0 0 0 -5.2 v-2.2 a1.8 1.8 0 0 1 1.8 -1.8 z"/></svg></span></span></p>
       <h1>It does the shopping.<em>You do the buying.</em></h1>
       <p class="lede">One sentence in. A filled checkout out.</p>
       <a class="btn" href="knili-extension.zip" download>Add to Chrome</a>
@@ -922,9 +953,9 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
     <h2>How it works</h2>
 
     <ol class="beatnav" id="beatnav">
-      <li><span>01 &middot; Ask for it</span><i><u></u></i></li>
-      <li><span>02 &middot; Find it</span><i><u></u></i></li>
-      <li><span>03 &middot; Get it</span><i><u></u></i></li>
+      <li><span>01 &middot; You ask for it</span><i><u></u></i></li>
+      <li><span>02 &middot; Knili finds it</span><i><u></u></i></li>
+      <li><span>03 &middot; You get it</span><i><u></u></i></li>
     </ol>
 
     <div class="stage screen" id="stage" data-anim="stage">
@@ -934,7 +965,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
         <svg class="nav" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg>
         <span class="omni">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
-          <span class="doms"><b style="--i:0">tarjet.example</b><b style="--i:1">wallmarq.example</b><b style="--i:2">ebuy.example</b><b style="--i:3">zonda.example</b><b style="--i:4">bestly.example</b><b style="--i:5">shopheathotsauce.com</b><b class="final">shopheathotsauce.com/checkout/</b><b class="home">shopheathotsauce.com</b></span>
+          <span class="doms"><b style="--i:0">tarjet.example</b><b style="--i:1">wallmarq.example</b><b style="--i:2">ebuy.example</b><b style="--i:3">zonda.example</b><b style="--i:4">bestly.example</b><b class="final">shopheathotsauce.com/checkout/</b><b class="home">shopheathotsauce.com</b></span>
         </span>
         <img src="icon.png" alt="Knili">
       </div>
@@ -1042,7 +1073,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
 
       <svg class="hand" viewBox="0 0 12 19" aria-hidden="true"><path d="M0 0v16l4.2-3.6 2.6 6 2.6-1.2-2.5-5.8h4.6z" fill="#fff" stroke="#0A1140" stroke-width="1.1" stroke-linejoin="round"/></svg>
       <div class="finale" aria-hidden="true">
-        <img src="lockup-ink.png" alt="">
+        <img src="lockup.png" alt="">
         <p>It does the shopping.<em>You do the buying.</em></p>
       </div>
       <div class="ripple" aria-hidden="true"><i></i></div>
@@ -1076,7 +1107,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
       </figure>
 
       <figure>
-        <figcaption class="cap">02 &middot; Copy this</figcaption>
+        <figcaption class="cap">02 &middot; Open extensions</figcaption>
         <div class="mk mk2">
           <button class="mkomni" id="copyBtn" type="button"
                   aria-label="Copy chrome://extensions to the clipboard">
@@ -1090,6 +1121,8 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
             <div class="on"><i></i>chrome://extensions</div>
             <div><i></i>chrome://extensions/shortcuts</div>
           </div>
+          <p class="mknote">Paste it in the address bar. Chrome blocks web pages
+            from linking to <b>chrome://</b> addresses.</p>
         </div>
       </figure>
 
@@ -1122,7 +1155,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
         <figcaption class="cap">05 &middot; Pin it</figcaption>
         <div class="mk mk5">
           <div class="tbar">
-            <svg class="puz" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M8.4 5.2 a2.6 2.6 0 0 1 5.2 0 h4.4 a1.8 1.8 0 0 1 1.8 1.8 v11 a1.8 1.8 0 0 1 -1.8 1.8 h-12 a1.8 1.8 0 0 1 -1.8 -1.8 v-3.6 a2.6 2.6 0 0 0 0 -5.2 v-2.2 a1.8 1.8 0 0 1 1.8 -1.8 z"/></svg>
+            <svg class="puz" viewBox="3.35 1.75 17.3 18.9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M8.4 5.2 a2.6 2.6 0 0 1 5.2 0 h4.4 a1.8 1.8 0 0 1 1.8 1.8 v11 a1.8 1.8 0 0 1 -1.8 1.8 h-12 a1.8 1.8 0 0 1 -1.8 -1.8 v-3.6 a2.6 2.6 0 0 0 0 -5.2 v-2.2 a1.8 1.8 0 0 1 1.8 -1.8 z"/></svg>
             <img src="icon.png" alt="Knili">
             <span class="me"></span>
           </div>
@@ -1137,8 +1170,6 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
       </figure>
 
     </div>
-
-    <p class="note">Chrome blocks links to chrome:// pages, so step two copies instead of clicking.</p>
 
     <a class="btn" href="knili-extension.zip" download>Add to Chrome</a>
   </div>
@@ -1417,7 +1448,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
       el.classList.remove('burst');
       lampAll();
     });
-    at(16200, play);
+    at(15300, play);
   }
 
   var live = false;
