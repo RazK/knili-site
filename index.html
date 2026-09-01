@@ -134,11 +134,17 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--acid);outline-offse
    in-flow line boxes, so CSS 2.1 10.8.1 applies to IT: its baseline is its
    bottom margin edge, which is the glyph's bottom edge. That edge is what
    vertical-align:baseline then puts on the text baseline. */
+/* Two things kept this glyph floating above the line, and both are fixed here
+   rather than nudged. (1) Its ink stopped 3.35 units short of the bottom of the
+   original 24-unit viewBox, so a box sitting perfectly on the baseline still
+   drew the puzzle high — the viewBox is cropped to the ink, so box bottom IS
+   ink bottom. (2) If width and height ever stop matching that viewBox's aspect,
+   SVG letterboxes and the default xMidYMid re-centres the ink, floating it
+   again — preserveAspectRatio="xMidYMax" pins the drawing to the bottom of its
+   box instead, so the alignment survives any dimensions put on it later.
+   Height is set here and width derives from it: they cannot disagree. */
 .pz{display:inline-block;line-height:0;vertical-align:baseline;margin-left:8px}
-/* The glyph's ink stops 3.35 units short of its 24-unit viewBox, so a box sitting
-   perfectly on the baseline still drew the puzzle 2.4px above it. The viewBox is
-   cropped to the ink instead — box bottom IS ink bottom, no offset, any size. */
-.pz svg{display:block}
+.pz svg{display:block;height:17px;width:auto}
 .nb{white-space:nowrap}
 h1{font:600 clamp(36px,3.8vw,52px)/.94 var(--display);letter-spacing:.005em;
   text-transform:uppercase;color:var(--ink);margin:0 0 24px}
@@ -865,7 +871,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
   <div class="wrap">
     <div class="hero-grid">
     <div>
-      <p class="kicker">A new Chrome <span class="nb">extension<span class="pz"><svg viewBox="3.35 1.75 17.3 18.9" width="15.6" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M8.4 5.2 a2.6 2.6 0 0 1 5.2 0 h4.4 a1.8 1.8 0 0 1 1.8 1.8 v11 a1.8 1.8 0 0 1 -1.8 1.8 h-12 a1.8 1.8 0 0 1 -1.8 -1.8 v-3.6 a2.6 2.6 0 0 0 0 -5.2 v-2.2 a1.8 1.8 0 0 1 1.8 -1.8 z"/></svg></span></span></p>
+      <p class="kicker">A new Chrome <span class="nb">extension<span class="pz"><svg viewBox="3.35 1.75 17.3 18.9" preserveAspectRatio="xMidYMax meet" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M8.4 5.2 a2.6 2.6 0 0 1 5.2 0 h4.4 a1.8 1.8 0 0 1 1.8 1.8 v11 a1.8 1.8 0 0 1 -1.8 1.8 h-12 a1.8 1.8 0 0 1 -1.8 -1.8 v-3.6 a2.6 2.6 0 0 0 0 -5.2 v-2.2 a1.8 1.8 0 0 1 1.8 -1.8 z"/></svg></span></span></p>
       <h1>It does the shopping.<em>You do the buying.</em></h1>
       <p class="lede">One sentence in. A filled checkout out.</p>
       <a class="btn" href="knili-extension.zip" download>Add to Chrome</a>
@@ -1162,7 +1168,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
         <figcaption class="cap">05 &middot; Pin it</figcaption>
         <div class="mk mk5">
           <div class="tbar">
-            <svg class="puz" viewBox="3.35 1.75 17.3 18.9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M8.4 5.2 a2.6 2.6 0 0 1 5.2 0 h4.4 a1.8 1.8 0 0 1 1.8 1.8 v11 a1.8 1.8 0 0 1 -1.8 1.8 h-12 a1.8 1.8 0 0 1 -1.8 -1.8 v-3.6 a2.6 2.6 0 0 0 0 -5.2 v-2.2 a1.8 1.8 0 0 1 1.8 -1.8 z"/></svg>
+            <svg class="puz" viewBox="3.35 1.75 17.3 18.9" preserveAspectRatio="xMidYMax meet" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M8.4 5.2 a2.6 2.6 0 0 1 5.2 0 h4.4 a1.8 1.8 0 0 1 1.8 1.8 v11 a1.8 1.8 0 0 1 -1.8 1.8 h-12 a1.8 1.8 0 0 1 -1.8 -1.8 v-3.6 a2.6 2.6 0 0 0 0 -5.2 v-2.2 a1.8 1.8 0 0 1 1.8 -1.8 z"/></svg>
             <img src="icon.png" alt="Knili">
             <span class="me"></span>
           </div>
