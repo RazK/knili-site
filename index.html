@@ -51,7 +51,7 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
-body{background:var(--g);color:var(--body);overflow-x:hidden;
+body{background:var(--g);color:var(--body);
   font:400 14px/1.5 var(--display);letter-spacing:.01em;-webkit-font-smoothing:antialiased}
 img{max-width:100%;display:block}
 svg{display:block}
@@ -864,14 +864,35 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
   .fit{--avail:min(874px,calc(100vw - 48px))}
 }
 @media (max-width:900px){
-  /* The film is a desktop shape. Narrower than this it stops being legible at
-     any scale, so the stage holds its final state — the panel with the answer
-     in it — and the labels carry the sequence instead. */
-  .stage{--dw:404;height:auto}
-  .stage .cbar,.stage .page,.stage .hand,.stage .confetti,.stage .placed{display:none}
-  .stage .sbody{height:auto}
+  /* On a phone the panel IS the composition — 404 design px against 390 of
+     screen. So it plays alone for the ask and the search, and the shop slides
+     in over it only for the handoff, which is the one beat whose subject is
+     the shop's own button. The height is fixed to the tallest state so the
+     page below never jumps between beats. */
+  .stage{--dw:404;height:calc(var(--px)*824)}
+  .stage .cbar{display:none}
+  .stage .sbody{position:relative;height:100%;overflow:hidden}
   .stage .pnl{flex:1 1 auto}
+  .stage[data-beat="1"] .pnl,.stage[data-beat="0"] .pnl{transform:none}
+  .stage .page{position:absolute;inset:0;z-index:4;opacity:0;
+    transform:translateX(100%);
+    transition:transform .55s cubic-bezier(.3,.8,.3,1), opacity .3s ease-out}
+  .stage[data-beat="4"] .page{opacity:1;transform:none}
+  /* nothing flicks past on a phone — the checkout is what arrives */
+  .stage .shops,.stage .scan,.stage .pickring{display:none}
+  .checkout .co{grid-template-columns:1fr;align-content:center}
+  .cform{display:none}
   .beatnav{grid-template-columns:1fr;gap:12px}
+
+  /* The panel is a screenshot at desktop and nearly full width here, so people
+     will read it. Nothing in it goes below 11px, even where that departs from
+     the extension's exact proportions: legible beats faithful on a phone. */
+  .stage .icons,.stage .tag,.stage .kv,.stage .foot,
+  .stage .buy-m span,.stage .rcp dt{font-size:11px}
+  .stage h3,.stage .stamp{font-size:11.5px}
+  .stage .starters span,.stage .chip,.stage .bars span{font-size:11.5px}
+  .stage .rcp,.stage .steps div,.stage .now span{font-size:12px}
+  .stage .ask{font-size:13px}
 }
 @media (max-width:660px){
   /* Three links plus the lockup plus the CTA stop fitting. The lockup and the
@@ -907,6 +928,11 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
   .mkomni{height:44px}
   .dlbtn{padding:16px 10px}
 }
+@media (max-width:660px){
+  /* the only target under 44 in the measured sweep */
+  .spec a{display:inline-flex;align-items:center;min-height:44px;min-width:44px;
+    padding:0}
+}
 @media (max-width:620px){
   /* The hero shot cannot hold a 404px panel beside a checkout on a phone. The
      panel is the product, so the checkout half goes and the panel gets the
@@ -914,6 +940,12 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
      which is a UI you can read rather than a screenshot of one. */
   .fit{--dw:404}
   .fbody .co{display:none}
+  /* The hero is 1.4 screens on a phone and this is where its pixels are: the
+     four folded heads are empty ground in a still image. The ask and the answer
+     both survive. */
+  .frame .zmid{display:none}
+  .hero{padding:24px 0 32px}
+  .hero-grid{gap:28px}
   .finale img{max-width:72%}
   .finale p{font-size:calc(var(--px)*38)}
 }
@@ -1398,7 +1430,6 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
   var el = document.getElementById('stage');
   if (!el) return;
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
-  var wide = window.matchMedia && window.matchMedia('(min-width: 901px)');
   if (!('IntersectionObserver' in window)) return;
 
   var ask = el.querySelector('.ask'), go = el.querySelector('.go');
@@ -1579,6 +1610,9 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
     /* the winner is held, bars settled, before the page navigates */
     at(10800, function () {
       place(); flip();
+      /* On a phone the shop arrives by sliding in, so the button's rect is only
+         true once it has landed — measure again after the move. */
+      at(700, place);
       el.classList.remove('found');
       el.setAttribute('data-beat', '4'); lamp(2, 4950);
     });
@@ -1599,7 +1633,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
   new IntersectionObserver(function (entries) {
     var seen = entries[0].isIntersecting;
     el.classList.toggle('play', seen);
-    var ok = seen && !(reduce && reduce.matches) && !(wide && !wide.matches);
+    var ok = seen && !(reduce && reduce.matches);
     if (ok && !live) { live = true; play(); }
     else if (!ok && live) { live = false; rest(); }
   }, { threshold: 0.3 }).observe(el);
