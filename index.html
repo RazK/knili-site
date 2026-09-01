@@ -351,8 +351,12 @@ h1 em{font-style:normal;color:var(--acid);display:block}
    ========================================================================== */
 .beatnav{list-style:none;display:grid;grid-template-columns:repeat(3,1fr);gap:24px;
   margin:0 0 16px}
+/* Lit by default, so a page with no JavaScript shows three completed phases
+   rather than three grey ones. The driver adds .seq and takes over. */
 .beatnav li{position:relative;font:600 13px/1.2 var(--display);letter-spacing:.12em;
-  text-transform:uppercase;color:#9AA0B8;transition:color .3s ease-out}
+  text-transform:uppercase;color:var(--ink2);transition:color .3s ease-out}
+.beatnav.seq li{color:#9AA0B8}
+.beatnav.seq li.on{color:var(--ink2)}
 /* A mark hanging off the live label's rule, reaching toward the picture it
    names. It stops well short of the stage — this points, where the install
    caption frame and the stage ring enclose. */
@@ -360,11 +364,11 @@ h1 em{font-style:normal;color:var(--acid);display:block}
   background:var(--acid);opacity:0;
   transition:height .3s ease-out, opacity .3s ease-out}
 .beatnav li.on:after{height:9px;opacity:1}
-.beatnav li.on{color:var(--ink2)}
 .beatnav i{display:block;height:2px;background:#E2E5F0;margin-top:10px;overflow:hidden}
-.beatnav u{display:block;height:100%;background:var(--g);transform:scaleX(0);
+.beatnav u{display:block;height:100%;background:var(--g);transform:scaleX(1);
   transform-origin:left}
-.beatnav li.done u{transform:scaleX(1)}
+.beatnav.seq u{transform:scaleX(0)}
+.beatnav.seq li.done u,.beatnav.seq li.on u{transform:scaleX(1)}
 
 /* The design frame is 1400 wide, not 1072, so at a 1072px column --px lands
    near .77 and the whole stage renders about 524px tall instead of 684. The
@@ -880,10 +884,18 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
      and everything in it would be 4px tall; pinned, it stays legible and the
      window crops instead. Specificity beats the @supports rule below. */
   .works .stagewin{--avail:1072px}
-  .stagewin{overflow:hidden;height:300px;background:var(--co-bg);
-    box-shadow:var(--lift)}
+  /* The desktop entrance — panel and page sliding in from the left — is what
+     the camera does here instead, and leaving it on put the subject 381px away
+     from where box() measures it, so beats 0 and 1 framed bare cream. Layout
+     space cannot see a transform that is about to be applied; the cure is to
+     not apply one. Any future frame subject must stay untransformed too. */
+  .stage[data-beat="1"] .pnl,.stage[data-beat="0"] .pnl,
+  .stage[data-beat="1"] .page,.stage[data-beat="0"] .page,
+  .stage[data-beat="1"] .cbar,.stage[data-beat="0"] .cbar{transform:none}
+  .stagewin{overflow:hidden;height:408px;background:var(--co-bg);
+    box-shadow:var(--lift);transition:height .45s cubic-bezier(.3,.8,.3,1)}
   .stage{box-shadow:none;transform-origin:0 0;
-    transform:translate(var(--fx2,-346px),var(--fy2,-67px)) scale(var(--fz,.672));
+    transform:translate(var(--fx2,-346px),var(--fy2,-13px)) scale(var(--fz,.672));
     transition:transform .45s cubic-bezier(.3,.8,.3,1)}
   .beatnav{grid-template-columns:1fr;gap:12px}
 
@@ -1522,30 +1534,48 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
      subject in a portrait window fits by width; a landscape one — the shop
      page — covers instead, filling the window and cropping its far side, which
      keeps the storefronts at a size worth looking at. */
+  /* Per beat: what to frame, how to fit it, where to anchor it — and the
+     window takes the height that frame actually needs rather than one height
+     trying to serve all of them. A fixed height either crops the composer at
+     the ask or overflows the seam; measuring removes the guess.
+
+     Beat 1 frames the header and the ask, not the whole panel: below them the
+     panel is empty at that beat, and framing the empty part is what forced the
+     window tall enough to slice the composer. */
   var FRAME = {
-    1: { sel: ['.pnl'],            fit: 'width', ax: 0.5, ay: 0 },
-    2: { sel: ['.page'],           fit: 'cover', ax: 0,   ay: 0 },
-    3: { sel: ['.page'],           fit: 'cover', ax: 0,   ay: 0 },
+    1: { sel: ['.hd', '.ztop'],    fit: 'width', ax: 0.5, ay: 0 },
+    2: { sel: ['.page'],           fit: 'cover', ax: 0,   ay: 0, h: 300 },
+    3: { sel: ['.page'],           fit: 'cover', ax: 0,   ay: 0, h: 300 },
     4: { sel: ['.csum', '.point'], fit: 'width', ax: 0.5, ay: 0.5 },
     5: { sel: ['.fin'],            fit: 'width', ax: 0.5, ay: 0.5 }
   };
+  var HMIN = 220, HMAX = 470;
   function frameBeat(n) {
     if (!narrow || !narrow.matches) {
       el.style.setProperty('--fz', 1);
       el.style.setProperty('--fx2', '0px');
       el.style.setProperty('--fy2', '0px');
+      win.style.height = '';
       return;
     }
     var f = FRAME[n] || FRAME[1];
     var b = union(f.sel);
     if (!b) return;
-    var W = win.clientWidth, H = win.clientHeight;
-    if (!W || !H || !b.w || !b.h) return;
-    var z = f.fit === 'cover' ? Math.max(W / b.w, H / b.h)
-                              : Math.min(W / b.w, 1.6);
+    var W = win.clientWidth;
+    if (!W || !b.w || !b.h) return;
+    var z, H;
+    if (f.fit === 'cover') {
+      H = f.h;                       /* cover: the height is the frame, z follows */
+      z = Math.max(W / b.w, H / b.h);
+    } else {
+      z = Math.min(W / b.w, 1.6);    /* width: z is the frame, the height follows */
+      H = b.h * z;
+    }
+    H = Math.max(HMIN, Math.min(HMAX, Math.round(H)));
+    win.style.height = H + 'px';
     el.style.setProperty('--fz', z);
     el.style.setProperty('--fx2', (-b.x * z + (W - b.w * z) * f.ax) + 'px');
-    el.style.setProperty('--fy2', (-b.y * z + (H - b.h * z) * f.ay) + 'px');
+    el.style.setProperty('--fy2', (-b.y * z + (b.h * z < H ? (H - b.h * z) * f.ay : 0)) + 'px');
   }
   var ft;
   window.addEventListener('resize', function () {
@@ -1602,6 +1632,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
 
   function rest() {
     clear();
+    if (nav) nav.classList.remove('seq');
     el.removeAttribute('data-beat');
     el.classList.remove('flick', 'seek', 'burst', 'found');
     if (ask) ask.textContent = full;
@@ -1618,6 +1649,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
 
   function play() {
     clear();
+    if (nav) nav.classList.add('seq');
     el.classList.remove('flick', 'seek', 'burst', 'found');
     el.setAttribute('data-beat', '1'); frameBeat(1);
     lines.forEach(function (l) { l.classList.remove('in'); });
