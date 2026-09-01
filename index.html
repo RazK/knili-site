@@ -143,8 +143,9 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--acid);outline-offse
    again — preserveAspectRatio="xMidYMax" pins the drawing to the bottom of its
    box instead, so the alignment survives any dimensions put on it later.
    Height is set here and width derives from it: they cannot disagree. */
-.pz{display:inline-block;line-height:0;vertical-align:baseline;margin-left:8px}
-.pz svg{display:block;height:17px;width:auto}
+.pz{display:inline-block;line-height:0;vertical-align:baseline;margin-left:8px;
+  margin-bottom:-1px}
+.pz svg{display:block}
 .nb{white-space:nowrap}
 h1{font:600 clamp(36px,3.8vw,52px)/.94 var(--display);letter-spacing:.005em;
   text-transform:uppercase;color:var(--ink);margin:0 0 24px}
@@ -842,11 +843,16 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
   .beatnav li{color:var(--ink2)}
   .beatnav u{transform:scaleX(1)}
 }
-/* 100vw counts the scrollbar; where the column can measure itself, let it. */
+/* 100vw counts the scrollbar, so the column would rather measure itself — but
+   `container-type` on an element does NOT make `cqw` inside that same element
+   resolve against it: cqw looks for an ANCESTOR container. Declared on .stage
+   and .fit themselves it found none, fell back to the viewport, and --px
+   clamped to 1px — so the stage rendered at its full 1400 design width and
+   overflowed the 1072px column by 328px. The container goes on the wrapper. */
+.wrap{container-type:inline-size}
 @supports (container-type:inline-size){
-  .fit,.stage{container-type:inline-size}
-  .fit{--avail:100cqw}
-  .stage{--avail:100cqw}
+  .fit{--avail:min(596px,100cqw)}
+  .stage{--avail:min(1072px,100cqw)}
 }
 </style>
 </head>
@@ -871,7 +877,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
   <div class="wrap">
     <div class="hero-grid">
     <div>
-      <p class="kicker">A new Chrome <span class="nb">extension<span class="pz"><svg viewBox="3.35 1.75 17.3 18.9" preserveAspectRatio="xMidYMax meet" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M8.4 5.2 a2.6 2.6 0 0 1 5.2 0 h4.4 a1.8 1.8 0 0 1 1.8 1.8 v11 a1.8 1.8 0 0 1 -1.8 1.8 h-12 a1.8 1.8 0 0 1 -1.8 -1.8 v-3.6 a2.6 2.6 0 0 0 0 -5.2 v-2.2 a1.8 1.8 0 0 1 1.8 -1.8 z"/></svg></span></span></p>
+      <p class="kicker">A new Chrome <span class="nb">extension<span class="pz"><svg viewBox="3.35 1.75 17.3 18.9" preserveAspectRatio="xMidYMax meet" width="15.6" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M8.4 5.2 a2.6 2.6 0 0 1 5.2 0 h4.4 a1.8 1.8 0 0 1 1.8 1.8 v11 a1.8 1.8 0 0 1 -1.8 1.8 h-12 a1.8 1.8 0 0 1 -1.8 -1.8 v-3.6 a2.6 2.6 0 0 0 0 -5.2 v-2.2 a1.8 1.8 0 0 1 1.8 -1.8 z"/></svg></span></span></p>
       <h1>It does the shopping.<em>You do the buying.</em></h1>
       <p class="lede">One sentence in. A filled checkout out.</p>
       <a class="btn" href="knili-extension.zip" download>Add to Chrome</a>
