@@ -65,7 +65,7 @@ section{scroll-margin-top:76px}
 .btn:hover{filter:brightness(1.06)}
 
 h2{font:600 clamp(28px,4vw,44px)/1.08 var(--display);letter-spacing:.01em;
-  text-transform:uppercase;color:var(--ink);margin:0 0 28px}
+  text-transform:uppercase;color:var(--ink);margin:0 0 20px}
 .cap{font:600 14px/1.2 var(--display);letter-spacing:.14em;text-transform:uppercase;
   color:var(--ink);margin:0 0 16px}
 
@@ -333,7 +333,7 @@ h1 em{font-style:normal;color:var(--acid);display:block}
                   50%{transform:translateX(-9px);opacity:.55}}
 
 /* ================================================ how it works, on paper */
-.works{background:var(--paper);padding:56px 0 40px;
+.works{background:var(--paper);padding:40px 0 32px;
   --lift:0 28px 60px -20px rgba(10,17,64,.34), 0 0 0 1px rgba(10,17,64,.16)}
 .works h2,.works .cap{color:var(--ink2)}
 /* ==========================================================================
@@ -350,7 +350,7 @@ h1 em{font-style:normal;color:var(--acid);display:block}
    it play, and puts it back the moment the stage leaves the screen.
    ========================================================================== */
 .beatnav{list-style:none;display:grid;grid-template-columns:repeat(3,1fr);gap:24px;
-  margin:0 0 16px}
+  margin:0 0 12px}
 /* Lit by default, so a page with no JavaScript shows three completed phases
    rather than three grey ones. The driver adds .seq and takes over. */
 .beatnav li{position:relative;font:600 13px/1.2 var(--display);letter-spacing:.12em;
@@ -381,7 +381,13 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 .stagewin{--dw:1400;--avail:1072px;--px:min(calc(var(--avail)/var(--dw)),1px);
   position:relative}
 .stage{--u:var(--px);
-  position:relative;width:calc(var(--px)*var(--dw));height:calc(var(--px)*684);
+  /* 924 = 44 chrome bar + 920 body. The body was 640, which is shorter than a
+     finished panel's own content stack — header, ask, and a result card with an
+     image, a bill and the CTA come to roughly 880 design px. The overflow was
+     clipped by .pnl, and what fell off the bottom was the last ~190px: the
+     PAY ON THE PAGE bar. Beat 4 was framing an element that was never painted.
+     A window is as tall as a window; this is what a real one measures. */
+  position:relative;width:calc(var(--px)*var(--dw));height:calc(var(--px)*964);
   background:var(--co-bg);box-shadow:var(--lift);overflow:hidden;
   transition:background-color .5s ease-out, box-shadow .5s ease-out}
 /* At the ask there is no browser yet — no ground, no frame, no shadow. The
@@ -415,7 +421,7 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 .finale p{font:600 calc(var(--px)*52)/1.15 var(--display);letter-spacing:.005em;
   text-transform:uppercase;color:var(--ink);text-align:left;margin:0}
 .finale em{font-style:normal;color:var(--acid);display:block}
-.sbody{display:flex;align-items:stretch;height:calc(var(--px)*640)}
+.sbody{display:flex;align-items:stretch;height:calc(var(--px)*920)}
 .stage .page{position:relative;flex:1 1 auto;min-width:0;overflow:hidden;
   background:var(--co-bg)}
 .stage .pnl{flex:0 0 calc(var(--px)*404)}
@@ -589,7 +595,9 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 .stage[data-beat="2"] .cform,.stage[data-beat="3"] .cform{opacity:0;
   transform:translateY(calc(var(--px)*12))}
 .checkout .co > *{max-width:none}
-.checkout .co{flex:1;background:#FAFBFC;display:grid;align-content:start;align-items:start;
+/* centred in a much taller page now — which also pulls the summary and the
+   panel's CTA closer together, and that pair is what the seam beat frames */
+.checkout .co{flex:1;background:#FAFBFC;display:grid;align-content:center;align-items:start;
   grid-template-columns:1fr calc(var(--px)*300);gap:calc(var(--px)*24);
   padding:calc(var(--px)*24)}
 .flab{height:calc(var(--px)*9);width:calc(var(--px)*96);background:#DDE1E6;
@@ -892,10 +900,10 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
   .stage[data-beat="1"] .pnl,.stage[data-beat="0"] .pnl,
   .stage[data-beat="1"] .page,.stage[data-beat="0"] .page,
   .stage[data-beat="1"] .cbar,.stage[data-beat="0"] .cbar{transform:none}
-  .stagewin{overflow:hidden;height:408px;background:var(--co-bg);
+  .stagewin{overflow:hidden;height:360px;background:var(--co-bg);
     box-shadow:var(--lift);transition:height .45s cubic-bezier(.3,.8,.3,1)}
   .stage{box-shadow:none;transform-origin:0 0;
-    transform:translate(var(--fx2,-346px),var(--fy2,-13px)) scale(var(--fz,.672));
+    transform:translate(var(--fx2,-346px),var(--fy2,-155px)) scale(var(--fz,.672));
     transition:transform .45s cubic-bezier(.3,.8,.3,1)}
   .beatnav{grid-template-columns:1fr;gap:12px}
 
@@ -1549,7 +1557,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
     4: { sel: ['.csum', '.point'], fit: 'width', ax: 0.5, ay: 0.5 },
     5: { sel: ['.fin'],            fit: 'width', ax: 0.5, ay: 0.5 }
   };
-  var HMIN = 220, HMAX = 470;
+  var HMIN = 180, HMAX = 470;
   function frameBeat(n) {
     if (!narrow || !narrow.matches) {
       el.style.setProperty('--fz', 1);
