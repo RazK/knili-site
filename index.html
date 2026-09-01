@@ -35,10 +35,6 @@
   font-weight:500 700;font-display:swap}
 
 :root{
-  /* Every screenshot is lifted off its ground the same way: one deep soft
-     shadow in the ink of the palette plus a hairline edge. Only the ink
-     changes with the ground, so a cobalt panel never melts into a cobalt page. */
-  --lift:0 32px 72px -20px rgba(2,4,26,.85), 0 0 0 1px rgba(232,255,58,.34);
   --g:#1B2CF0; --ink2:#0A1140; --ink:#FFFFFF; --body:#D3D8FF; --dim:#9AA6F5;
   --rule:#4152F5; --acid:#E8FF3A; --acid-ink:#5C6606; --paper:#FFFFFF;
   --slate:#3A3F5E;
@@ -58,16 +54,19 @@ svg{display:block}
 section{scroll-margin-top:76px}
 
 .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
-.screen{box-shadow:var(--lift)}
 
 .btn{display:inline-block;background:var(--acid);color:var(--ink2);text-decoration:none;
   font:600 18px/1 var(--display);letter-spacing:.06em;text-transform:uppercase;padding:20px 32px}
 .btn:hover{filter:brightness(1.06)}
 
+/* --ink2, not --ink. There is exactly one h2 left on the page — HOW TO INSTALL
+   — and exactly five .cap elements, the install steps' figcaptions, and all six
+   sit on that section's paper. The white was for a cobalt install section that
+   no longer exists. */
 h2{font:600 clamp(28px,4vw,44px)/1.08 var(--display);letter-spacing:.01em;
-  text-transform:uppercase;color:var(--ink);margin:0 0 20px}
+  text-transform:uppercase;color:var(--ink2);margin:0 0 20px}
 .cap{font:600 14px/1.2 var(--display);letter-spacing:.14em;text-transform:uppercase;
-  color:var(--ink);margin:0 0 16px}
+  color:var(--ink2);margin:0 0 16px}
 
 /* ==================================================== the bar that follows */
 /* The header condenses rather than arrives. At rest it has no plate at all —
@@ -98,8 +97,6 @@ h2{font:600 clamp(28px,4vw,44px)/1.08 var(--display);letter-spacing:.01em;
    bar moves when the highlight changes. */
 .barnav a:after{content:"";display:block;height:1px;margin-top:5px;
   background:transparent}
-.barnav a[aria-current="true"]{color:var(--acid)}
-.barnav a[aria-current="true"]:after{background:var(--acid)}
 /* The hero's jump nav is gone. It existed for one reason — below 660 the bar
    was display:none and the three section links had nowhere else to be — and
    that reason went when the bar came back on phones carrying them. Above 660
@@ -134,7 +131,11 @@ h2{font:600 clamp(28px,4vw,44px)/1.08 var(--display);letter-spacing:.01em;
    now, on every screen. No attribute, no state, no way to be stranded in one,
    and three guarantees deleted rather than maintained.
    ========================================================================== */
-.barnav a{font:400 12px/1 var(--mono);letter-spacing:.04em;color:var(--dim);
+/* --body, not --dim. At rest the bar has no plate of its own and this link sits
+   straight on the hero's cobalt, where --dim measures 3.43:1 — under the 4.5
+   that 12px of text needs. --body is 5.64:1 there and 12.88:1 once .stuck puts
+   the navy plate behind it, so one value passes in both states. */
+.barnav a{font:400 12px/1 var(--mono);letter-spacing:.04em;color:var(--body);
   text-decoration:none}
 .barnav a:hover{color:var(--acid)}
 .btn-sm{background:var(--acid);color:var(--ink2);text-decoration:none;
@@ -149,7 +150,7 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--acid);outline-offse
 .btn-sm:hover{filter:brightness(1.06)}
 
 /* ================================================================== hero */
-.hero{padding:48px 0 64px}
+.hero{padding:48px 0 48px}
 /* Chrome's own sign for an extension, outlined, after the words. NOT flex:
    flex synthesises a baseline for a replaced element and lands it high. In an
    inline formatting context the behaviour is specified instead — an
@@ -164,8 +165,7 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--acid);outline-offse
    hidden. It came straight back out: a label, a kicker and an h1 is three
    stacked lines of preamble on one block, and the headline underneath already
    answers the question the label was asking. The section is still named where
-   naming does work — in .barnav, which is the nav at every width now that the
-   phone has a bar again — and not where it only repeats the headline.
+   naming does work — in .barnav — and not where it only repeats the headline.
    The 24px below is the kicker's own gap to the h1 and has no override on it;
    there is nothing above it any more to share a block with. On a phone this
    line is the second half of the identity row instead: see .idrow. */
@@ -202,17 +202,25 @@ h1{font:600 clamp(36px,3.8vw,52px)/.94 var(--display);letter-spacing:.005em;
   text-transform:uppercase;color:var(--ink);margin:0 0 24px}
 h1 em{font-style:normal;color:var(--acid);display:block}
 .lede{font:400 17px/1.45 var(--mono);color:var(--body);letter-spacing:0;margin:0 0 32px}
-/* The whole argument on one screen: the shot sits beside the words and is
-   sized to the height left over, so 1440x800 still shows the next section. */
-.hero-grid{display:grid;grid-template-columns:minmax(0,1fr) 596px;gap:48px;
+/* THE WHOLE ARGUMENT ON ONE SCREEN, AND THE ARGUMENT IS THE THING RUNNING.
+   There used to be a still photograph of the product here and a HOW IT WORKS
+   section under it holding the demo. A picture of the thing beside the thing
+   is one of them too many, so the picture is gone and the demo took its place:
+   the words on the left, the product working on the right, one section.
+   Two equal columns rather than the shot's fixed 596px, because the demo is a
+   frame the camera fits its subject into and it is happier with the room. */
+.hero-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:48px;
   align-items:center}
-
-/* The shot. Enough Chrome to prove it is a browser, and nothing more: no tab
-   strip, no billing form — the panel, and the part of the checkout it is
-   about. Sizes are design pixels times --px, one design pixel in real ones. */
-.fit{--dw:874;--avail:596px}
-.frame{--px:min(calc(var(--avail) / var(--dw)),1px);width:calc(var(--px)*var(--dw));
-  display:flex;flex-direction:column;background:var(--co-bg)}
+/* THE DEMO COLUMN, AND ITS WIDTH IS A SHAPE. The frame is portrait (20/21) so
+   the camera has room to fit a beat's subject; let the column run to a full
+   one-column width and the frame turns landscape against its own height cap and
+   the fits invert. Measured at 1000px before this cap: a 952x560 window put
+   beat 1's --fz at 2.919 — the panel's header magnified three times — against
+   0.598 on a phone. 520 is the widest the two-column hero ever hands it (512 at
+   1440), so capping there costs the wide layout nothing and keeps one frame
+   shape at every width. Centred, because between 661 and 1000 the hero is a
+   single column and a left-aligned frame there reads as a mistake. */
+.demo{min-width:0;width:100%;max-width:520px;margin-inline:auto}
 /* THE SYSTEM UI FACE, BECAUSE THIS IS CHROME'S CHROME AND NOT OURS. It was
    inheriting the page's display face from body, which is a condensed poster
    type wearing an address bar. Everything else in the mock browser — the
@@ -251,21 +259,13 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 .omni svg{width:calc(var(--px)*11);height:calc(var(--px)*11);color:#5F6368;flex:none}
 .omni b{font-weight:400;color:#5F6368}
 .cbar img{width:calc(var(--px)*20);height:calc(var(--px)*20);flex:none}
-.fbody{display:flex;align-items:stretch}
-
 /* the shop, cropped to what it is about */
 .co{flex:1 1 auto;min-width:0;background:var(--co-bg);color:var(--co-ink);
   font-family:var(--ui);display:flex;flex-direction:column;justify-content:center;
   align-items:center;padding:calc(var(--px)*40)}
 .co > *{width:100%;max-width:calc(var(--px)*420)}
-.co-brand{font-size:calc(var(--px)*13);letter-spacing:.18em;text-transform:uppercase;
-  color:var(--co-dim);margin-bottom:calc(var(--px)*16)}
-.co-title{font-size:calc(var(--px)*30);font-weight:600;letter-spacing:-.01em;
-  margin-bottom:calc(var(--px)*24)}
 .co-card{background:var(--co-card);border:calc(var(--px)*1) solid var(--co-line);
   padding:calc(var(--px)*24);border-radius:calc(var(--px)*8)}
-.co-del{margin-bottom:calc(var(--px)*16)}
-.del{font-size:calc(var(--px)*13);line-height:1.7;color:var(--co-ink)}
 .co-h{font-size:calc(var(--px)*13);letter-spacing:.08em;text-transform:uppercase;
   color:var(--co-dim);margin-bottom:calc(var(--px)*16)}
 .co-item{display:flex;align-items:center;gap:calc(var(--px)*12);
@@ -294,7 +294,6 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 .pnl{--u:1px;background:var(--g);color:var(--body);
   font:400 calc(var(--u)*13)/1.45 var(--display);letter-spacing:.01em;
   display:flex;flex-direction:column;overflow:hidden}
-.fbody .pnl{--u:var(--px);flex:0 0 calc(var(--px)*404)}
 .pnl .hd{display:flex;align-items:center;gap:calc(var(--u)*12);
   padding:calc(var(--u)*12) calc(var(--u)*16);background:var(--ink2);
   min-height:calc(var(--u)*52);flex:none}
@@ -329,16 +328,8 @@ h1 em{font-style:normal;color:var(--acid);display:block}
   white-space:nowrap;display:grid;place-items:center;min-width:calc(var(--u)*120);
   font-size:calc(var(--u)*34)}
 .go.busy{background:var(--rule);color:var(--dim)}
-.starters{display:flex;flex-wrap:wrap;gap:calc(var(--u)*4);margin:0 calc(var(--u)*16)}
-.starters span{background:var(--ink2);color:var(--ink);
-  padding:calc(var(--u)*6) calc(var(--u)*11);font:500 calc(var(--u)*11.5)/1 var(--display);
-  letter-spacing:.1em;text-transform:uppercase}
-.chips{display:flex;flex-wrap:wrap;gap:calc(var(--u)*4);margin:0 calc(var(--u)*16)}
-.chip{background:var(--ink2);color:var(--ink);padding:calc(var(--u)*6) calc(var(--u)*11);
-  font:500 calc(var(--u)*11.5)/1 var(--display);letter-spacing:.1em;text-transform:uppercase}
-.chip.late{background:var(--acid);color:var(--ink2);font-weight:600}
-.chip.pref{background:transparent;color:var(--dim);
-  box-shadow:inset 0 0 0 calc(var(--u)*1) var(--rule)}
+/* .starters, .chips and .chip stood here and matched nothing — swept with a
+   walk over every rule in this stylesheet against the live document. */
 .now{display:flex;align-items:center;gap:calc(var(--u)*12);margin:0 calc(var(--u)*16);
   background:var(--ink2);padding:calc(var(--u)*12) calc(var(--u)*16)}
 .now span{flex:1;min-width:0;font:400 calc(var(--u)*12)/1.4 var(--mono);color:var(--acid);
@@ -425,17 +416,12 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 /* The hero shot is a screenshot, not part of the sequence — it is the first
    thing anyone sees and it should carry the panel's own movement. It was gated
    on a class only the stage ever sets, which is why it stopped. */
-.frame .point .arrow{animation:knudge 1.3s ease-in-out infinite}
 /* The product's nudge exactly: 1.3s, six pixels, no opacity flicker — written
    in the panel's own pixels, because a flat -6px would travel six REAL pixels
    whether the shot renders at 1.0 or at 0.39. */
 @keyframes knudge{0%,100%{transform:translateX(0)}
                   50%{transform:translateX(calc(var(--u)*-6))}}
 
-/* ================================================ how it works, on paper */
-.works{background:var(--paper);padding:40px 0 32px;
-  --lift:0 28px 60px -20px rgba(10,17,64,.34), 0 0 0 1px rgba(10,17,64,.16)}
-.works h2,.works .cap{color:var(--ink2)}
 /* ==========================================================================
    THE STAGE. One looping sequence in four beats, in a frame that reserves its
    full size from the first frame so nothing it does can push the page around:
@@ -464,12 +450,20 @@ h1 em{font-style:normal;color:var(--acid);display:block}
    three rules therefore sit on ONE line however many lines each label runs
    to. They are the sequence's progress bar; a progress bar at three different
    heights is three bars. */
+/* Inked for cobalt, because the demo is in the hero and the hero is cobalt at
+   every width. Measured on --g: --body 5.64:1 at rest, --dim 3.43:1 for the
+   phases already played, --acid 7.05:1 for the one running. */
 .beatnav li{position:relative;display:flex;flex-direction:column;
   font:600 13px/1.2 var(--display);letter-spacing:.12em;
-  text-transform:uppercase;color:var(--ink2);transition:color .3s ease-out}
+  text-transform:uppercase;color:var(--body);transition:color .3s ease-out}
 .beatnav li > span{flex:1}
-.beatnav.seq li{color:#9AA0B8}
-.beatnav.seq li.on{color:var(--ink2)}
+/* Three states, three inks, all of them legible on cobalt: --body at rest for a
+   page with no JavaScript (5.64:1), this for a phase not yet reached, and acid
+   for the one running (7.05:1). #BAC2FA rather than --dim, which is the token
+   that would otherwise say "quieter" here and measures 3.43:1 on --g; this is
+   4.57:1, the first step up the same ramp that clears 4.5. */
+.beatnav.seq li{color:#BAC2FA}
+.beatnav.seq li.on{color:var(--acid)}
 /* A mark hanging off the live label's rule, reaching toward the picture it
    names. It stops well short of the stage — this points, where the install
    caption frame and the stage ring enclose. */
@@ -477,8 +471,9 @@ h1 em{font-style:normal;color:var(--acid);display:block}
   background:var(--acid);opacity:0;
   transition:height .3s ease-out, opacity .3s ease-out}
 .beatnav li.on:after{height:9px;opacity:1}
-.beatnav i{display:block;height:2px;background:#E2E5F0;margin-top:10px;overflow:hidden}
-.beatnav u{display:block;height:100%;background:var(--g);transform:scaleX(1);
+.beatnav i{display:block;height:2px;background:rgba(211,216,255,.24);
+  margin-top:10px;overflow:hidden}
+.beatnav u{display:block;height:100%;background:var(--acid);transform:scaleX(1);
   transform-origin:left}
 .beatnav.seq u{transform:scaleX(0)}
 .beatnav.seq li.done u,.beatnav.seq li.on u{transform:scaleX(1)}
@@ -499,28 +494,44 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 /* The frame is a shape, not a number. It was 560px on a wide screen and a
    flat 360px on every phone — one fixed height serving a 360px screen and a
    430px one alike, inside a page that otherwise scales. It takes its height
-   from its own width now and stops at the desktop 560, so it is continuous
-   at every width in between rather than stepping at a breakpoint.
+   from its own width now, and .demo above caps that width, so there is no
+   max-height left to fight the ratio: one shape at every width.
    20/21 is measured, not chosen: the tallest subject the camera has to hold
    at a width fit is beat 4's seam, ~0.87 high per wide, and a frame a little
    taller than square clears that at every width with air to spare.
    The height transition went with the fixed heights — nothing resizes this
    box any more, and nothing may: see frameBeat below for why. */
+/* ONE SHADOW, AND IT BELONGS TO THIS BOX. The window is the object the reader
+   watches for the whole sequence; nothing inside it may carry an outer lift of
+   its own or the beats read as a stack of separately shadowed screens. It sits
+   on the hero's cobalt at every width now, and the page's old --lift was a DROP
+   shadow: read off its value, 0 32px 72px -20px reached 16px left and right,
+   48px below and — blur/2 + spread - offset — nothing at all above. On paper
+   that is fine because the section's white does the separating; on cobalt the
+   top edge had a 1px hairline and nothing else. Three layers instead: the acid
+   hairline for the crisp edge, an ambient ring with no offset so it is equal on
+   every side, and a drop that says which way is down. Per-side reach, measured
+   by reproducing each layer's Gaussian: 21px top, 21px left, 21px right, 33px
+   below. There is no beat exemption any more — the old one blanked the window's
+   ground and shadow at beats 0 and 1 so a cobalt panel could float on white
+   paper, and there is no white paper behind this box at any width. */
 .stagewin{--dw:1400;--avail:1072px;--px:min(calc(var(--avail)/var(--dw)),1px);
-  position:relative;overflow:hidden;box-shadow:var(--lift);
+  position:relative;overflow:hidden;
+  box-shadow:0 0 0 1px rgba(232,255,58,.34),
+             0 0 30px 6px rgba(2,4,26,.6),
+             0 22px 50px -14px rgba(2,4,26,.9);
   /* width:100% is load-bearing. With both dimensions auto, clamping the
      height against max-height re-derives the WIDTH from the ratio too, and
      the window stopped filling its column — 533px inside a 637px one.
      A definite width leaves the ratio only the height to resolve. */
-  width:100%;aspect-ratio:20/21;height:auto;min-height:320px;max-height:560px}
+  width:100%;aspect-ratio:20/21;height:auto;min-height:320px}
 /* The camera's identity. Every number that positions it now comes from
    frameBeat() measuring the composition, including the first one — there is
    no seeded offset left in this stylesheet. With JavaScript off this is what
    stands: the composition from its own top-left corner, uncropped across. */
 .stage{--u:var(--px);--fz:1;--fx2:0px;--fy2:0px;
-  transform-origin:0 0;box-shadow:none;
+  transform-origin:0 0;
   transform:translate(var(--fx2),var(--fy2)) scale(var(--fz));
-  transition:transform .45s cubic-bezier(.3,.8,.3,1);
   /* 924 = 44 chrome bar + 920 body. The body was 640, which is shorter than a
      finished panel's own content stack — header, ask, and a result card with an
      image, a bill and the CTA come to roughly 880 design px. The overflow was
@@ -528,20 +539,32 @@ h1 em{font-style:normal;color:var(--acid);display:block}
      PAY ON THE PAGE bar. Beat 4 was framing an element that was never painted.
      A window is as tall as a window; this is what a real one measures. */
   position:relative;width:calc(var(--px)*var(--dw));height:calc(var(--px)*964);
-  background:var(--co-bg);box-shadow:var(--lift);overflow:hidden;
-  transition:background-color .5s ease-out, box-shadow .5s ease-out}
-/* At the ask there is no browser yet — no ground, no frame, no shadow. The
-   window arrives with the shop, and the panel carries its own lift so it reads
-   as an object on the page rather than a hole in one. */
-.stage[data-beat="1"],.stage[data-beat="0"]{background-color:transparent;box-shadow:none}
+  background:var(--co-bg);overflow:hidden;
+  /* ONE transition declaration, because there were two. `transition:transform
+     .45s` used to sit up beside the transform itself and this line, later in
+     the same rule, silently replaced it — measured, getComputedStyle reported
+     transitionProperty "background-color, box-shadow" and nothing else. The
+     camera therefore CUT on every beat instead of easing, for as long as that
+     second declaration has existed. At the 4 -> 5 seam that cut is what the
+     page was reported to do at the end: the composition is still at full
+     opacity when beat 5 lands, and it snapped 102.9px right and 13.9px down
+     while zooming .598 -> .686 at 390px before it began to fade. Everything
+     the .cut class exists for — killing the ease for exactly one frame at the
+     5 -> 1 wrap — was a no-op until now, and is load-bearing again. */
+  transition:transform .45s cubic-bezier(.3,.8,.3,1),
+             background-color .5s ease-out, box-shadow .5s ease-out}
+/* At the ask there is no browser yet, so the composition paints no ground and
+   the window's own cream shows through instead — one lit rectangle with a lone
+   panel in it. The window keeps its frame and its shadow throughout: it is the
+   thing being watched, not a property of the beat. */
+.stage[data-beat="1"],.stage[data-beat="0"]{background-color:transparent}
 /* One frame with nothing easing anywhere inside the composition. play() adds
    this, sets beat 1 and the camera, forces a reflow so that state is committed
    as the new resting point, and takes it off again — which is what turns the
    5 -> 1 wrap from a half-second cross-fade into a cut. It is never left on. */
 .stage.cut,.stage.cut *{transition:none !important}
-.stage .pnl{box-shadow:var(--lift)}
 /* the closing frame: everything goes, and the argument is left on its own */
-.stage[data-beat="5"]{background-color:transparent;box-shadow:none}
+.stage[data-beat="5"]{background-color:transparent}
 .stage[data-beat="5"] .cbar,.stage[data-beat="5"] .page,.stage[data-beat="5"] .pnl,
 .stage[data-beat="5"] .hand,.stage[data-beat="5"] .confetti,
 .stage[data-beat="5"] .placed{opacity:0}
@@ -551,7 +574,10 @@ h1 em{font-style:normal;color:var(--acid);display:block}
    colour world from the page it closes, and left the brand's acid out of its
    own title card entirely. */
 .finale{position:absolute;inset:0;z-index:6;pointer-events:none;opacity:0;
-  background:var(--g);
+  /* --ink2, not the brand cobalt. The card ends by fading to what is behind it,
+     and behind it is the window's cream with the page's own cobalt all around;
+     navy is legible against both, cobalt against only one. */
+  background:var(--ink2);
   display:flex;align-items:center;justify-content:center;
   transition:opacity .6s ease-out}
 /* The block is centred in the stage, but everything inside shares the lockup's
@@ -561,7 +587,17 @@ h1 em{font-style:normal;color:var(--acid);display:block}
    keeping the two sentences as two statements. */
 .fin{display:flex;flex-direction:column;align-items:flex-start;
   gap:calc(var(--px)*9)}
-.stage[data-beat="5"] .finale{opacity:1}
+/* AND IT ARRIVES ONLY ONCE THE FRAME HAS STOPPED MOVING. With the camera
+   easing again (450ms) and the outgoing composition fading out (500ms), a
+   finale that starts fading at the same instant is painted while the frame is
+   still travelling: the closing card renders under a camera on its way from
+   beat 4 to beat 5 — off-centre, clipped, and lying over a checkout that has
+   not left yet. The 500ms delay is the longer of those two: by the time the
+   plate is worth any opacity at all the camera has arrived AND the previous
+   scene has reached zero. Sequential in, sequential out, and never two scenes
+   in one frame. .bye re-declares its own transition, so the delay does not
+   follow the card on the way out. */
+.stage[data-beat="5"] .finale{opacity:1;transition:opacity .6s ease-out .5s}
 /* The closing card fading out, alone, before anything else arrives. Nothing
    else in the composition is animating while this runs — at beat 5 the chrome
    bar, the page, the panel and the cursor have been at opacity 0 for two
@@ -865,10 +901,9 @@ h1 em{font-style:normal;color:var(--acid);display:block}
    a hard constraint, not a preference. FRAME[4] frames union('.csum','.out')
    and takes the union's TOP edge from .csum. The grid centres its single row,
    so a .csum taller than .cform grows the row, lifts that top edge, and the
-   union outgrows the 560px window: the wide fit is z=min(1,H/b.h), so the
-   whole seam beat would zoom out. Stretching to the row .csum is already in
-   moves nothing — measured, --fz at beat 4 stays 0.9964 at 1440 and 0.5743 at
-   390, exactly what it was. align-self, therefore, and never a height.
+   union outgrows the window and the whole seam beat zooms out. Stretching to
+   the row .csum is already in moves nothing. align-self, therefore, and never
+   a height.
    ========================================================================== */
 .checkout .csum{align-self:stretch;display:flex}
 .checkout .csum > .co-card{flex:1;display:flex;flex-direction:column}
@@ -996,7 +1031,7 @@ h1 em{font-style:normal;color:var(--acid);display:block}
    balance, because a centred two-line block with a one-word second line is
    the sloppiest thing on a page: at 390 this broke 295.2 / 43.2 before, which
    centred would have hung the word "Knili." alone under a full line. */
-.works .foot{font:400 12px/1.6 var(--mono);color:var(--slate);letter-spacing:0;
+.foot{font:400 12px/1.6 var(--mono);color:var(--body);letter-spacing:0;
   margin-top:14px;text-align:center;text-wrap:balance}
 
 /* ==========================================================================
@@ -1029,7 +1064,6 @@ h1 em{font-style:normal;color:var(--acid);display:block}
    ground carrying 19px of ink. The section still opens on 88, because that is
    the gap that separates it from what came before; what it stops doing is
    holding a screen open after it has finished talking. */
-.install{padding:88px 0 36px}
 .grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;
   margin-bottom:20px}
 .grid5 .cap{font-size:13px;letter-spacing:.12em;margin-bottom:12px;
@@ -1042,11 +1076,29 @@ h1 em{font-style:normal;color:var(--acid);display:block}
    for exactly that reason. Auto-play is off below 640px, where the reader
    drives the row with a thumb, so no card is .live there and nothing lights. */
 .grid5 > figure:has(.mk.live) .cap{color:var(--acid)}
+/* Near-white cards on white paper need an edge of their own. This was the
+   page's --lift token, which had exactly one user left once the window took
+   its own shadow and the hero shot was deleted, so it is written here. */
 .mk{background:var(--paper);height:220px;padding:16px;font-family:var(--ui);
-  color:#202124;overflow:hidden;box-shadow:var(--lift)}
+  color:#202124;overflow:hidden;
+  box-shadow:0 28px 60px -20px rgba(10,17,64,.34), 0 0 0 1px rgba(10,17,64,.16)}
 .mknote{font:400 10.5px/1.45 var(--ui);color:#5F6368;margin-top:10px}
 .mknote b{font-weight:600;color:#3C4043}
 
+/* ==========================================================================
+   TWO SECTIONS, TWO GROUNDS. The hero is the page's cobalt and carries the
+   argument and the demo; this is the paper, and it carries the instructions.
+   One alternation at every width — there is no longer a desktop version of
+   this page and a phone version of it, only a wide one and a narrow one.
+   The DESKTOP ONLY banner deliberately does NOT flip with the section. It is
+   the one thing here a reader must not miss, and a dark plate is louder on
+   paper than it ever was on cobalt: it stops being a slightly darker patch of
+   the page and becomes the one object on it.
+   ========================================================================== */
+.install{background:var(--paper);padding:88px 0 36px}
+/* The live card says so in cobalt rather than acid: acid on white measures
+   1.1:1 and disappears. Cobalt on white is 7.88:1 and is the page's own. */
+.grid5 > figure:has(.mk.live) .cap{color:var(--g)}
 /* DESKTOP ONLY, SAID OUT LOUD. It used to be implied — by a collapsed
    disclosure labelled WHEN YOU ARE AT YOUR COMPUTER — which a reader on a
    phone can miss entirely and then work through five steps they cannot
@@ -1184,10 +1236,15 @@ h1 em{font-style:normal;color:var(--acid);display:block}
    a margin, not as a section. Equal on both sides now, and the same on a
    phone, where the spec wraps to three lines and every extra pixel is paid
    for three times over. */
-footer{border-top:1px solid var(--rule);padding:20px 0}
+/* ON THE PAPER, not on a band of its own. The page is two grounds now and the
+   colophon is not a third: it is the last line of the install section and it
+   shares its ground. That also retires a contrast failure that had been here
+   at every width — --dim on --g measured 3.43:1 against the 4.5 that 12px of
+   body text needs. --slate on paper is 9.71:1 and the link is 7.88:1. */
+footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
 .spec{display:flex;flex-wrap:wrap;gap:8px 24px;justify-content:space-between;
-  font:400 12px/1.6 var(--mono);color:var(--dim);letter-spacing:0}
-.spec a{color:var(--acid)}
+  font:400 12px/1.6 var(--mono);color:var(--slate);letter-spacing:0}
+.spec a{color:var(--g)}
 
 /* =========================================================== responsive */
 @media (max-width:1023px){
@@ -1198,44 +1255,33 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
 }
 @media (max-width:1000px){
   .hero-grid{grid-template-columns:1fr;gap:40px}
-  .fit{--avail:min(874px,calc(100vw - 48px))}
 }
 /* ==========================================================================
-   THE TIGHT CAMERA. A screen that cannot hold the whole composition gets it
-   one beat at a time, framed on whatever that beat is actually about: the
-   panel for the ask, the shop for the search, the seam between them for the
-   handoff. Same DOM, same timeline, same driver as a wide screen — only a
-   transform on the composition changes, so it reads as the frame moving.
-
-   `.tight` is set by frameBeat() from a MEASURED comparison — does the
-   composition fit the window's width — not by a media query. Everything that
-   only makes sense in that mode hangs off the class, so the mode and its
-   consequences can never disagree with each other, which is what a stylesheet
-   breakpoint and a matchMedia() in the driver were free to do.
+   THE CAMERA. One mode, at every width. The composition is 1400 design px
+   wide and the window it is seen through never is, so every beat is framed on
+   whatever that beat is actually about: the panel for the ask, the shop for
+   the search, the seam between them for the handoff. Same DOM, same timeline,
+   same driver everywhere; only a transform on the composition changes, so it
+   reads as the frame moving.
+   There used to be a second mode. While the demo was a full-width section
+   below the fold, a desktop column was 1072px — exactly the composition's
+   layout width — so a `wide` branch panned it vertically at natural scale and
+   a `.tight` class carried everything that only made sense in the other one.
+   The demo is half of a two-column hero now: 512px at 1440 against 358 at 390,
+   and the composition has never once fitted. The branch was unreachable, so it
+   and the class are gone, and with them the 900px discontinuity between the
+   two. Everything below is simply what the camera does.
    ========================================================================== */
 /* The desktop entrance — panel and page sliding in from the left — is what
    the camera does here instead, and leaving it on put the subject 381px away
    from where box() measures it, so beats 0 and 1 framed bare cream. Layout
    space cannot see a transform that is about to be applied; the cure is to
    not apply one. Any future frame subject must stay untransformed too. */
-.stage.tight[data-beat="1"] .pnl,.stage.tight[data-beat="0"] .pnl,
-.stage.tight[data-beat="1"] .page,.stage.tight[data-beat="0"] .page,
-.stage.tight[data-beat="1"] .cbar,.stage.tight[data-beat="0"] .cbar{transform:none}
+.stage[data-beat="1"] .pnl,.stage[data-beat="0"] .pnl,
+.stage[data-beat="1"] .page,.stage[data-beat="0"] .page,
+.stage[data-beat="1"] .cbar,.stage[data-beat="0"] .cbar{transform:none}
 /* the ground the window shows wherever the cropped composition does not reach */
-.stagewin.tight{background:var(--co-bg)}
-/* AT THE ASK THERE IS NO BROWSER YET — and the window has to agree with the
-   stage about that. The stage already goes background:transparent and
-   box-shadow:none for beats 0 and 1; the WINDOW around it kept its own lift
-   and its own hairline, and behind a transparent stage sits the works
-   section's white paper. So a panel that is supposed to be floating on the
-   page arrived inside a white rectangle with a shadow round it. Measured
-   before and after the last round's changes and identical in both, so this is
-   older than the camera — but it contradicts the rule three lines up, and the
-   rule is right. :has() rather than a class because the beat lives on the
-   stage and the ground lives on its parent; no JavaScript should have to
-   keep two boxes in step over something the stylesheet can see. */
-.stagewin:has(.stage[data-beat="0"]),
-.stagewin:has(.stage[data-beat="1"]){box-shadow:none;background-color:transparent}
+.stagewin{background:var(--co-bg)}
 /* Two frames zoom out below the panel's own scale, so the things those beats
    are about get sized for the frame they appear in: the shop's name while the
    pages flick, and the two labels either side of the seam. These are the shot's
@@ -1244,14 +1290,14 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
    composition rather than pinned to a pixel size outside it — the same move
    the shop's wordmark makes two lines down. The pill grows with its type and
    stays inside the bar's own 44 design px; nothing here is absolute. */
-.stage.tight .omni{height:calc(var(--px)*38);border-radius:calc(var(--px)*19);
+.stage .omni{height:calc(var(--px)*38);border-radius:calc(var(--px)*19);
   font-size:calc(var(--px)*28);padding:0 calc(var(--px)*16)}
-.stage.tight .omni svg{width:calc(var(--px)*22);height:calc(var(--px)*22)}
-.stage.tight .lights i{width:calc(var(--px)*16);height:calc(var(--px)*16)}
-.stage.tight .cbar .nav{width:calc(var(--px)*24);height:calc(var(--px)*24)}
-.stage.tight .cbar img{width:calc(var(--px)*30);height:calc(var(--px)*30)}
-.stage.tight .wm{font-size:calc(var(--px)*26)}
-.stage.tight .co-pay{font-size:calc(var(--px)*22)}
+.stage .omni svg{width:calc(var(--px)*22);height:calc(var(--px)*22)}
+.stage .lights i{width:calc(var(--px)*16);height:calc(var(--px)*16)}
+.stage .cbar .nav{width:calc(var(--px)*24);height:calc(var(--px)*24)}
+.stage .cbar img{width:calc(var(--px)*30);height:calc(var(--px)*30)}
+.stage .wm{font-size:calc(var(--px)*26)}
+.stage .co-pay{font-size:calc(var(--px)*22)}
 /* The tight camera zooms this bar out, so its two lines are set larger than
    the product's — but the shaft is what pays for it, and the shaft is the
    thing that makes the arrow POINT. Measured: the old 22px override left the
@@ -1261,8 +1307,8 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
    at 10.6px effective at 390 (the shop's own Place order lands at 9.7 under
    the same camera, and the panel should be the louder of the two), and leaves
    the arrow 39 design px of shaft. */
-.stage.tight .point b{font-size:calc(var(--u)*24)}
-.stage.tight .point i{font-size:calc(var(--u)*17)}
+.stage .point b{font-size:calc(var(--u)*24)}
+.stage .point i{font-size:calc(var(--u)*17)}
 /* THE FINALE, RE-PROPORTIONED FOR A PORTRAIT FRAME. Written for a landscape
    screen the block is twice as wide as it is tall, and a portrait window can
    only letterbox that: measured at 390px it filled the frame edge to edge —
@@ -1275,20 +1321,13 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
    Flush left survives — mark, line one and line two share one edge — and so
    does the spacing relationship: the mark sits close to the words it belongs
    to, and the two statements sit further apart than the lines inside either. */
-.stage.tight .fin{width:calc(var(--px)*620);padding:calc(var(--px)*40);
+.stage .fin{width:calc(var(--px)*620);padding:calc(var(--px)*40);
   gap:calc(var(--px)*14)}
-.stage.tight .finale img{width:58%}
-.stage.tight .finale p{font-size:calc(var(--px)*86);line-height:1.02}
-.stage.tight .finale em{margin-top:calc(var(--px)*30)}
+.stage .finale img{width:58%}
+.stage .finale p{font-size:calc(var(--px)*86);line-height:1.02}
+.stage .finale em{margin-top:calc(var(--px)*30)}
 
 @media (max-width:900px){
-  /* The composition stops shrinking with the column here and holds the scale
-     it had. Fitted instead to 358px of screen it would lay 1400 design px out
-     into 358, everything in it would be rasterised at four or five pixels, and
-     the camera would then magnify that mush. Pinned, the text is laid out
-     large and the camera scales it DOWN, which is the direction that stays
-     crisp. Specificity beats the @supports rule below. */
-  .works .stagewin{--avail:1072px}
   /* still three across — only smaller. Measured widths are in the report; the
      tracking comes down further than the type does, because .12em is what
      makes these labels wide and it is the cheapest width to buy back. */
@@ -1312,7 +1351,6 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
      to a bar that arrives after this screen instead of spending three lines
      of it on navigation nobody needs yet.
      ========================================================================== */
-  .fit{display:none}
   .hero .lede{display:none}
   /* The mark and the line it belongs with, on one row. The wrapper is
      display:contents everywhere else, so nothing above 660 knows it exists. */
@@ -1336,68 +1374,21 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
      rule that forced that span back to display:inline went with it, and so
      did the .getlink margin: both belonged to elements that no longer exist. */
 
-  /* ==========================================================================
-     ONE GROUND, ALL THE WAY DOWN. The section under the hero used to cut to
-     white paper, which on a phone is a hard seam two thirds of the way into
-     the first screen — and the thing the seam framed is a browser window that
-     is already near-white, so the paper was working against it rather than
-     for it. On cobalt the shop reads as a lit object, which is what it is.
-     Everything the paper was carrying has to be re-inked here: the phase
-     labels and their track, the foot, and the lift — that shadow was tuned as
-     navy-on-white and is nearly invisible on navy, so the acid hairline from
-     the root does the edge instead.
-     There were two ways to stop HOW IT WORKS reading as a line floating under
-     the headline rather than as a section header: give the section its own
-     ground back, or drop the heading. Both were built and looked at on a real
-     phone, and the ground won — so the heading is what goes. The three phase
-     labels open the section instead, and they are a better opening than the
-     h2 was: 01 · 02 · 03 with a progress track under them says "a sequence
-     starts here" in a way a title cannot, and they were already carrying that
-     job one line further down.
-     (No .works .cap rule here, and there is none in the base block worth
-     keeping either: measured, all five .cap elements on the page are the
-     install section's figcaptions. .works .cap has never matched anything.)
-     ========================================================================== */
-  /* section.hero and .bar .barin, not .hero and .barin: the <=560 block sits
-     further down this stylesheet and a single class there beats a single
-     class here. Specificity is the fix, not source order — moving this block
-     below it would put the phone rules out of breakpoint order. */
-  section.hero{padding:14px 0 0}
+  /* section.hero, not .hero: the <=560 block sits further down this stylesheet
+     and a single class there beats a single class here. Specificity is the fix,
+     not source order — moving this block below it would put the phone rules out
+     of breakpoint order. */
+  section.hero{padding:14px 0 20px}
   /* 32, not the 34 the <=560 block sets. Measured at 360: at 34px "It does
      the shopping." runs to two lines and the headline to three, at 95.9px;
      at 32px it is two lines and 60.2. Nearly 36px of the one screen, for a
      6% change in size nobody can see — and a three-line headline whose last
      line is two words was the worse setting anyway. */
   .hero h1{font-size:32px;margin-bottom:14px}
-  .works{background:transparent;padding:16px 0 20px;
-    --lift:0 20px 44px -18px rgba(2,4,26,.9), 0 0 0 1px rgba(232,255,58,.34)}
-  /* The heading, not its colour. display:none rather than a re-ink, so the
-     h2 costs the one screen nothing at all rather than costing it less. */
-  .works h2{display:none}
-  /* --body, not the --dim the base rule uses on paper. Measured on cobalt,
-     --dim is 3.43:1 — under the 4.5 this 12px line needs — and --body is
-     5.64:1 while still reading as the quietest thing in the section. */
-  .works .foot{color:var(--body);margin-top:12px}
+  /* The demo is the whole point of the screen, so it gets the room the copy
+     gives up: no lede, and the labels sit tighter to the window. */
   .beatnav{margin:0 0 10px}
-  .beatnav li{color:var(--body)}
-  .beatnav.seq li{color:var(--dim)}
-  .beatnav.seq li.on{color:var(--acid)}
-  .beatnav i{background:rgba(211,216,255,.24)}
-  .beatnav u{background:var(--acid)}
-  /* THE ENDING IS BUILT FOR THIS GROUND. Beat 5's closing card is a cobalt
-     plate and it ends by fading to whatever is behind it, and on a phone that
-     is a cobalt page. The plate takes the page's own deep navy here so the
-     card is an object on the ground and its 520ms fade has something to be
-     the disappearance OF.
-     One correction to the note this replaces, because it was measured and it
-     matters if anyone touches this again: what is DIRECTLY behind the finale
-     is not the section but .stagewin.tight, whose background reads
-     rgb(247,243,237) — the shop's cream. That is only true while the window
-     is opaque; the stage goes transparent at beat 5 and the acid hairline is
-     the only thing separating window from page, so the card is read against
-     the cobalt around it as much as the cream under it. Navy is legible
-     against both, cobalt against only one of them. */
-  .stage .finale{background:var(--ink2)}
+  .foot{margin-top:12px}
 
   /* ==========================================================================
      THE BAR COMES BACK, AND IT WAITS ITS TURN. It was removed below 660
@@ -1439,43 +1430,7 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
   .barnav a:after{content:"";position:absolute;left:-10px;right:-10px;
     top:50%;height:32px;transform:translateY(-50%);background:none;
     display:block;margin:0}
-  .barnav a[aria-current="true"]:after{background:none}
-  /* the current-section rule cannot live on :after any more, so it moves to a
-     second pseudo that is still reserved at all times and still moves nothing */
-  .barnav a:before{content:"";position:absolute;left:0;right:0;bottom:-5px;
-    height:1px;background:transparent}
-  .barnav a[aria-current="true"]:before{background:var(--acid)}
   .btn-sm{padding:16px}
-  /* ==========================================================================
-     TWO BLOCKS, AND THIS IS THE SECOND ONE. The hero and the animation share
-     one cobalt ground above, so HOW TO INSTALL has to be the other half of
-     the page rather than more of the same — and paper is what the page
-     already alternates with. Above 661 nothing here applies: the desktop
-     alternation is cobalt hero, white works, cobalt install, and it is not
-     being disturbed. Below it, works is cobalt and install is the paper.
-     Everything that was inked for cobalt has to be re-inked, and the list is
-     longer than the body text: the heading, the disclosure, the five step
-     captions and the live one, the mock cards' own edge, and the swipe rail
-     (that one lives in the <=640 block below, because that is the only place
-     the rail exists at all). Contrast for every pair is in the report.
-     The DESKTOP ONLY banner deliberately does NOT flip. It is the one thing
-     in this section a reader must not miss, and a dark plate is louder on
-     paper than it ever was on cobalt — it stops being a slightly darker patch
-     of the page and becomes the one object on it. Its own two pairs are
-     unchanged and already measured: --body on --ink2 and --acid on --ink2.
-     ========================================================================== */
-  .install{background:var(--paper);
-    /* the mocks are near-white cards and --lift is what gives them an edge.
-       The root's acid hairline is for cobalt; on paper it would ring five
-       white cards in yellow. This is the same navy pair .works carries. */
-    --lift:0 28px 60px -20px rgba(10,17,64,.34), 0 0 0 1px rgba(10,17,64,.16)}
-  .install h2{color:var(--ink2)}
-  .install .cap{color:var(--ink2)}
-  /* The live card still says so, in cobalt rather than acid — acid on white
-     is 1.1:1 and disappears. Auto-play is off below 640px where the reader
-     drives the row, so this only ever fires in the 641-660 band; it has to
-     work there, and cobalt on white is the page's loudest legible colour. */
-  .grid5 > figure:has(.mk.live) .cap{color:var(--g)}
 
   /* the bar is 32px tall on a phone, measured; anchors clear it by 8 */
   section{scroll-margin-top:40px}
@@ -1484,12 +1439,6 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
   .hero{padding:32px 0 48px}
   .install{padding:56px 0 20px}
   .btn{font-size:16px;padding:16px 24px}
-}
-/* Bounded below, because the phone block sets its own and comes EARLIER in
-   the file: an unbounded max-width:720px rule would win the cascade over it
-   at 390 and put 56px of padding back on top of a one-screen layout. */
-@media (min-width:661px) and (max-width:720px){
-  .works{padding:56px 0 48px}
 }
 /* ==========================================================================
    THE SWIPE RAIL. The native scrollbar on a phone is an overlay: it appears
@@ -1513,11 +1462,9 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
      things, it is document tail. 8, and the section's own 20 does the rest. */
   .swipe{display:flex;align-items:center;gap:12px;margin:0 0 8px;
     pointer-events:none}
-  /* The rail exists only here, which is also the only place it can be styled
-     for the ground it sits on: the install section is paper below 660px. The
-     acid thumb on a --rule track was chosen against cobalt and neither colour
-     survives the flip — acid on white is 1.1:1. This is the beatnav's own
-     paper pair instead, #E2E5F0 track and cobalt fill, so the two progress
+  /* Inked for the paper the install section is printed on. The acid thumb on a
+     --rule track was chosen for a cobalt install section; acid on white is
+     1.1:1. #E2E5F0 track and cobalt fill instead, so the two progress
      indicators on the page read as one idea. */
   .swrail{flex:1;min-width:0;height:4px;background:#E2E5F0;display:block;
     position:relative;overflow:hidden}
@@ -1621,7 +1568,6 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
 }
 @media (max-width:560px){
   .wrap{padding:0 16px}
-  .fit{--avail:min(874px,calc(100vw - 32px))}
   h1{font-size:34px}
   .lede{font-size:15px}
   /* no row gap: the strip is three lines of one block, not three blocks. The
@@ -1632,33 +1578,15 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
   html{scroll-behavior:auto}
   .bar,.btn-sm,.steps div,.bars i,.beatnav li:after,.grid5 .cap{transition:none}
   .stage *,.stage{animation:none!important;transition:none!important}
-  .caret,.go.pulse,.mk.live *,.mk.live,
-  .point .arrow,.frame .point .arrow{animation:none!important}
+  .caret,.go.pulse,.mk.live *,.mk.live,.point .arrow{animation:none!important}
   /* the rail still tracks the row; it just stops easing to the new position */
   .swrail i,.swipe b{transition:none}
   /* the end of the sequence: the pair composed, the answer in, and the
      reader's cursor resting on the shop's own button */
   .stage .hand{opacity:1;transform:none}
-  .beatnav li{color:var(--ink2)}
-  /* …but only where the section is paper. This block sits at the END of the
-     stylesheet, so a single class here beats the identical single class in
-     the <=660 block above it — and below 660 the works section is cobalt,
-     where --ink2 on --g measures 2.28:1 and the three labels all but vanish.
-     Reduced motion must not cost a reader the labels. --body is 5.64:1 there,
-     the same value the animated state uses. */
-  @media (max-width:660px){ .beatnav li{color:var(--body)} }
+  /* every phase complete, in the same ink the running sequence rests at */
+  .beatnav li{color:var(--body)}
   .beatnav u{transform:scaleX(1)}
-}
-/* 100vw counts the scrollbar, so the column would rather measure itself — but
-   `container-type` on an element does NOT make `cqw` inside that same element
-   resolve against it: cqw looks for an ANCESTOR container. Declared on .stage
-   and .fit themselves it found none, fell back to the viewport, and --px
-   clamped to 1px — so the stage rendered at its full 1400 design width and
-   overflowed the 1072px column by 328px. The container goes on the wrapper. */
-.wrap{container-type:inline-size}
-@supports (container-type:inline-size){
-  .fit{--avail:min(596px,100cqw)}
-  .stagewin{--avail:min(1072px,100cqw)}
 }
 </style>
 </head>
@@ -1671,8 +1599,6 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
     <img src="lockup.png" alt="Knili">
     <a class="btn-sm" href="knili-extension.zip" download>Add to Chrome</a>
     <nav class="barnav">
-      <a href="#hero">What it is</a>
-      <a href="#works">How it works</a>
       <a href="#install">How to install</a>
     </nav>
   </div>
@@ -1692,98 +1618,7 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
       <a class="btn ondesk" href="knili-extension.zip" download>Add to Chrome</a>
     </div>
 
-    <div class="fit">
-    <div class="frame screen" data-anim="arrow">
-
-      <div class="cbar">
-        <span class="lights"><i></i><i></i><i></i></span>
-        <svg class="nav" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 5 8 12l7 7"/></svg>
-        <svg class="nav" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg>
-        <span class="omni">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
-          shopheathotsauce.com<b>/checkout/</b>
-        </span>
-        <img src="icon.png" alt="Knili">
-      </div>
-
-      <div class="fbody">
-        <div class="co">
-          <p class="co-brand">Shop Heat Hot Sauce</p>
-          <p class="co-title">Checkout</p>
-          <div class="co-card co-del">
-            <p class="co-h">Delivery</p>
-            <p class="del">Dana Levi<br>Herzl 1, Jerusalem 9226708<br>Israel<br>dana@example.com</p>
-          </div>
-          <div class="co-card">
-            <p class="co-h">Order summary</p>
-            <div class="co-item">
-              <img src="shot-sauce.png" alt="Father&rsquo;s Day Hot Sauce Gift Set">
-              <div><b>Father&rsquo;s Day Hot Sauce Gift Set</b><em>Qty 1</em></div>
-              <span class="p">$6.00</span>
-            </div>
-            <!-- Free, not "Flat rate": the panel beside it totals $6.00 against a
-                 $6.00 subtotal, and a flat rate that adds nothing to the bill is
-                 the one line here that did not add up. The beats' checkout says
-                 Free too, and both are reading the same order. -->
-            <dl class="co-sum"><dt>Subtotal</dt><dd>$6.00</dd><dt>Shipping</dt><dd>Free</dd></dl>
-            <div class="co-tot"><span>Total</span><b>$6.00</b></div>
-            <div class="co-pay">Place order</div>
-          </div>
-        </div>
-
-        <div class="pnl">
-          <div class="hd">
-            <img src="lockup.png" alt="Knili">
-            <span class="icons"><span>profile</span><span>close</span></span>
-          </div>
-          <div class="bd">
-            <div class="ztop">
-              <h3>Next search</h3>
-              <div class="composer">
-                <div class="ask">hot sauce gift set under $35, shipped to Jerusalem, Israel</div>
-                <div class="go">Go</div>
-              </div>
-              <div class="starters">
-                <span>65W GaN charger</span><span>Merino socks</span><span>Coffee beans</span>
-              </div>
-            </div>
-            <div class="zmid">
-              <h3 class="fold">Your rules</h3>
-              <h3 class="fold">Steps</h3>
-              <h3 class="fold">Ruled out</h3>
-              <h3 class="fold">Checkouts tried</h3>
-            </div>
-            <div class="zbot">
-              <div class="out">
-                <span class="stamp">Checkout ready</span>
-                <img class="opic" src="shot-sauce.png" alt="Father&rsquo;s Day Hot Sauce Gift Set">
-                <div class="buy">
-                  <div class="buy-m"><span>shopheathotsauce.com</span><span>ships to Israel</span></div>
-                  <div class="buy-t">Father&rsquo;s Day Hot Sauce Gift Set</div>
-                  <dl class="rcp">
-                    <dt>Ship to</dt><dd>Jerusalem, Israel</dd>
-                    <dt>Total</dt><dd class="tot">$6.00</dd>
-                    <dt>Card</dt><dd class="pend">yours to enter</dd>
-                  </dl>
-                </div>
-                <div class="point"><span class="arrow"></span><span class="lbl"><b>Pay on the page</b><i>It is filled in</i></span><span class="tail"></span></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-    </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============================================================ how it works -->
-<section class="works" id="works">
-  <div class="wrap">
-    <h2>How it works</h2>
-
+    <div class="demo">
     <ol class="beatnav" id="beatnav">
       <li><span>01 &middot; Tell Knili what to buy</span><i><u></u></i></li>
       <li><span>02 &middot; Let it do the shopping</span><i><u></u></i></li>
@@ -1941,6 +1776,8 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
     </div>
 
     <p class="foot">Orders are placed on the shop, not inside Knili.</p>
+    </div>
+    </div>
   </div>
 </section>
 
@@ -2086,36 +1923,6 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
     new IntersectionObserver(function (e) {
       bar.classList.toggle('past', !e[0].isIntersecting);
     }, { threshold: 0 }).observe(heroSec);
-  }
-
-  /* Which section you are actually in, marked on the link that jumps back to
-     it. The band is a thin strip across the middle of the viewport, so exactly
-     one section answers at a time; when several are in it, the furthest down
-     wins, which is the one being scrolled into. Nothing ever clears the mark,
-     so it holds over the footer instead of blinking out. */
-  var order = ['hero', 'works', 'install'];
-  var links = {}, vis = {};
-  [].slice.call(document.querySelectorAll('.barnav a')).forEach(function (a) {
-    links[a.getAttribute('href').slice(1)] = a;
-  });
-  function mark(id) {
-    for (var k in links) {
-      if (k === id) links[k].setAttribute('aria-current', 'true');
-      else links[k].removeAttribute('aria-current');
-    }
-  }
-  if ('IntersectionObserver' in window && links.hero) {
-    mark('hero');
-    var spy = new IntersectionObserver(function (entries) {
-      entries.forEach(function (en) { vis[en.target.id] = en.isIntersecting; });
-      for (var i = order.length - 1; i >= 0; i--) {
-        if (vis[order[i]]) { mark(order[i]); return; }
-      }
-    }, { rootMargin: '-45% 0px -45% 0px' });
-    order.forEach(function (id) {
-      var sec = document.getElementById(id);
-      if (sec) spy.observe(sec);
-    });
   }
 
   /* The one control on this page rather than a picture. Chrome will not follow
@@ -2264,11 +2071,10 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
      Beat 1 frames the header and the ask, not the whole panel: below them the
      panel is empty at that beat, and framing the empty part is what forced the
      window tall enough to slice the composer. */
-  /* `sel` is what the tight camera frames — one subject, filling the window.
-     `dsel` is what a window big enough to hold the whole composition frames —
-     the same beat, but keeping the panel and the page together, which is the
-     whole point of having the room. Beats 4 and 5 have no `dsel`: the seam and
-     the closing card are the same subject either way. */
+  /* One subject per beat, filling the window. There used to be a second list,
+     `dsel`, for a window big enough to hold the whole composition — no window
+     on this page is, since the demo became half a two-column hero, so both the
+     list and the branch that read it are gone. */
   /* `h: 300` used to sit on beats 2 and 3. Nothing ever read it — it was left
      over from the version of the driver that resized the window per beat, and
      that version is the one that froze the sequence (see below). A hardcoded
@@ -2295,12 +2101,12 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
      so framing it put the card's own edge past the frame while its contents
      stopped exactly at it. The card is the object; frame the object. */
   var FRAME = {
-    1: { sel: ['.hd', '.ztop'],    dsel: ['.cbar', '.ztop'],
-         fit: 'contain', ax: 0.5, ay: 0 },
-    2: { sel: ['.cbar', '.page'],  dsel: ['.cbar', '.page'],
-         fit: 'cover',   ax: 0,   ay: 0 },
-    3: { sel: ['.cbar', '.page'],  dsel: ['.cbar', '.page'],
-         fit: 'cover',   ax: 0,   ay: 0 },
+    /* bare: there is no browser at the ask, so the stage paints no ground and
+       has nothing to keep against the frame's edges — the lone panel stays
+       centred rather than being clamped. Beat 0 falls through to this one. */
+    1: { sel: ['.hd', '.ztop'],   fit: 'contain', ax: 0.5, ay: 0, bare: true },
+    2: { sel: ['.cbar', '.page'], fit: 'cover',   ax: 0,   ay: 0 },
+    3: { sel: ['.cbar', '.page'], fit: 'cover',   ax: 0,   ay: 0 },
     4: { sel: ['.csum', '.out'],   fit: 'contain', ax: 0.5, ay: 0.5 },
     5: { sel: ['.fin'],            fit: 'contain', ax: 0.5, ay: 0.5 }
   };
@@ -2321,34 +2127,8 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
      everything that only makes sense in one mode can hang off it. */
   function frameBeat(n) {
     var f = FRAME[n] || FRAME[1];
-    var wide = el.offsetWidth <= win.clientWidth + 1;
-    el.classList.toggle('tight', !wide);
-    win.classList.toggle('tight', !wide);
-    var b = union(wide ? (f.dsel || f.sel) : f.sel);
+    var b = union(f.sel);
     if (!b) return;
-
-    if (wide) {
-      /* Vertical pan at natural scale: full width, the panel at its own size,
-         because on a screen this size the point is seeing the panel AND the
-         page together. The window is fixed at its tallest beat so the page
-         below never moves as the camera does.
-         The one exception is a subject taller than the window. Panning cannot
-         reveal it — the pan is clamped to the composition's own foot — so it
-         simply fell off the bottom: measured at 1000px, beat 4's seam is 588
-         tall in a 560 window and 85px of it, the shop's Place order included,
-         was below the frame. Where that happens the camera zooms out by
-         exactly as much as it takes and no more, so 1100 and 1440 stay at 1.
-         Not for the cover beats: those are meant to run past the frame. */
-      var CH = el.offsetHeight, CW = el.offsetWidth, W2 = win.clientWidth,
-          H2 = win.clientHeight;
-      var z1 = f.fit === 'cover' ? 1 : Math.min(1, H2 / b.h);
-      var ty2 = -b.y * z1 + (b.h * z1 < H2 ? (H2 - b.h * z1) * f.ay : 0);
-      ty2 = Math.min(0, Math.max(ty2, H2 - CH * z1));
-      el.style.setProperty('--fz', z1);
-      el.style.setProperty('--fx2', Math.round((W2 - CW * z1) / 2) + 'px');
-      el.style.setProperty('--fy2', Math.round(ty2) + 'px');
-      return;
-    }
     var W = win.clientWidth, H = win.clientHeight;
     if (!W || !H || !b.w || !b.h) return;
     /* THE FRAME BREATHES. A contain fit that exactly fits is still a frame with
@@ -2366,9 +2146,35 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
     var IW = W - m * 2, IH = H - m * 2;
     var z = cover ? Math.max(W / b.w, H / b.h)
                   : Math.min(IW / b.w, IH / b.h);
+    var tx = m - b.x * z + (IW - b.w * z) * f.ax;
+    var ty = m - b.y * z + (b.h * z < IH ? (IH - b.h * z) * f.ay : 0);
+    /* THE COMPOSITION HAS TO REACH ALL FOUR EDGES OF THE FRAME, and until now
+       nothing made it. A contain fit centres the SUBJECT, and the subject is
+       not the middle of the composition: beat 4 frames .csum and .out, which
+       live in the panel at the right of a 1400-wide shot. Centring them pulls
+       the whole stage left and up until its own right and bottom edges land
+       INSIDE the window — measured at beat 4, the stage stopped 8.8px short on
+       the right and 13.3px short at the bottom at 390px, 8.4/12.3 at 360,
+       10/15 at 430, 46.9/14.1 at 660. elementFromPoint in those strips returns
+       .stagewin, whose background is the shop's cream, with the stage's own
+       drop shadow smeared over it — which is the grey band down the right and
+       along the bottom of the window. Not a shadow bug and not a crop: the
+       camera simply ran the picture out.
+       So the pan is clamped to the composition's own edges, exactly as the
+       wide branch below has always clamped its vertical pan. The subject gives
+       up as much centring as it takes and no more — at 390 that is 8.8px of
+       the 16px inner margin on the right and 13.3 of it at the bottom, so the
+       air is reduced, never crossed. Where the composition is genuinely
+       smaller than the frame it cannot cover it, and centring is the honest
+       answer; that branch is unreachable at every width measured. */
+    if (!f.bare) {
+      var CW = el.offsetWidth * z, CH = el.offsetHeight * z;
+      tx = CW >= W ? Math.min(0, Math.max(tx, W - CW)) : (W - CW) / 2;
+      ty = CH >= H ? Math.min(0, Math.max(ty, H - CH)) : (H - CH) / 2;
+    }
     el.style.setProperty('--fz', z);
-    el.style.setProperty('--fx2', (m - b.x * z + (IW - b.w * z) * f.ax) + 'px');
-    el.style.setProperty('--fy2', (m - b.y * z + (b.h * z < IH ? (IH - b.h * z) * f.ay : 0)) + 'px');
+    el.style.setProperty('--fx2', tx + 'px');
+    el.style.setProperty('--fy2', ty + 'px');
   }
   /* Beat 4 is the resting frame: with no data-beat the markup draws the
      finished state — the pair composed, the answer in, the cursor on the
@@ -2384,6 +2190,30 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
   reframe();
   place();
   window.addEventListener('load', function () { reframe(); place(); });
+  /* AND AGAIN WHEN THE TYPE ARRIVES. The two calls above run against fallback
+     metrics: the faces are font-display:swap and `load` fires before they have
+     necessarily swapped in, so every box the camera measures — .csum, .out,
+     .fin — is the wrong size when it is measured. Measured at 390px, the
+     resting frame came out at --fz .5743 against the .5982 the same call
+     produces once Oswald is in, and nothing ever recomputed it: the camera the
+     reader sees first was framed for a font the page does not use. That is 15px
+     of the frame's right edge and 16px of its bottom left showing the window's
+     own ground, which is the grey band along two sides of the window, and it
+     survives the clamp below because the clamp was applied to stale numbers.
+     The same staleness is in the wide branch on a desktop; it is only invisible
+     there because that branch pans rather than crops. */
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function () {
+      reframe(); ring(); place();
+      /* and once more on the next frame. The spec says the ready promise
+         resolves after layout has been updated with the loaded faces, and in a
+         foregrounded tab it does; in a tab that is not painting, layout is
+         deferred and the promise can land before the swap is reflected in a
+         single box. One extra frame costs nothing and removes the difference
+         between the two. */
+      requestAnimationFrame(function () { reframe(); ring(); place(); });
+    });
+  }
   var ft;
   window.addEventListener('resize', function () {
     clearTimeout(ft);
@@ -2587,15 +2417,18 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
        between two frames and it reads as a glitch. This is the third: the
        finale leaves ON ITS OWN, and only when it has finished leaving does
        anything of the next pass exist. Never two scenes, and still a fade.
-       The budget at the seam is 600 in / 1100 held / 520 out, then the cut.
+       The budget at the seam is 500 waited / 600 in / 1100 held / 520 out,
+       then the cut. The 500 is new and it is the price of the finale waiting
+       for the camera (see .stage[data-beat="5"] .finale): the hold was not
+       shortened to pay for it, so the loop runs 17.97s -> 18.47s.
        520 was chosen against the 600 the card arrives on: an ending that
        leaves faster than it came reads as an interruption, and one that takes
        longer reads as a stall. Just under, so it is quicker than the arrival
        without being abrupt. It costs the loop 320ms — 17.65s to 17.97s, under
        two per cent — rather than eating the hold, because shortening the time
        the closing card is legible is the opposite of what was asked for. */
-    at(17450, function () { el.classList.add('bye'); });
-    at(17970, play);
+    at(17950, function () { el.classList.add('bye'); });
+    at(18470, play);
   }
 
   /* WHAT IS WATCHED IS THE WINDOW, NOT THE CAMERA — and this is the fourth
