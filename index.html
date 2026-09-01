@@ -88,19 +88,30 @@ h2{font:600 clamp(28px,4vw,44px)/1.08 var(--display);letter-spacing:.01em;
   box-shadow:0 -16px 0 0 var(--ink2), 0 14px 34px -14px rgba(2,4,26,.9)}
 /* Out of flow, so it can never push the bar down by even a pixel. */
 .sentinel{position:absolute;top:0;left:0;width:1px;height:40px;pointer-events:none}
-.barin{display:flex;align-items:center;gap:24px}
+.barin{display:flex;align-items:center;gap:20px}
 .barin > img{height:22px;width:auto}
-/* The section links are no use until there are sections behind you. They keep
-   their space so nothing shifts when they arrive. */
-.barnav{margin-left:auto;display:flex;gap:24px;opacity:0;pointer-events:none;
-  transition:opacity .25s ease}
-.bar.stuck .barnav{opacity:1;pointer-events:auto}
+/* Everything in the bar is there from the first frame — only the plate under
+   it changes on scroll. Nothing arrives, so nothing has to be choreographed. */
+.barnav{margin-left:auto;display:flex;gap:20px}
+/* Wayfinding, not a second ask: the mark is the acid these links already take
+   on hover, and the rule under it is reserved at all times so nothing in the
+   bar moves when the highlight changes. */
+.barnav a:after{content:"";display:block;height:1px;margin-top:5px;
+  background:transparent}
+.barnav a[aria-current="true"]{color:var(--acid)}
+.barnav a[aria-current="true"]:after{background:var(--acid)}
 .barnav a{font:400 12px/1 var(--mono);letter-spacing:.04em;color:var(--dim);
   text-decoration:none}
 .barnav a:hover{color:var(--acid)}
 .btn-sm{background:var(--acid);color:var(--ink2);text-decoration:none;
   font:600 12px/1 var(--display);letter-spacing:.06em;text-transform:uppercase;
   padding:11px 16px;white-space:nowrap}
+/* keyboard reachability: an acid outline vanishes on an acid button, so the
+   filled controls take the ink and everything else takes the acid */
+a:focus-visible,button:focus-visible{outline:3px solid var(--acid);outline-offset:3px}
+.btn:focus-visible,.btn-sm:focus-visible,.dlbtn:focus-visible{
+  outline:3px solid var(--ink2);outline-offset:2px}
+
 .btn-sm:hover{filter:brightness(1.06)}
 
 /* ================================================================== hero */
@@ -116,8 +127,16 @@ h2{font:600 clamp(28px,4vw,44px)/1.08 var(--display);letter-spacing:.01em;
 .kicker{
   font:500 13px/1 var(--mono);letter-spacing:.22em;text-transform:uppercase;
   color:var(--acid);margin:0 0 24px}
-.kicker svg{display:inline-block;vertical-align:baseline;width:17px;height:17px;
-  margin-left:8px}
+/* An inline <svg> is a replaced element: browsers synthesise its baseline
+   themselves, so vertical-align:baseline on it lands wherever they choose —
+   which is what kept the glyph riding high. Put the synthesis on a wrapper
+   instead. With line-height:0 and a block-level child, the span contains no
+   in-flow line boxes, so CSS 2.1 10.8.1 applies to IT: its baseline is its
+   bottom margin edge, which is the glyph's bottom edge. That edge is what
+   vertical-align:baseline then puts on the text baseline. */
+.pz{display:inline-block;line-height:0;vertical-align:baseline;margin-left:8px}
+.pz svg{display:block}
+.nb{white-space:nowrap}
 h1{font:600 clamp(36px,3.8vw,52px)/.94 var(--display);letter-spacing:.005em;
   text-transform:uppercase;color:var(--ink);margin:0 0 24px}
 h1 em{font-style:normal;color:var(--acid);display:block}
@@ -219,9 +238,12 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 .ask{background:var(--ink2);padding:calc(var(--u)*14) calc(var(--u)*16);color:var(--ink);
   font:400 calc(var(--u)*13.5)/1.35 var(--display);text-transform:uppercase;
   letter-spacing:.02em;min-height:calc(var(--u)*76)}
+/* The extension pins this at 120px so the ask field does not resize as the
+   label cycles Go / Stop / Stopping… / Done. The drawn panel holds the same
+   block, or it stops matching the real one. */
 .go{background:var(--acid);color:var(--ink2);padding:calc(var(--u)*14) calc(var(--u)*20);
   font:600 calc(var(--u)*15)/1 var(--display);letter-spacing:.06em;text-transform:uppercase;
-  white-space:nowrap;display:grid;place-items:center}
+  white-space:nowrap;display:grid;place-items:center;min-width:calc(var(--u)*120)}
 .go.busy{background:var(--rule);color:var(--dim)}
 .starters{display:flex;flex-wrap:wrap;gap:calc(var(--u)*4);margin:0 calc(var(--u)*16)}
 .starters span{background:var(--ink2);color:var(--ink);
@@ -329,6 +351,20 @@ h1 em{font-style:normal;color:var(--acid);display:block}
    as an object on the page rather than a hole in one. */
 .stage[data-beat="1"],.stage[data-beat="0"]{background-color:transparent;box-shadow:none}
 .stage .pnl{box-shadow:var(--lift)}
+/* the closing frame: everything goes, and the argument is left on its own */
+.stage[data-beat="5"]{background-color:transparent;box-shadow:none}
+.stage[data-beat="5"] .cbar,.stage[data-beat="5"] .page,.stage[data-beat="5"] .pnl,
+.stage[data-beat="5"] .hand,.stage[data-beat="5"] .confetti,
+.stage[data-beat="5"] .placed{opacity:0}
+.stage .hand{transition:opacity .5s ease-out}
+.finale{position:absolute;inset:0;z-index:6;pointer-events:none;opacity:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:calc(var(--px)*30);transition:opacity .6s ease-out}
+.stage[data-beat="5"] .finale{opacity:1}
+.finale img{height:calc(var(--px)*40);width:auto}
+.finale p{font:600 calc(var(--px)*36)/1.14 var(--display);letter-spacing:.005em;
+  text-transform:uppercase;color:var(--ink2);text-align:center;margin:0}
+.finale em{font-style:normal;color:var(--g);display:block}
 .sbody{display:flex;align-items:stretch;height:calc(var(--px)*640)}
 .stage .page{position:relative;flex:1 1 auto;min-width:0;overflow:hidden;
   background:var(--co-bg)}
@@ -347,7 +383,7 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 .stage[data-beat="3"] .doms b.home{opacity:1}
 .stage[data-beat="3"] .doms b.final{opacity:0}
 .stage.flick .doms b.home{opacity:0}
-.stage .pnl{transition:transform .7s cubic-bezier(.3,.8,.3,1)}
+.stage .pnl{transition:transform .7s cubic-bezier(.3,.8,.3,1), opacity .5s ease-out}
 .stage[data-beat="1"] .page,.stage[data-beat="0"] .page{opacity:0;
   transform:translateX(calc(var(--px)*-334))}
 .stage[data-beat="1"] .pnl,.stage[data-beat="0"] .pnl{
@@ -357,13 +393,19 @@ h1 em{font-style:normal;color:var(--acid);display:block}
    too fast to read is what a search across 34 listings actually looks like. */
 .shops,.checkout{position:absolute;inset:0;transition:opacity .45s ease-out}
 .shops{opacity:0}
-.stage[data-beat="2"] .shops,.stage[data-beat="3"] .shops{opacity:1}
+.stage[data-beat="2"] .shops,.stage[data-beat="3"] .shops,
+.stage[data-beat="4"] .shops{opacity:1}
 .stage[data-beat="2"] .checkout,.stage[data-beat="3"] .checkout{opacity:0}
 .shop,.checkout{position:absolute;inset:0;background:#fff;color:#6B7280;
   display:flex;flex-direction:column;font-family:var(--ui);overflow:hidden}
 .shop{opacity:0}
-.stage[data-beat="2"] .shop:first-child,
-.stage[data-beat="3"] .shop:last-child{opacity:1}
+/* Addressed by class, not by position: .scan is the last child of .shops, so
+   .shop:last-child matched nothing and the winner was never painted after the
+   flick stopped — which is what put bare stage on screen between the search
+   and the checkout. The winner also stays lit through beat 4, so the checkout
+   is drawn OVER a page that is still there rather than over the ground. */
+.stage[data-beat="2"] .shop.s1{opacity:1}
+.stage[data-beat="3"] .shop.s6,.stage[data-beat="4"] .shop.s6{opacity:1}
 .stage.flick .shop{animation:flick 1.02s steps(1,end) infinite;
   animation-delay:calc(var(--i) * -170ms)}
 @keyframes flick{0%,16.6%{opacity:1}16.61%,100%{opacity:0}}
@@ -429,6 +471,14 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 .row2{display:flex;align-items:center;gap:calc(var(--px)*14);
   border-bottom:calc(var(--px)*1) solid #EFF1F4;padding-bottom:calc(var(--px)*10)}
 .row2 .blk{width:calc(var(--px)*62);height:calc(var(--px)*50);flex:none}
+.row2.chosen img{width:calc(var(--px)*56);height:calc(var(--px)*56);
+  object-fit:contain;flex:none}
+.stage[data-beat="4"] .row2.chosen img{opacity:0}
+.stage[data-beat="4"] .shop.s6 .body{opacity:0;transform:scale(.985);
+  transition:opacity .4s ease-out, transform .55s ease-out}
+.stage[data-beat="4"] .co-item img{animation:travel .6s cubic-bezier(.2,.75,.3,1)}
+@keyframes travel{from{transform:translate(var(--fx,0),var(--fy,0))}
+                  to{transform:none}}
 .row2 div{flex:1}
 .row2 u{display:block;width:calc(var(--px)*50);height:calc(var(--px)*12);
   border-radius:calc(var(--px)*3);background:#E4E7EB}
@@ -436,13 +486,32 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 /* The winner does not become a different page — it navigates. The header and
    nav strip are the same elements the shop had, so across the change only the
    body swaps and the chrome bar never moves: same window, same shop. */
-.checkout{transition:opacity .18s ease-out}
+.shops{z-index:1}
+.checkout{z-index:2;transition:opacity .3s ease-out}
 .stage[data-beat="2"] .checkout,.stage[data-beat="3"] .checkout{opacity:0}
-.cobody{flex:1;min-height:0;display:flex;
-  transition:opacity .35s ease-out .1s, transform .35s ease-out .1s}
-.stage[data-beat="2"] .cobody,.stage[data-beat="3"] .cobody{opacity:0;
-  transform:translateY(calc(var(--px)*14))}
-.checkout .co{flex:1;background:#FAFBFC}
+.cobody{flex:1;min-height:0;display:flex;transition:opacity .4s ease-out .12s}
+.stage[data-beat="2"] .cobody,.stage[data-beat="3"] .cobody{opacity:0}
+.checkout .co{flex:1;background:#FAFBFC;display:grid;align-content:start;align-items:start;
+  grid-template-columns:1fr calc(var(--px)*252);gap:calc(var(--px)*24);
+  padding:calc(var(--px)*24)}
+.flab{height:calc(var(--px)*9);width:calc(var(--px)*96);background:#DDE1E6;
+  border-radius:calc(var(--px)*4);margin:calc(var(--px)*2) 0 calc(var(--px)*10);
+  display:block}
+.flab.w{width:calc(var(--px)*130)}
+.fld2{height:calc(var(--px)*34);border:calc(var(--px)*1) solid #DFE3E8;
+  border-radius:calc(var(--px)*4);background:#fff;display:block}
+.frow{display:grid;gap:calc(var(--px)*10);margin-bottom:calc(var(--px)*10)}
+.frow.two{grid-template-columns:1fr 1fr}
+.frow.three{grid-template-columns:1fr 1fr 1fr}
+.opt{display:flex;align-items:center;gap:calc(var(--px)*10);background:#fff;
+  border:calc(var(--px)*1) solid #DFE3E8;border-radius:calc(var(--px)*4);
+  padding:calc(var(--px)*10) calc(var(--px)*12);margin-bottom:calc(var(--px)*8)}
+.opt i{width:calc(var(--px)*12);height:calc(var(--px)*12);border-radius:50%;flex:none;
+  border:calc(var(--px)*2) solid #C6CCD4;display:block}
+.opt u{flex:1;height:calc(var(--px)*8);border-radius:calc(var(--px)*4);
+  background:#E4E7EB;display:block}
+.checkout .co-card{padding:calc(var(--px)*20)}
+.checkout .co-item img{width:calc(var(--px)*56);height:calc(var(--px)*56)}
 .scan{position:absolute;inset:0;overflow:hidden;pointer-events:none;opacity:0;
   transition:opacity .3s}
 .stage.flick .scan{opacity:1}
@@ -467,40 +536,43 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 /* The last click is the reader's own, so the cursor arrives from the page's
    space — from off-stage, below and to the left — and never out of the panel.
    Knili filled the checkout; the person buys. */
-.hand{position:absolute;left:var(--hx,31.2%);top:var(--hy,73.8%);width:calc(var(--px)*15);
+.hand{position:absolute;left:var(--hx,40.3%);top:var(--hy,53.1%);width:calc(var(--px)*15);
   height:calc(var(--px)*24);margin:calc(var(--px)*-2) 0 0 calc(var(--px)*-2);
   pointer-events:none;z-index:3;filter:drop-shadow(0 2px 4px rgba(10,17,64,.45))}
 .stage[data-beat="1"] .hand,.stage[data-beat="2"] .hand,
 .stage[data-beat="3"] .hand,.stage[data-beat="0"] .hand{opacity:0}
-.stage[data-beat="4"] .hand{animation:handoff 3.4s cubic-bezier(.4,0,.2,1) forwards}
+.stage[data-beat="4"] .hand{animation:handoff 3s cubic-bezier(.4,0,.2,1) forwards}
+/* In from beyond the right edge of the whole composition — off-frame, past the
+   panel — and left across it to the near side of the button. It is the
+   reader's hand arriving from outside, never something the panel emits. */
 @keyframes handoff{
-  0%{opacity:0;transform:translate(calc(var(--px)*-374),calc(var(--px)*301))}
-  9%{opacity:1;transform:translate(calc(var(--px)*-374),calc(var(--px)*301))}
-  50%,57%{opacity:1;transform:translate(0,0) scale(1)}
-  61%{transform:translate(0,calc(var(--px)*4)) scale(.84)}
-  67%{transform:translate(0,0) scale(1)}
+  0%{opacity:0;transform:translate(calc(var(--px)*980),calc(var(--px)*30))}
+  4%{opacity:1;transform:translate(calc(var(--px)*980),calc(var(--px)*30))}
+  46%,55%{opacity:1;transform:translate(0,0) scale(1)}
+  60%{transform:translate(0,calc(var(--px)*4)) scale(.84)}
+  66%{transform:translate(0,0) scale(1)}
   100%{opacity:1;transform:translate(0,0) scale(1)}
 }
-.stage[data-beat="4"] .co-pay{animation:press 3.4s cubic-bezier(.4,0,.2,1) forwards}
+.stage[data-beat="4"] .co-pay{animation:press 3s cubic-bezier(.4,0,.2,1) forwards}
 @keyframes press{
-  0%,44%{box-shadow:0 0 0 0 rgba(232,255,58,0);transform:scale(1);filter:none}
-  50%,57%{box-shadow:0 0 0 calc(var(--px)*4) rgba(232,255,58,.65);transform:scale(1);
+  0%,40%{box-shadow:0 0 0 0 rgba(232,255,58,0);transform:scale(1);filter:none}
+  46%,55%{box-shadow:0 0 0 calc(var(--px)*4) rgba(232,255,58,.65);transform:scale(1);
           filter:none}
-  61%{box-shadow:0 0 0 calc(var(--px)*4) rgba(232,255,58,.65);transform:scale(.955);
+  60%{box-shadow:0 0 0 calc(var(--px)*4) rgba(232,255,58,.65);transform:scale(.955);
       filter:brightness(.72)}
-  67%{box-shadow:0 0 0 calc(var(--px)*4) rgba(232,255,58,.65);transform:scale(1);
+  66%{box-shadow:0 0 0 calc(var(--px)*4) rgba(232,255,58,.65);transform:scale(1);
       filter:none}
   100%{box-shadow:0 0 0 calc(var(--px)*4) rgba(232,255,58,0);transform:scale(1)}
 }
 /* a ring off the click point, so the press is unmistakable */
-.ripple{position:absolute;left:var(--hx,31.2%);top:var(--hy,73.8%);width:0;height:0;
+.ripple{position:absolute;left:var(--hx,40.3%);top:var(--hy,53.1%);width:0;height:0;
   z-index:3;pointer-events:none}
 .ripple i{position:absolute;left:calc(var(--px)*-6);top:calc(var(--px)*-6);
   width:calc(var(--px)*12);height:calc(var(--px)*12);border-radius:50%;
   border:calc(var(--px)*2) solid rgba(59,44,37,.6);opacity:0;display:block}
 .stage.burst .ripple i{animation:ring .6s ease-out forwards}
 @keyframes ring{0%{opacity:.9;transform:scale(.3)}100%{opacity:0;transform:scale(6)}}
-.confetti{position:absolute;left:var(--hx,31.2%);top:var(--hy,73.8%);width:0;height:0;z-index:4}
+.confetti{position:absolute;left:var(--hx,40.3%);top:var(--hy,53.1%);width:0;height:0;z-index:4}
 .confetti i{position:absolute;display:block;width:calc(var(--px)*7);
   height:calc(var(--px)*10);left:calc(var(--px)*-3);top:calc(var(--px)*-5);
   background:var(--c);border-radius:calc(var(--px)*1);opacity:0}
@@ -511,7 +583,7 @@ h1 em{font-style:normal;color:var(--acid);display:block}
   100%{opacity:0;transform:translate(calc(var(--px)*var(--x)),calc(var(--px)*var(--y)))
        rotate(var(--r)) scale(1)}
 }
-.placed{position:absolute;left:var(--hx,31.2%);top:var(--hy,73.8%);z-index:5;
+.placed{position:absolute;left:var(--hx,40.3%);top:var(--hy,53.1%);z-index:5;
   margin:calc(var(--px)*-104) 0 0 calc(var(--px)*-74);width:calc(var(--px)*148);
   display:flex;align-items:center;justify-content:center;gap:calc(var(--px)*7);
   background:#fff;color:#1E7A3C;border:calc(var(--px)*1) solid var(--co-line);
@@ -695,12 +767,17 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
   .stage .pnl{flex:1 1 auto}
   .beatnav{grid-template-columns:1fr;gap:12px}
 }
+@media (max-width:660px){
+  /* three links plus the lockup plus the CTA stop fitting here. The lockup and
+     the CTA are not negotiable; the links are — the sections are still two
+     scrolls away either side. */
+  .barnav{display:none}
+}
 @media (max-width:720px){
   .hero{padding:32px 0 48px}
   .works{padding:56px 0 48px}
   .install{padding:48px 0 64px}
   .btn{font-size:16px;padding:16px 24px}
-  .barnav{display:none}
 }
 @media (max-width:640px){
   .grid5{grid-template-columns:1fr}
@@ -712,7 +789,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
 }
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
-  .bar,.barnav,.steps div,.bars i{transition:none}
+  .bar,.btn-sm,.steps div,.bars i{transition:none}
   .stage *,.stage{animation:none!important;transition:none!important}
   .caret,.go.pulse,.mk.live *,.mk.live{animation:none!important}
   /* the end of the sequence: the pair composed, the answer in, and the
@@ -736,11 +813,12 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
 <header class="bar" id="bar">
   <div class="wrap barin">
     <img src="lockup.png" alt="Knili">
+    <a class="btn-sm" href="knili-extension.zip" download>Add to Chrome</a>
     <nav class="barnav">
+      <a href="#hero">What is it</a>
       <a href="#works">How it works</a>
       <a href="#install">How to install</a>
     </nav>
-    <a class="btn-sm" href="knili-extension.zip" download>Add to Chrome</a>
   </div>
 </header>
 
@@ -749,7 +827,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
   <div class="wrap">
     <div class="hero-grid">
     <div>
-      <p class="kicker">A Chrome <span style="white-space:nowrap">extension<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M8.4 5.2 a2.6 2.6 0 0 1 5.2 0 h4.4 a1.8 1.8 0 0 1 1.8 1.8 v11 a1.8 1.8 0 0 1 -1.8 1.8 h-12 a1.8 1.8 0 0 1 -1.8 -1.8 v-3.6 a2.6 2.6 0 0 0 0 -5.2 v-2.2 a1.8 1.8 0 0 1 1.8 -1.8 z"/></svg></span></p>
+      <p class="kicker">A new Chrome <span class="nb">extension<span class="pz"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M8.4 5.2 a2.6 2.6 0 0 1 5.2 0 h4.4 a1.8 1.8 0 0 1 1.8 1.8 v11 a1.8 1.8 0 0 1 -1.8 1.8 h-12 a1.8 1.8 0 0 1 -1.8 -1.8 v-3.6 a2.6 2.6 0 0 0 0 -5.2 v-2.2 a1.8 1.8 0 0 1 1.8 -1.8 z"/></svg></span></span></p>
       <h1>It does the shopping.<em>You do the buying.</em></h1>
       <p class="lede">One sentence in. A filled checkout out.</p>
       <a class="btn" href="knili-extension.zip" download>Add to Chrome</a>
@@ -800,7 +878,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
               <h3>Next search</h3>
               <div class="composer">
                 <div class="ask">hot sauce gift set under $35, shipped to Jerusalem, Israel</div>
-                <div class="go">Fine, go</div>
+                <div class="go">Go</div>
               </div>
               <div class="starters">
                 <span>65W GaN charger</span><span>Merino socks</span><span>Coffee beans</span>
@@ -869,7 +947,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
             <div class="shop s3" style="--i:2"><div class="hdr"><i class="mark"></i><span class="wm">Ebuy</span></div><div class="nav"><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="chips2"><span></span><span></span><span></span><span></span><span></span></div><div class="body"><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div></div></div>
             <div class="shop s4" style="--i:3"><div class="hdr"><i class="mark"></i><span class="wm">Zonda</span><i class="pill"></i></div><div class="nav"><i></i><i></i><i></i><i></i><i></i></div><div class="body"><div class="side"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div></div></div>
             <div class="shop s5" style="--i:4"><div class="hdr"><i class="mark"></i><span class="wm">Bestly</span></div><div class="nav"><i></i><i></i><i></i><i></i></div><div class="body"><div class="card big"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card big"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><i class="sect"></i><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div><div class="card"><i class="blk"></i><i class="ln"></i><i class="ln s"></i></div></div></div>
-            <div class="shop s6" style="--i:5"><div class="hdr"><i class="mark"></i><span class="wm">Shop Heat Hot Sauce</span></div><div class="nav"><i></i><i></i><i></i><i></i><i></i></div><div class="body"><div class="row2"><i class="blk"></i><div><i class="ln"></i><i class="ln s"></i></div><u></u></div><div class="row2"><i class="blk"></i><div><i class="ln"></i><i class="ln s"></i></div><u></u></div><div class="row2"><i class="blk"></i><div><i class="ln"></i><i class="ln s"></i></div><u></u></div><div class="row2"><i class="blk"></i><div><i class="ln"></i><i class="ln s"></i></div><u></u></div><div class="row2"><i class="blk"></i><div><i class="ln"></i><i class="ln s"></i></div><u></u></div><div class="row2"><i class="blk"></i><div><i class="ln"></i><i class="ln s"></i></div><u></u></div><div class="row2"><i class="blk"></i><div><i class="ln"></i><i class="ln s"></i></div><u></u></div><div class="row2"><i class="blk"></i><div><i class="ln"></i><i class="ln s"></i></div><u></u></div><div class="row2"><i class="blk"></i><div><i class="ln"></i><i class="ln s"></i></div><u></u></div><div class="row2"><i class="blk"></i><div><i class="ln"></i><i class="ln s"></i></div><u></u></div></div></div>
+            <div class="shop s6" style="--i:5"><div class="hdr"><i class="mark"></i><span class="wm">Shop Heat Hot Sauce</span></div><div class="nav"><i></i><i></i><i></i><i></i><i></i></div><div class="body"><div class="row2"><i class="blk"></i><div><i class="ln"></i><i class="ln s"></i></div><u></u></div><div class="row2"><i class="blk"></i><div><i class="ln"></i><i class="ln s"></i></div><u></u></div><div class="row2 chosen"><img src="shot-sauce.png" alt=""><div><i class="ln"></i><i class="ln s"></i></div><u></u></div><div class="row2"><i class="blk"></i><div><i class="ln"></i><i class="ln s"></i></div><u></u></div><div class="row2"><i class="blk"></i><div><i class="ln"></i><i class="ln s"></i></div><u></u></div><div class="row2"><i class="blk"></i><div><i class="ln"></i><i class="ln s"></i></div><u></u></div><div class="row2"><i class="blk"></i><div><i class="ln"></i><i class="ln s"></i></div><u></u></div><div class="row2"><i class="blk"></i><div><i class="ln"></i><i class="ln s"></i></div><u></u></div><div class="row2"><i class="blk"></i><div><i class="ln"></i><i class="ln s"></i></div><u></u></div><div class="row2"><i class="blk"></i><div><i class="ln"></i><i class="ln s"></i></div><u></u></div></div></div>
             <div class="scan"><i></i></div>
           </div>
           <div class="checkout">
@@ -877,6 +955,21 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
             <div class="nav"><i></i><i></i><i></i><i></i><i></i></div>
             <div class="cobody">
               <div class="co">
+                <div class="cform">
+                  <i class="flab"></i>
+                  <div class="frow"><i class="fld2"></i></div>
+                  <i class="flab w"></i>
+                  <div class="frow two"><i class="fld2"></i><i class="fld2"></i></div>
+                  <div class="frow"><i class="fld2"></i></div>
+                  <div class="frow three"><i class="fld2"></i><i class="fld2"></i><i class="fld2"></i></div>
+                  <i class="flab"></i>
+                  <div class="opt"><i></i><u></u></div>
+                  <div class="opt"><i></i><u></u></div>
+                  <i class="flab w"></i>
+                  <div class="frow"><i class="fld2"></i></div>
+                  <div class="frow two"><i class="fld2"></i><i class="fld2"></i></div>
+                </div>
+                <div class="csum">
                 <div class="co-card">
                   <p class="co-h">Order summary</p>
                   <div class="co-item">
@@ -886,6 +979,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
                   </div>
                   <div class="co-tot"><span>Total</span><b>$6.00</b></div>
                   <div class="co-pay">Place order</div>
+                </div>
                 </div>
               </div>
             </div>
@@ -903,7 +997,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
               <h3>Ask</h3>
               <div class="composer">
                 <div class="ask">hot sauce gift set under $35, shipped to Jerusalem, Israel</div>
-                <div class="go">Fine, go</div>
+                <div class="go">Go</div>
               </div>
             </div>
             <div class="zmid">
@@ -947,6 +1041,10 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
       </div>
 
       <svg class="hand" viewBox="0 0 12 19" aria-hidden="true"><path d="M0 0v16l4.2-3.6 2.6 6 2.6-1.2-2.5-5.8h4.6z" fill="#fff" stroke="#0A1140" stroke-width="1.1" stroke-linejoin="round"/></svg>
+      <div class="finale" aria-hidden="true">
+        <img src="lockup-ink.png" alt="">
+        <p>It does the shopping.<em>You do the buying.</em></p>
+      </div>
       <div class="ripple" aria-hidden="true"><i></i></div>
       <div class="confetti" aria-hidden="true"><i style="--x:-99;--y:-53;--r:-166deg;--c:var(--acid);animation-delay:50ms"></i><i style="--x:-107;--y:-83;--r:-246deg;--c:#FFFFFF;animation-delay:68ms"></i><i style="--x:-66;--y:-71;--r:276deg;--c:var(--g);animation-delay:7ms"></i><i style="--x:-85;--y:-128;--r:-101deg;--c:#3B2C25;animation-delay:4ms"></i><i style="--x:-39;--y:-88;--r:108deg;--c:var(--acid);animation-delay:8ms"></i><i style="--x:-26;--y:-104;--r:244deg;--c:#FFFFFF;animation-delay:54ms"></i><i style="--x:-8;--y:-94;--r:259deg;--c:var(--g);animation-delay:15ms"></i><i style="--x:13;--y:-156;--r:276deg;--c:var(--acid);animation-delay:7ms"></i><i style="--x:32;--y:-126;--r:86deg;--c:#FFFFFF;animation-delay:6ms"></i><i style="--x:64;--y:-145;--r:-273deg;--c:var(--g);animation-delay:71ms"></i><i style="--x:83;--y:-125;--r:-24deg;--c:#3B2C25;animation-delay:53ms"></i><i style="--x:68;--y:-73;--r:-200deg;--c:var(--acid);animation-delay:73ms"></i><i style="--x:88;--y:-68;--r:-135deg;--c:#FFFFFF;animation-delay:13ms"></i><i style="--x:115;--y:-61;--r:-128deg;--c:var(--g);animation-delay:47ms"></i></div>
       <div class="placed" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M4 13l5 5L20 6"/></svg>Order placed</div>
@@ -1072,6 +1170,36 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
     bar.classList.add('stuck');
   }
 
+  /* Which section you are actually in, marked on the link that jumps back to
+     it. The band is a thin strip across the middle of the viewport, so exactly
+     one section answers at a time; when several are in it, the furthest down
+     wins, which is the one being scrolled into. Nothing ever clears the mark,
+     so it holds over the footer instead of blinking out. */
+  var order = ['hero', 'works', 'install'];
+  var links = {}, vis = {};
+  [].slice.call(document.querySelectorAll('.barnav a')).forEach(function (a) {
+    links[a.getAttribute('href').slice(1)] = a;
+  });
+  function mark(id) {
+    for (var k in links) {
+      if (k === id) links[k].setAttribute('aria-current', 'true');
+      else links[k].removeAttribute('aria-current');
+    }
+  }
+  if ('IntersectionObserver' in window && links.hero) {
+    mark('hero');
+    var spy = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) { vis[en.target.id] = en.isIntersecting; });
+      for (var i = order.length - 1; i >= 0; i--) {
+        if (vis[order[i]]) { mark(order[i]); return; }
+      }
+    }, { rootMargin: '-45% 0px -45% 0px' });
+    order.forEach(function (id) {
+      var sec = document.getElementById(id);
+      if (sec) spy.observe(sec);
+    });
+  }
+
   /* The one control on this page rather than a picture. Chrome will not follow
      a link to chrome://extensions from a web page — it silently does nothing —
      so the honest affordance is to hand you the string. */
@@ -1143,7 +1271,9 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
     if (!btn) return;
     var r = btn.getBoundingClientRect(), sr = el.getBoundingClientRect();
     if (!r.width || !sr.width) return;
-    el.style.setProperty('--hx', (r.left - sr.left + r.width / 2) + 'px');
+    /* the near side of the button, a touch inside it — arriving, not landing
+       dead centre as though it had teleported there */
+    el.style.setProperty('--hx', (r.left - sr.left + 20) + 'px');
     el.style.setProperty('--hy', (r.top - sr.top + r.height / 2) + 'px');
   }
   place();
@@ -1152,6 +1282,18 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
   window.addEventListener('resize', function () {
     clearTimeout(rt); rt = setTimeout(place, 150);
   });
+
+  /* The item that was found and the item being bought are the same picture at
+     the same size, so moving one onto the other is a pure translate: nothing
+     scales, nothing distorts, and the crossover cannot show a seam. */
+  function flip() {
+    var from = el.querySelector('.row2.chosen img'), to = el.querySelector('.co-item img');
+    if (!from || !to) return;
+    var a = from.getBoundingClientRect(), b = to.getBoundingClientRect();
+    if (!a.width || !b.width) return;
+    el.style.setProperty('--fx', (a.left - b.left) + 'px');
+    el.style.setProperty('--fy', (a.top - b.top) + 'px');
+  }
 
   function at(ms, fn) { T.push(setTimeout(fn, ms)); }
   function clear() {
@@ -1174,6 +1316,15 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
         u.style.transitionDuration = dur + 'ms';
         u.style.transform = 'scaleX(1)';
       }
+    });
+  }
+
+  /* the sequence is finished, so every label is: complete */
+  function lampAll() {
+    items.forEach(function (li) {
+      li.classList.add('on', 'done');
+      var u = li.querySelector('u');
+      if (u) { u.style.transitionDuration = '0ms'; u.style.transform = 'scaleX(1)'; }
     });
   }
 
@@ -1201,7 +1352,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
     fills.forEach(function (f) { f.style.width = '0%'; });
     counts.forEach(function (c) { c.textContent = '0'; });
     if (band && lines.length) band.textContent = lines[0].textContent;
-    lamp(0, 2500);
+    lamp(0, 3800);
 
     /* 01 — the sentence types itself. An even rate reads as a machine typing,
        which is the wrong story, so the interval jitters and the comma breathes. */
@@ -1209,7 +1360,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
     caret.className = 'caret';
     if (ask) { ask.textContent = ''; ask.appendChild(text); ask.appendChild(caret); }
     var i = 0;
-    at(150, function tick() {
+    at(200, function tick() {
       if (i < full.length) {
         var ch = full.charAt(i++);
         text.nodeValue = full.slice(0, i);
@@ -1221,25 +1372,27 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
     });
 
     /* 02 — the panel slides right and the shop arrives beside it */
-    at(2500, function () {
+    /* the sentence finishes and sits there before anything else moves */
+    at(3800, function () {
       if (ask) ask.textContent = full;
       el.setAttribute('data-beat', '2');
-      lamp(1, 4400);
+      lamp(1, 6400);
     });
 
     /* 03 — shops flick past while the log fills, then the rejects are counted */
-    at(3300, function () {
+    /* the window has arrived and is allowed to settle before the search starts */
+    at(5100, function () {
       el.setAttribute('data-beat', '3');
       el.classList.add('flick');
     });
     lines.forEach(function (l, n) {
-      at(3450 + n * 500, function () {
+      at(5300 + n * 600, function () {
         l.classList.add('in');
         if (band) band.textContent = l.textContent;
       });
     });
-    at(5700, function () { el.classList.remove('flick'); });
-    at(5800, function () {
+    at(7700, function () { el.classList.remove('flick'); });
+    at(7900, function () {
       fills.forEach(function (f, n) { f.style.width = widths[n]; });
       var t0 = null;
       raf = requestAnimationFrame(function cnt(ts) {
@@ -1252,15 +1405,19 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
 
     /* 04 — the answer lands, and the reader's own cursor comes in from
        off-stage to buy it. Knili filled the checkout; the person clicks. */
-    at(6900, function () { place(); el.setAttribute('data-beat', '4'); lamp(2, 4100); });
-    at(8960, function () { el.classList.add('burst'); });
+    /* the winner is held, bars settled, before the page navigates */
+    at(10200, function () { place(); flip(); el.setAttribute('data-beat', '4'); lamp(2, 3200); });
+    at(12000, function () { el.classList.add('burst'); });
 
     /* the contraction back to a lone panel is the loop seam */
-    at(11000, function () {
-      el.setAttribute('data-beat', '0');
+    /* everything goes, and the argument is left on its own for a beat — which
+       is a calmer loop seam than contracting the furniture back to a panel */
+    at(13400, function () {
+      el.setAttribute('data-beat', '5');
       el.classList.remove('burst');
+      lampAll();
     });
-    at(11700, play);
+    at(16200, play);
   }
 
   var live = false;
