@@ -107,33 +107,33 @@ h2{font:600 clamp(28px,4vw,44px)/1.08 var(--display);letter-spacing:.01em;
    pretending to be a feature. */
 /* Chrome has no extensions on Android or iOS, and unpacked ones additionally
    need Developer mode, which is desktop-only. Nobody can install this from a
-   phone. So the phone's job is not conversion — it is understand it, want it,
-   and get the link to a computer. These two classes carry that difference. */
-.onphone{display:none}
-.murl{font:400 13px/1.4 var(--mono);color:var(--body);letter-spacing:0;
-  margin-top:12px;word-break:break-all}
+   phone. The page used to answer that with a COPY THE LINK button and the URL
+   under it, and that control could not do the thing it offered: a reader
+   cannot get a link onto their computer by pressing a button on their phone.
+   It is gone, along with the .onphone class and the .murl line that carried
+   it — so below 660 there is no call to action anywhere, which is correct.
+   On a phone this page's job is to convince, not to convert, and the DESKTOP
+   ONLY banner in the install section says why there is nothing to press.
+   .ondesk is what is left: the desktop-only half of that split. */
 /* ==========================================================================
-   THE DISCLOSURE MUST NEVER BE ABLE TO STRAND ITS OWN CONTENT. Above 660px
-   the summary is not displayed, because there is nothing to disclose — the
-   steps are simply the section. That was true only while `open` was
-   guaranteed, and it was not: a reader who collapsed the steps on a phone and
-   then widened the window got a details with no `open`, whose summary is
-   display:none and whose content is hidden by the UA — measured, .install
-   collapsed from 596.1px to 270.5px at 1440 with no control anywhere to bring
-   it back. A fresh load below 660 reached the same dead end with no
-   interaction at all, because the script removes `open` on load.
-   Two independent guarantees, because one was not enough. This is the
-   structural one: above the breakpoint the content is shown whatever the
-   attribute says, so the state cannot matter. The script below restores the
-   attribute as well, for engines that do not implement ::details-content.
+   THERE IS NO DISCLOSURE ANY MORE, AND THAT IS THE FIX. The five steps used
+   to live in a <details class="whenpc"> labelled WHEN YOU ARE AT YOUR
+   COMPUTER, and it cost this file three separate defences: a
+   ::details-content override above 661px, a matchMedia listener restoring
+   `open` on the way up, and a script that stripped `open` on load below 660.
+   The dead end they were all defending against was real — collapse the steps
+   on a phone, widen the window, and the summary is display:none while the
+   content is hidden by the UA, so the section loses its contents with no
+   control anywhere to bring them back: measured, .install went from 596.1px
+   to 270.5px at 1440 with no way out.
+   The label was also the DESKTOP ONLY banner said twice, in a quieter voice,
+   directly under it. Dropping the label left a control whose only remaining
+   job was to hide the thing the reader had just asked to be shown — 46.2px of
+   summary buying the option to fold away 213.1px of steps, measured at 390.
+   So the whole element is gone: the steps are simply the section's content
+   now, on every screen. No attribute, no state, no way to be stranded in one,
+   and three guarantees deleted rather than maintained.
    ========================================================================== */
-@media (min-width:661px){
-  .whenpc::details-content{content-visibility:visible;
-    /* content-visibility:hidden also suppresses contain-intrinsic-size's
-       replacement box; releasing it needs the size released too */
-    contain-intrinsic-size:none}
-}
-.whenpc > summary{display:none}
 .barnav a{font:400 12px/1 var(--mono);letter-spacing:.04em;color:var(--dim);
   text-decoration:none}
 .barnav a:hover{color:var(--acid)}
@@ -625,7 +625,7 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 .doms b.final{opacity:1;color:#202124}
 .stage.flick .doms b.final{opacity:0}
 .stage.flick .doms b:not(.final):not(.home){animation:flick 1.6s steps(1,end) infinite;
-  animation-delay:calc(var(--i) * -320ms)}
+  animation-delay:calc(var(--i) * -320ms - 168ms)}
 /* the pill follows the winner: its own address while it sits there, then its
    checkout once the page navigates */
 .doms b.home{opacity:0}
@@ -660,9 +660,34 @@ h1 em{font-style:normal;color:var(--acid);display:block}
    and then again as the result — the same shop, many times. Five go by; the
    sixth is what the search lands on, once. */
 .stage.flick .shop:not(.s6){animation:flick 1.6s steps(1,end) infinite;
-  animation-delay:calc(var(--i) * -320ms)}
+  animation-delay:calc(var(--i) * -320ms - 168ms)}
 .stage.flick .shop.s6{opacity:0}
-@keyframes flick{0%,20%{opacity:1}20.01%,100%{opacity:0}}
+/* THE FIRST FRAME STARTS MID-STEP, AND THAT IS WHAT KILLS THE FLASH. Five
+   elements share this 1.6s animation, staggered a fifth of it apart, so
+   element i sits at local time i*320 whenever element 0 sits at 0. The step
+   boundary is therefore also the stagger boundary, and MEASURED, Chrome holds
+   a steps(1,end) interval THROUGH its closing keyframe: with the old
+   0%,20%{opacity:1} 20.01%,100%{opacity:0} the lit window was [0,320.16] of a
+   320 step, and tightening it to 0%..20% still measured [0,320] inclusive.
+   Either way two neighbours are lit at exactly t=0, 320, 640 … — scanned at
+   4ms across a full cycle, 6 of 401 samples painted two domains and two
+   storefronts on top of each other.
+   In the middle of a cycle a browser lands on 320.000ms essentially never.
+   At the START it lands on 0.000 EVERY time: the animation's start time is
+   the frame it is first composited on, so the first rendered frame of the
+   phase was always the double-painted one. That is the flash the sequence was
+   reported to open with, and no keyframe can fix it while the first frame is
+   a boundary. So the whole rotation is phase-shifted: element i starts at
+   local time i*320 + 168, which puts the first frame in the middle of the
+   first domain's window instead of on its edge.
+   168 and not the round 160, and the 8ms is measured too. The boundaries then
+   sit at 168 + 320k, and a display ticking at a steady 60Hz samples multiples
+   of 16.667ms: at 160 the boundary at t=800 is frame 48 exactly, and one
+   frame per 1.6s cycle painted the pair. Scanned frame by frame over two
+   cycles at 60, 90 and 120Hz, 168 puts every boundary between ticks and the
+   double paint never lands. Half-open keyframes as well, so the boundary
+   itself is as narrow as CSS allows rather than 0.16ms wide. */
+@keyframes flick{0%{opacity:1}20%,100%{opacity:0}}
 /* Six storefronts going by. Deliberately quiet — one grey, one wordmark size,
    one type — because the only thing on this stage allowed to be loud is the
    panel. What separates them is the shape of the page. Each one runs past the
@@ -1271,47 +1296,45 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
   .beatnav li{font-size:11px;letter-spacing:.04em}
 }
 @media (max-width:660px){
-  /* One call to action, and one a thumb can actually complete. ADD TO CHROME
-     led nowhere from a phone and the page showed it three times. */
+  /* No call to action at all. ADD TO CHROME led nowhere from a phone and the
+     page showed it three times; COPY THE LINK replaced it and led nowhere
+     either, because nothing a thumb presses here can put a URL on a computer.
+     A phone reader leaves with the argument, and that is the whole ask. */
   .ondesk{display:none}
-  .onphone{display:block}
   .bar .btn-sm{display:none}
-  /* The install steps stay — they are the truth about how it works, and a
-     curious reader may want them — but they are instructions for a screen the
-     reader is not holding, so they cost one line instead of a screen. */
-  .whenpc > summary{display:block;cursor:pointer;list-style:none;
-    font:600 14px/1.3 var(--display);letter-spacing:.12em;text-transform:uppercase;
-    color:var(--acid);padding:14px 0;min-height:44px}
-  .whenpc > summary::-webkit-details-marker{display:none}
-  .whenpc > summary:after{content:" +";color:var(--dim)}
-  .whenpc[open] > summary:after{content:" \2013"}
   /* ==========================================================================
      THE PHONE IS ONE SCREEN, AND THIS IS THE WHOLE OF IT: who we are, what it
      does, and the thing doing it. Everything that was between them has gone
      somewhere it is worth more. The browser shot goes because the animation
      below is the same picture, moving. The lede goes because the headline is
-     already the sentence. The copy-link control goes to the install section,
-     where the DESKTOP ONLY banner has just given the reader a reason to want
-     it. The jump nav goes to a bar that arrives after this screen instead of
-     spending three lines of it on navigation nobody needs yet.
+     already the sentence. The copy-link control goes because it never worked
+     — see the .ondesk note at the top of this stylesheet. The jump nav goes
+     to a bar that arrives after this screen instead of spending three lines
+     of it on navigation nobody needs yet.
      ========================================================================== */
   .fit{display:none}
   .hero .lede{display:none}
   /* The mark and the line it belongs with, on one row. The wrapper is
      display:contents everywhere else, so nothing above 660 knows it exists. */
+  /* The two ends of the row, not two things side by side. The mark keeps the
+     column's left edge and the line takes its right, so the row is as wide as
+     everything under it and the hero starts with one full-width object rather
+     than a lockup with a caption stuck to it. text-align on a flex:1 child
+     rather than justify-content, because the kicker still has to be allowed
+     to take the remaining width and wrap inside it if a translation or a
+     narrower screen ever needs it to — space-between with an unflexed child
+     would push it off the edge instead. */
   .idrow{display:flex;align-items:center;gap:12px;margin:0 0 14px}
   .heromark{display:block;width:auto;height:30px;flex:none}
   /* 886px of source into 30px of height is 4.4x the pixels a 3x screen asks
      for, so it stays crisp with nothing new to download. */
   .kicker{margin:0;font-size:11px;letter-spacing:.12em;line-height:1.4;
-    flex:1;min-width:0}
-  /* INLINE, not block. .onphone is display:block below 660 for the copy-link
-     card, and that rule was landing on this span too — which is what put the
-     separator at the head of its own line and made a one-line kicker two. */
-  .kicker .onphone{display:inline}
-  /* the control now sits between the banner it answers and the steps it
-     precedes, so it needs a foot as well as a head */
-  .getlink{margin:0 0 10px}
+    flex:1;min-width:0;text-align:right}
+  /* The kicker is "A new Chrome extension" and stops there. It used to add
+     "· for your computer", which cost a second line beside a 30px mark and
+     said in the hero what the DESKTOP ONLY banner says where it matters. The
+     rule that forced that span back to display:inline went with it, and so
+     did the .getlink margin: both belonged to elements that no longer exist. */
 
   /* ==========================================================================
      ONE GROUND, ALL THE WAY DOWN. The section under the hero used to cut to
@@ -1319,10 +1342,21 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
      the first screen — and the thing the seam framed is a browser window that
      is already near-white, so the paper was working against it rather than
      for it. On cobalt the shop reads as a lit object, which is what it is.
-     Everything the paper was carrying has to be re-inked here: the heading,
-     the phase labels and their track, the caption, and the lift — that shadow
-     was tuned as navy-on-white and is nearly invisible on navy, so the acid
-     hairline from the root does the edge instead.
+     Everything the paper was carrying has to be re-inked here: the phase
+     labels and their track, the foot, and the lift — that shadow was tuned as
+     navy-on-white and is nearly invisible on navy, so the acid hairline from
+     the root does the edge instead.
+     There were two ways to stop HOW IT WORKS reading as a line floating under
+     the headline rather than as a section header: give the section its own
+     ground back, or drop the heading. Both were built and looked at on a real
+     phone, and the ground won — so the heading is what goes. The three phase
+     labels open the section instead, and they are a better opening than the
+     h2 was: 01 · 02 · 03 with a progress track under them says "a sequence
+     starts here" in a way a title cannot, and they were already carrying that
+     job one line further down.
+     (No .works .cap rule here, and there is none in the base block worth
+     keeping either: measured, all five .cap elements on the page are the
+     install section's figcaptions. .works .cap has never matched anything.)
      ========================================================================== */
   /* section.hero and .bar .barin, not .hero and .barin: the <=560 block sits
      further down this stylesheet and a single class there beats a single
@@ -1337,21 +1371,32 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
   .hero h1{font-size:32px;margin-bottom:14px}
   .works{background:transparent;padding:16px 0 20px;
     --lift:0 20px 44px -18px rgba(2,4,26,.9), 0 0 0 1px rgba(232,255,58,.34)}
-  .works h2{color:var(--ink);margin:0 0 12px}
-  .works .cap{color:var(--ink)}
-  .works .foot{color:var(--dim);margin-top:12px}
+  /* The heading, not its colour. display:none rather than a re-ink, so the
+     h2 costs the one screen nothing at all rather than costing it less. */
+  .works h2{display:none}
+  /* --body, not the --dim the base rule uses on paper. Measured on cobalt,
+     --dim is 3.43:1 — under the 4.5 this 12px line needs — and --body is
+     5.64:1 while still reading as the quietest thing in the section. */
+  .works .foot{color:var(--body);margin-top:12px}
   .beatnav{margin:0 0 10px}
   .beatnav li{color:var(--body)}
   .beatnav.seq li{color:var(--dim)}
   .beatnav.seq li.on{color:var(--acid)}
   .beatnav i{background:rgba(211,216,255,.24)}
   .beatnav u{background:var(--acid)}
-  /* THE ENDING HAD TO BE REBUILT FOR THIS GROUND. Beat 5's closing card is a
-     cobalt plate and it ends by fading to whatever is behind it — which was
-     white paper, and is now cobalt. Fading cobalt into cobalt is nothing
-     leaving nothing: the ending simply stopped existing. The plate takes the
-     page's own deep navy here, so the card is an object on the ground again
-     and its 520ms fade has something to be the disappearance OF. */
+  /* THE ENDING IS BUILT FOR THIS GROUND. Beat 5's closing card is a cobalt
+     plate and it ends by fading to whatever is behind it, and on a phone that
+     is a cobalt page. The plate takes the page's own deep navy here so the
+     card is an object on the ground and its 520ms fade has something to be
+     the disappearance OF.
+     One correction to the note this replaces, because it was measured and it
+     matters if anyone touches this again: what is DIRECTLY behind the finale
+     is not the section but .stagewin.tight, whose background reads
+     rgb(247,243,237) — the shop's cream. That is only true while the window
+     is opaque; the stage goes transparent at beat 5 and the acid hairline is
+     the only thing separating window from page, so the card is read against
+     the cobalt around it as much as the cream under it. Navy is legible
+     against both, cobalt against only one of them. */
   .stage .finale{background:var(--ink2)}
 
   /* ==========================================================================
@@ -1401,6 +1446,37 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
     height:1px;background:transparent}
   .barnav a[aria-current="true"]:before{background:var(--acid)}
   .btn-sm{padding:16px}
+  /* ==========================================================================
+     TWO BLOCKS, AND THIS IS THE SECOND ONE. The hero and the animation share
+     one cobalt ground above, so HOW TO INSTALL has to be the other half of
+     the page rather than more of the same — and paper is what the page
+     already alternates with. Above 661 nothing here applies: the desktop
+     alternation is cobalt hero, white works, cobalt install, and it is not
+     being disturbed. Below it, works is cobalt and install is the paper.
+     Everything that was inked for cobalt has to be re-inked, and the list is
+     longer than the body text: the heading, the disclosure, the five step
+     captions and the live one, the mock cards' own edge, and the swipe rail
+     (that one lives in the <=640 block below, because that is the only place
+     the rail exists at all). Contrast for every pair is in the report.
+     The DESKTOP ONLY banner deliberately does NOT flip. It is the one thing
+     in this section a reader must not miss, and a dark plate is louder on
+     paper than it ever was on cobalt — it stops being a slightly darker patch
+     of the page and becomes the one object on it. Its own two pairs are
+     unchanged and already measured: --body on --ink2 and --acid on --ink2.
+     ========================================================================== */
+  .install{background:var(--paper);
+    /* the mocks are near-white cards and --lift is what gives them an edge.
+       The root's acid hairline is for cobalt; on paper it would ring five
+       white cards in yellow. This is the same navy pair .works carries. */
+    --lift:0 28px 60px -20px rgba(10,17,64,.34), 0 0 0 1px rgba(10,17,64,.16)}
+  .install h2{color:var(--ink2)}
+  .install .cap{color:var(--ink2)}
+  /* The live card still says so, in cobalt rather than acid — acid on white
+     is 1.1:1 and disappears. Auto-play is off below 640px where the reader
+     drives the row, so this only ever fires in the 641-660 band; it has to
+     work there, and cobalt on white is the page's loudest legible colour. */
+  .grid5 > figure:has(.mk.live) .cap{color:var(--g)}
+
   /* the bar is 32px tall on a phone, measured; anchors clear it by 8 */
   section{scroll-margin-top:40px}
 }
@@ -1437,13 +1513,19 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
      things, it is document tail. 8, and the section's own 20 does the rest. */
   .swipe{display:flex;align-items:center;gap:12px;margin:0 0 8px;
     pointer-events:none}
-  .swrail{flex:1;min-width:0;height:4px;background:var(--rule);display:block;
+  /* The rail exists only here, which is also the only place it can be styled
+     for the ground it sits on: the install section is paper below 660px. The
+     acid thumb on a --rule track was chosen against cobalt and neither colour
+     survives the flip — acid on white is 1.1:1. This is the beatnav's own
+     paper pair instead, #E2E5F0 track and cobalt fill, so the two progress
+     indicators on the page read as one idea. */
+  .swrail{flex:1;min-width:0;height:4px;background:#E2E5F0;display:block;
     position:relative;overflow:hidden}
   .swrail i{position:absolute;left:0;top:0;bottom:0;display:block;
-    background:var(--acid);width:var(--sw,40%);
+    background:var(--g);width:var(--sw,40%);
     transform:translateX(var(--sx,0px));transition:transform .12s linear}
   .swipe b{font:500 11px/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;
-    color:var(--acid);white-space:nowrap;transition:opacity .3s ease-out}
+    color:var(--g);white-space:nowrap;transition:opacity .3s ease-out}
   /* once you have started, the instruction has done its job and steps back —
      the rail keeps answering the other half of the question */
   .swipe.moved b{opacity:.4}
@@ -1457,15 +1539,15 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
      the swipe is the better interaction. */
   /* Snapping is OFF until the disclosure is open. A mandatory snap container
      re-snaps to the element it last snapped to whenever its layout changes,
-     and `<details>` content changes layout the instant it opens — so a row
+     and `<details>` content changed layout the instant it opened — so a row
      that acquired a snap target while it was closed and unlaid-out came back
-     two cards in. With no snapping there is nothing to come back to, and the
-     driver's reset (see the script) lands on card 01. */
+     two cards in. Snapping was therefore held off until [open]. The details is
+     gone, the row is laid out from the first frame, and there is no such
+     layout change left to re-snap on: the mandatory snap can simply be on. */
   .grid5{display:flex;grid-template-columns:none;gap:12px;overflow-x:auto;
-    scroll-snap-type:none;-webkit-overflow-scrolling:touch;
+    scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
     margin:0 -16px 16px;padding:0 16px 10px;scroll-padding-left:16px;
     overscroll-behavior-x:contain}
-  .whenpc[open] .grid5{scroll-snap-type:x mandatory}
   /* 80% of the screen per card put 1.2 cards on screen: one card, and a
      sliver that reads as damage rather than as "there is more". The card is
      144px now, and the mock inside it is NOT re-laid-out at 144 — it is drawn
@@ -1558,6 +1640,13 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
      reader's cursor resting on the shop's own button */
   .stage .hand{opacity:1;transform:none}
   .beatnav li{color:var(--ink2)}
+  /* …but only where the section is paper. This block sits at the END of the
+     stylesheet, so a single class here beats the identical single class in
+     the <=660 block above it — and below 660 the works section is cobalt,
+     where --ink2 on --g measures 2.28:1 and the three labels all but vanish.
+     Reduced motion must not cost a reader the labels. --body is 5.64:1 there,
+     the same value the animated state uses. */
+  @media (max-width:660px){ .beatnav li{color:var(--body)} }
   .beatnav u{transform:scaleX(1)}
 }
 /* 100vw counts the scrollbar, so the column would rather measure itself — but
@@ -1596,7 +1685,7 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
     <div>
       <div class="idrow">
       <img class="heromark" src="lockup.png" alt="Knili" width="886" height="339">
-      <p class="kicker">A new Chrome <span class="nb">extension<span class="pz"><svg viewBox="3.35 1.75 17.3 18.9" preserveAspectRatio="xMidYMax meet" width="15.6" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M8.4 5.2 a2.6 2.6 0 0 1 5.2 0 h4.4 a1.8 1.8 0 0 1 1.8 1.8 v11 a1.8 1.8 0 0 1 -1.8 1.8 h-12 a1.8 1.8 0 0 1 -1.8 -1.8 v-3.6 a2.6 2.6 0 0 0 0 -5.2 v-2.2 a1.8 1.8 0 0 1 1.8 -1.8 z"/></svg></span></span><span class="onphone"> &middot; for your computer</span></p>
+      <p class="kicker">A new Chrome <span class="nb">extension<span class="pz"><svg viewBox="3.35 1.75 17.3 18.9" preserveAspectRatio="xMidYMax meet" width="15.6" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M8.4 5.2 a2.6 2.6 0 0 1 5.2 0 h4.4 a1.8 1.8 0 0 1 1.8 1.8 v11 a1.8 1.8 0 0 1 -1.8 1.8 h-12 a1.8 1.8 0 0 1 -1.8 -1.8 v-3.6 a2.6 2.6 0 0 0 0 -5.2 v-2.2 a1.8 1.8 0 0 1 1.8 -1.8 z"/></svg></span></span></p>
       </div>
       <h1>It does the shopping.<em>You do the buying.</em></h1>
       <p class="lede">One sentence in. A filled checkout.</p>
@@ -1865,17 +1954,6 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
       <p><b>Desktop only.</b> Chrome has no extensions on a phone &mdash; this one
       needs a computer.</p>
     </div>
-    <!-- The control belongs to this sentence, not to the hero. Up there it was
-         an action with no motive — nobody copies a URL before they know why.
-         Here it answers the question the banner has just put in the reader's
-         head, and it is the same button with the same copied-state feedback;
-         only its position in the document changed. -->
-    <div class="onphone getlink">
-      <button class="btn" id="copyLink" type="button">Copy the link for your computer</button>
-      <p class="murl" id="siteUrl">razk.github.io/knili-site</p>
-    </div>
-    <details class="whenpc" id="stepsBox" open>
-      <summary>When you are at your computer</summary>
     <div class="grid5" id="steps">
 
       <figure>
@@ -1964,7 +2042,6 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
     </div>
 
     <a class="btn ondesk" href="knili-extension.zip" download>Add to Chrome</a>
-    </details>
   </div>
 </section>
 
@@ -2433,19 +2510,30 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
       }
     });
 
-    /* 02 — the panel slides right and the shop arrives beside it */
-    /* the sentence finishes and sits there before anything else moves */
+    /* 02 — the panel slides right and the shop arrives beside it, ALREADY
+       SEARCHING. The flick used to be added 1300ms later with beat 3, and the
+       measured result was a phase that opens on a still: from t=3800 to t=5100
+       the address bar read shopheathotsauce.com/checkout/ — the destination,
+       named before the search that finds it — over one motionless storefront,
+       and only then did anything move. "It starts by showing the target and
+       then waits and then flickers and then it actually starts" is exactly
+       that, and it was true at 1440 as well as at 390; the phone only makes it
+       obvious, because beats 2 and 3 are a cover fit and the chrome bar is a
+       third of the frame there against a twentieth of it on a desktop.
+       FRAME[2] and FRAME[3] are the same entry, so nothing about the camera
+       needed the two beats to be separated in time — only the log lines did,
+       and they still start at 5400. The search now begins on the same frame
+       the window arrives on: the shop flicks in as it slides in. */
     at(3800, function () {
       if (ask) ask.textContent = full;
       el.setAttribute('data-beat', '2'); frameBeat(2);
+      el.classList.add('flick');
       lamp(1, 7000);
     });
 
     /* 03 — shops flick past while the log fills, then the rejects are counted */
-    /* the window has arrived and is allowed to settle before the search starts */
     at(5100, function () {
       el.setAttribute('data-beat', '3'); frameBeat(3);
-      el.classList.add('flick');
     });
     lines.forEach(function (l, n) {
       at(5400 + n * 970, function () {
@@ -2591,70 +2679,12 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
 </script>
 
 <script>
-/* Getting the link off the phone, since installing on one is not possible.
-   Chrome supports no extensions on Android or iOS, and an unpacked one needs
-   Developer mode besides — which is desktop only. */
+/* The steps are the section's content, not a state of it — see the note in
+   the stylesheet for what used to be here and why none of it is needed. What
+   is left is the swipe rail and the row's own starting position. */
 (function () {
-  var out = document.getElementById('siteUrl');
-  if (out && location.host) {
-    out.textContent = (location.host + location.pathname)
-      .replace(/index\.html$/, '').replace(/\/$/, '');
-  }
-  var btn = document.getElementById('copyLink');
-  if (!btn) return;
-  var label = btn.textContent, t;
-  function say(w) {
-    btn.textContent = w;
-    clearTimeout(t);
-    t = setTimeout(function () { btn.textContent = label; }, 2200);
-  }
-  btn.addEventListener('click', function () {
-    var url = location.href.split('#')[0];
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(url).then(
-        /* the confirmation says what to do next, not that a mechanism ran:
-           "Copied" answers a question nobody asked */
-        function () { say('Copied \u2014 now open it on a computer'); },
-        function () { say('Press and hold the link below'); });
-    } else {
-      say('Press and hold the link below');
-    }
-  });
-})();
-
-/* The steps carry `open` in the markup, so with no JavaScript — and on any
-   screen that can actually run the thing — they are simply there. A phone
-   folds them away, because they describe a screen it is not. */
-(function () {
-  var d = document.getElementById('stepsBox');
   var grid = document.getElementById('steps');
-  if (!d) return;
-  var mq = window.matchMedia && window.matchMedia('(max-width: 660px)');
-  if (mq && mq.matches) d.removeAttribute('open');
-  /* And put it back on the way out. Collapsing the steps is an affordance
-     that exists only while the summary does, which is only below 660px; carry
-     the collapsed state up past that breakpoint and the reader is left with a
-     section that has lost its contents and offers no way to ask for them
-     back. The stylesheet above already forces the content visible there, so
-     this is the second belt rather than the only one — it is what covers an
-     engine without ::details-content. Restoring on the way UP only: narrowing
-     must not re-open what the reader deliberately folded away. */
-  if (mq && mq.addEventListener) {
-    mq.addEventListener('change', function (e) {
-      if (!e.matches) d.setAttribute('open', '');
-    });
-  }
-  /* Back to the first card, every time the disclosure opens. `<details>`
-     content has no layout worth scrolling while it is closed, so a reset that
-     runs once at load cannot stick — it has to run on `toggle`. And it has to
-     run again on the next two frames, because the layout that matters here
-     happens after the event fires and a mandatory snap container re-snaps
-     itself to whatever it last snapped to once that layout lands. (Snapping is
-     off until [open] in the stylesheet so there is nothing for it to go back
-     to; this is the belt to that pair of braces.) On a real phone the row
-     opened on cards 02 and 03 with 01 sliced off past the left edge — a peek
-     at the right edge says "there is more", a slice at the left says "you
-     lost something", and only one of those is wanted. */
+  if (!grid) return;
   /* THE RAIL. Two numbers, both read off the scroller itself: how much of the
      row fits (the thumb's width) and how far along it you are (its offset).
      Written as CSS custom properties so the paint is the stylesheet's job and
@@ -2682,31 +2712,34 @@ footer{border-top:1px solid var(--rule);padding:20px 0}
     };
     grid.addEventListener('scroll', railTick, { passive: true });
     window.addEventListener('resize', railTick);
-    d.addEventListener('toggle', railTick);
     railUpdate();
     window.addEventListener('load', railUpdate);
   }
 
-  if (grid) {
-    var first = function () {
-      grid.scrollLeft = 0;
-      if (grid.scrollTo) {
-        try { grid.scrollTo({ left: 0, behavior: 'instant' }); } catch (e) { }
-      }
-    };
+  /* Card 01, on the frame the row is first laid out. This used to hang off the
+     disclosure's `toggle` because a closed <details> has no layout to scroll
+     and a reset at load could not stick; with no disclosure the row is laid
+     out immediately and the reset lands. It still runs across the next two
+     frames, because a mandatory snap container re-snaps once late layout —
+     the card images, the zoomed mocks — settles, and a row that opens on card
+     02 with 01 sliced off past the left edge reads as damage rather than as
+     "there is more". Browsers also restore a scroller's position across a
+     reload, and this is what overrides that. */
+  var first = function () {
+    grid.scrollLeft = 0;
+    if (grid.scrollTo) {
+      try { grid.scrollTo({ left: 0, behavior: 'instant' }); } catch (e) { }
+    }
+  };
+  first();
+  requestAnimationFrame(function () {
     first();
-    d.addEventListener('toggle', function () {
-      if (!d.open) return;
+    requestAnimationFrame(function () {
       first();
-      requestAnimationFrame(function () {
-        first();
-        requestAnimationFrame(function () {
-          first();
-          if (railTick) railTick();
-        });
-      });
+      if (railTick) railTick();
     });
-  }
+  });
+  window.addEventListener('load', first);
 })();
 </script>
 
