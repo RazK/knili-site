@@ -953,7 +953,12 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
   .whenpc > summary::-webkit-details-marker{display:none}
   .whenpc > summary:after{content:" +";color:var(--dim)}
   .whenpc[open] > summary:after{content:" \2013"}
-  /* the links move out of the bar and appear once under the hero */
+  /* The bar holds the nav and the CTA on a wide screen and earns its place.
+     Here it holds neither — no links, no CTA, no text at all — so it is 47px
+     of permanently occupied screen showing a logo the reader meets again 40px
+     below it. It goes, and the anchors stop compensating for it. */
+  .bar{display:none}
+  section{scroll-margin-top:16px}
   .barnav{display:none}
   .jump{display:flex;gap:20px;flex-wrap:wrap;margin-top:16px}
   .jump a{display:inline-flex;align-items:center;min-height:44px;
@@ -999,6 +1004,17 @@ footer{border-top:1px solid var(--rule);padding:24px 0 64px}
   /* The hero is 1.4 screens on a phone and this is where its pixels are: the
      four folded heads are empty ground in a still image. The ask and the answer
      both survive. */
+  /* The stage has a camera and a transform; the hero shot has neither, so its
+     design pixels are what render — at 358 of 404 the small labels land near
+     8px and the shot reads as something to squint at. The text that carries
+     meaning gets the same 11px floor the stage has. The text that is only
+     texture — the shop domain, the panel's two icon controls, the starter
+     suggestions — steps back in contrast instead of growing: nobody needs to
+     read `profile`, and making it bigger would only make it shout. */
+  .frame .stamp,.frame h3{font-size:11.5px}
+  .frame .rcp dt{font-size:11px}
+  .frame .rcp,.frame .ask{font-size:12px}
+  .frame .buy-m span,.frame .icons,.frame .starters span{opacity:.55}
   .frame .zmid{display:none}
   .hero{padding:24px 0 32px}
   .hero-grid{gap:28px}
