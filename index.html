@@ -135,9 +135,24 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--acid);outline-offse
    the letters sit on. The kicker is uppercase, so that line is the lowest
    pixel of every letter. The last word and the mark share a nowrap span so
    they can never break apart. */
+/* THE SECTION HAS A NAME NOW, AND IT SAYS IT. #hero IS the "what it is"
+   section — the desktop bar has always linked here under that label — but the
+   bar is hidden below 660px and the phone's jump nav listed only the other
+   two, so on a phone the page read as two sections and the first one was
+   nameless. This is the page's own label voice, the mono/uppercase/dim the
+   nav links themselves use, because that is exactly what this line is:
+   wayfinding for #hero, said out loud where a phone can see it. Dim under the
+   acid kicker on purpose — the label is the signpost, the kicker is the
+   claim, and they must not read as two claims.
+   It is not a third stacked line's worth of height: the label and the kicker
+   are one block, so the kicker's 24px gap to the h1 closes to 14 whenever the
+   label is above it. Measured at 390, the pair costs 10px, not 34. */
+.seclabel{font:400 12px/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;
+  color:var(--dim);margin:0 0 8px}
 .kicker{
   font:500 13px/1 var(--mono);letter-spacing:.22em;text-transform:uppercase;
   color:var(--acid);margin:0 0 24px}
+.seclabel + .kicker{margin-bottom:14px}
 /* An inline <svg> is a replaced element: browsers synthesise its baseline
    themselves, so vertical-align:baseline on it lands wherever they choose —
    which is what kept the glyph riding high. Put the synthesis on a wrapper
@@ -459,6 +474,11 @@ h1 em{font-style:normal;color:var(--acid);display:block}
    window arrives with the shop, and the panel carries its own lift so it reads
    as an object on the page rather than a hole in one. */
 .stage[data-beat="1"],.stage[data-beat="0"]{background-color:transparent;box-shadow:none}
+/* One frame with nothing easing anywhere inside the composition. play() adds
+   this, sets beat 1 and the camera, forces a reflow so that state is committed
+   as the new resting point, and takes it off again — which is what turns the
+   5 -> 1 wrap from a half-second cross-fade into a cut. It is never left on. */
+.stage.cut,.stage.cut *{transition:none !important}
 .stage .pnl{box-shadow:var(--lift)}
 /* the closing frame: everything goes, and the argument is left on its own */
 .stage[data-beat="5"]{background-color:transparent;box-shadow:none}
@@ -722,7 +742,43 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 .cfld.blank u{display:block;width:calc(var(--px)*2);height:calc(var(--px)*15);
   background:var(--co-ink);opacity:.5}
 .checkout .co-card{padding:calc(var(--px)*20)}
-.checkout .co-item img{width:calc(var(--px)*56);height:calc(var(--px)*56)}
+/* the product is the subject of this card, so it is drawn at a size worth
+   looking at now that the card has the room — and flip() reads both widths
+   off the DOM, so the arriving thumbnail still lands on it exactly. */
+.checkout .co-item img{width:calc(var(--px)*72);height:calc(var(--px)*72)}
+/* ==========================================================================
+   THE SUMMARY COLUMN, FILLED. It was one short card at the top of a full-
+   height column: measured at 1440, 208px of card over a 503px track, a 41%
+   fill and 295px of bare page under it. Two things were wrong and both are
+   fixed here. The card said `Total` and nothing else, which is not what an
+   order summary is; it now carries the bill. And it sat at the top of a
+   column it did not use; it now stretches to the column.
+
+   IT MAY STRETCH TO THE FORM'S HEIGHT AND NOT ONE PIXEL FURTHER, and that is
+   a hard constraint, not a preference. FRAME[4] frames union('.csum','.out')
+   and takes the union's TOP edge from .csum. The grid centres its single row,
+   so a .csum taller than .cform grows the row, lifts that top edge, and the
+   union outgrows the 560px window: the wide fit is z=min(1,H/b.h), so the
+   whole seam beat would zoom out. Stretching to the row .csum is already in
+   moves nothing — measured, --fz at beat 4 stays 0.9964 at 1440 and 0.5743 at
+   390, exactly what it was. align-self, therefore, and never a height.
+   ========================================================================== */
+.checkout .csum{align-self:stretch;display:flex}
+.checkout .csum > .co-card{flex:1;display:flex;flex-direction:column}
+/* Whatever room the column has spare is SPLIT between two auto margins rather
+   than opening as one hole: half above the bill and half above the button, so
+   the card reads as goods / money / act with air between the three, and no
+   single gap is large enough to look like a mistake. */
+.checkout .cdisc,.checkout .csum .co-pay{margin-top:auto}
+.cdisc{display:flex;align-items:center;gap:calc(var(--px)*8);
+  background:var(--co-card);border:calc(var(--px)*1) solid var(--co-line);
+  border-radius:calc(var(--px)*4);padding:calc(var(--px)*10) calc(var(--px)*12);
+  margin-bottom:calc(var(--px)*4);font-size:calc(var(--px)*13);color:var(--co-dim)}
+.cdisc span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cdisc b{font-weight:600;color:var(--co-ink);flex:none}
+.cfine{font-size:calc(var(--px)*11);line-height:1.5;color:var(--co-dim);
+  text-align:center;margin-top:calc(var(--px)*10)}
+.checkout .co-sum dt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .scan{position:absolute;inset:0;overflow:hidden;pointer-events:none;opacity:0;
   transition:opacity .3s}
 .stage.flick .scan{opacity:1}
@@ -851,13 +907,25 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 .stage.play .point .arrow{animation:knudge 1.15s ease-in-out infinite}
 
 /* ==================================================== how to install */
-/* 104 of bottom padding plus the footer's own 24 of top put 128px of nothing
-   between the last card and the rule. The section still opens on 88; it just
-   stops holding a screen open after it has finished talking. */
-.install{padding:88px 0 72px}
+/* The tail of the document, twice trimmed and twice still too long. Measured
+   at 1440 before this pass: 72px from the CTA to the section's foot, the
+   hairline, 24px, one 19px line of colophon, then 32px to the end — 148px of
+   ground carrying 19px of ink. The section still opens on 88, because that is
+   the gap that separates it from what came before; what it stops doing is
+   holding a screen open after it has finished talking. */
+.install{padding:88px 0 36px}
 .grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;
   margin-bottom:20px}
-.grid5 .cap{font-size:13px;letter-spacing:.12em;margin-bottom:12px}
+.grid5 .cap{font-size:13px;letter-spacing:.12em;margin-bottom:12px;
+  transition:color .25s ease-out}
+/* The card that is moving says so. The row plays one card at a time and the
+   only sign of which one was inside the mockup, so the eye had to find the
+   motion before it could know where to look. The live card's caption lights
+   in acid instead: a colour, and nothing that has to track geometry — a
+   travelling highlight over these titles was tried here once and withdrawn
+   for exactly that reason. Auto-play is off below 640px, where the reader
+   drives the row with a thumb, so no card is .live there and nothing lights. */
+.grid5 > figure:has(.mk.live) .cap{color:var(--acid)}
 .mk{background:var(--paper);height:220px;padding:16px;font-family:var(--ui);
   color:#202124;overflow:hidden;box-shadow:var(--lift)}
 .mknote{font:400 10.5px/1.45 var(--ui);color:#5F6368;margin-top:10px}
@@ -994,8 +1062,13 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 /* =============================================================== footer */
 /* 64px below the last line of the spec was 64px of ground with nothing on it
    and nothing under it — the end of the document, held open. Half of it is
-   the end of the page; the other half was dead. */
-footer{border-top:1px solid var(--rule);padding:24px 0 32px}
+   the end of the page; the other half was dead.
+   32 below and 24 above was still not symmetrical and still not tight: a
+   colophon is one line of small print, and the room around it should read as
+   a margin, not as a section. Equal on both sides now, and the same on a
+   phone, where the spec wraps to three lines and every extra pixel is paid
+   for three times over. */
+footer{border-top:1px solid var(--rule);padding:20px 0}
 .spec{display:flex;flex-wrap:wrap;gap:8px 24px;justify-content:space-between;
   font:400 12px/1.6 var(--mono);color:var(--dim);letter-spacing:0}
 .spec a{color:var(--acid)}
@@ -1124,7 +1197,10 @@ footer{border-top:1px solid var(--rule);padding:24px 0 32px}
   .bar{display:none}
   section{scroll-margin-top:16px}
   .barnav{display:none}
-  .jump{display:flex;gap:20px;flex-wrap:wrap;margin-top:16px}
+  /* Three destinations, and they have to fit one row at 360px: measured, the
+     three labels come to 277px and 16px gaps put the row at 309 inside 313.
+     A 20px gap wrapped it, and a wrapped row costs a whole second 44px band. */
+  .jump{display:flex;gap:16px;flex-wrap:wrap;margin-top:16px}
   .jump a{display:inline-flex;align-items:center;min-height:44px;
     font:400 12px/1 var(--mono);letter-spacing:.04em;color:var(--acid);
     text-decoration:none}
@@ -1135,7 +1211,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 32px}
 @media (max-width:720px){
   .hero{padding:32px 0 48px}
   .works{padding:56px 0 48px}
-  .install{padding:56px 0 40px}
+  .install{padding:56px 0 20px}
   .btn{font-size:16px;padding:16px 24px}
 }
 /* ==========================================================================
@@ -1155,7 +1231,10 @@ footer{border-top:1px solid var(--rule);padding:24px 0 32px}
      one hides; whichever is in charge, the result is the same. */
   .grid5{scrollbar-width:none}
   .grid5::-webkit-scrollbar{display:none}
-  .swipe{display:flex;align-items:center;gap:12px;margin:0 0 20px;
+  /* the rail is the last thing on the page below 640px — the CTA under it is
+     display:none there — so its bottom margin is not a gap between two
+     things, it is document tail. 8, and the section's own 20 does the rest. */
+  .swipe{display:flex;align-items:center;gap:12px;margin:0 0 8px;
     pointer-events:none}
   .swrail{flex:1;min-width:0;height:4px;background:var(--rule);display:block;
     position:relative;overflow:hidden}
@@ -1229,7 +1308,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 32px}
 }
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
-  .bar,.btn-sm,.steps div,.bars i,.beatnav li:after{transition:none}
+  .bar,.btn-sm,.steps div,.bars i,.beatnav li:after,.grid5 .cap{transition:none}
   .stage *,.stage{animation:none!important;transition:none!important}
   .caret,.go.pulse,.mk.live *,.mk.live,
   .point .arrow,.frame .point .arrow{animation:none!important}
@@ -1263,7 +1342,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 32px}
     <img src="lockup.png" alt="Knili">
     <a class="btn-sm" href="knili-extension.zip" download>Add to Chrome</a>
     <nav class="barnav">
-      <a href="#hero">What is it</a>
+      <a href="#hero">What it is</a>
       <a href="#works">How it works</a>
       <a href="#install">How to install</a>
     </nav>
@@ -1275,6 +1354,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 32px}
   <div class="wrap">
     <div class="hero-grid">
     <div>
+      <p class="seclabel">What it is</p>
       <p class="kicker">A new Chrome <span class="nb">extension<span class="pz"><svg viewBox="3.35 1.75 17.3 18.9" preserveAspectRatio="xMidYMax meet" width="15.6" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M8.4 5.2 a2.6 2.6 0 0 1 5.2 0 h4.4 a1.8 1.8 0 0 1 1.8 1.8 v11 a1.8 1.8 0 0 1 -1.8 1.8 h-12 a1.8 1.8 0 0 1 -1.8 -1.8 v-3.6 a2.6 2.6 0 0 0 0 -5.2 v-2.2 a1.8 1.8 0 0 1 1.8 -1.8 z"/></svg></span></span><span class="onphone"> &middot; for your computer</span></p>
       <h1>It does the shopping.<em>You do the buying.</em></h1>
       <p class="lede">One sentence in. A filled checkout out.</p>
@@ -1284,6 +1364,7 @@ footer{border-top:1px solid var(--rule);padding:24px 0 32px}
         <p class="murl" id="siteUrl">razk.github.io/knili-site</p>
       </div>
       <nav class="jump">
+        <a href="#hero">What it is</a>
         <a href="#works">How it works</a>
         <a href="#install">How to install</a>
       </nav>
@@ -1318,7 +1399,11 @@ footer{border-top:1px solid var(--rule);padding:24px 0 32px}
               <div><b>Father&rsquo;s Day Hot Sauce Gift Set</b><em>Qty 1</em></div>
               <span class="p">$6.00</span>
             </div>
-            <dl class="co-sum"><dt>Subtotal</dt><dd>$6.00</dd><dt>Shipping</dt><dd>Flat rate</dd></dl>
+            <!-- Free, not "Flat rate": the panel beside it totals $6.00 against a
+                 $6.00 subtotal, and a flat rate that adds nothing to the bill is
+                 the one line here that did not add up. The beats' checkout says
+                 Free too, and both are reading the same order. -->
+            <dl class="co-sum"><dt>Subtotal</dt><dd>$6.00</dd><dt>Shipping</dt><dd>Free</dd></dl>
             <div class="co-tot"><span>Total</span><b>$6.00</b></div>
             <div class="co-pay">Place order</div>
           </div>
@@ -1440,11 +1525,24 @@ footer{border-top:1px solid var(--rule);padding:24px 0 32px}
                   <p class="co-h">Order summary</p>
                   <div class="co-item">
                     <img src="shot-sauce.png" alt="Father&rsquo;s Day Hot Sauce Gift Set">
-                    <div><b>Father&rsquo;s Day Hot Sauce Gift Set</b><em>Jerusalem, Israel</em></div>
+                    <div><b>Father&rsquo;s Day Hot Sauce Gift Set</b><em>Qty 1 &middot; Jerusalem, Israel</em></div>
                     <span class="p">$6.00</span>
                   </div>
+                  <!-- The bill, itemised, and every line of it lands on the
+                       $6.00 the panel beside it is claiming: free is the
+                       delivery option the form has selected, and the tax is
+                       the one figure a checkout cannot know until the card is
+                       in — which is the half of this the reader does. -->
+                  <div class="cdisc"><span>Discount code</span><b>Apply</b></div>
+                  <dl class="co-sum">
+                    <dt>Subtotal</dt><dd>$6.00</dd>
+                    <dt>Delivery</dt><dd>Standard, 3&ndash;5 days</dd>
+                    <dt>Shipping</dt><dd>Free</dd>
+                    <dt>Estimated tax</dt><dd>At payment</dd>
+                  </dl>
                   <div class="co-tot"><span>Total</span><b>$6.00</b></div>
                   <div class="co-pay">Place order</div>
+                  <p class="cfine">Free returns within 30 days.</p>
                 </div>
                 </div>
               </div>
@@ -2034,8 +2132,25 @@ footer{border-top:1px solid var(--rule);padding:24px 0 32px}
   function play() {
     clear();
     if (nav) nav.classList.add('seq');
+    /* THE LOOP SEAM IS A CUT, NOT A DISSOLVE. Coming back from beat 5 the
+       finale fades out over 600ms while .cbar, .page and .pnl fade in over
+       500ms, so for half a second the closing card and the whole composition
+       were painted through each other — the lockup showing through the panel,
+       the two finale lines running across it. And the camera jumps from
+       FRAME[5] to FRAME[1] in the same instant, so the finale is still on
+       screen when its frame moves under it: measured at 1440 the camera goes
+       from --fy2 -88px to 0, which is the title dropping 88px as it fades.
+       A restart is a new scene, not a later state of the old one.
+       Transitions are killed for exactly one frame, the beat and the camera
+       are set, a forced reflow commits that as the new starting point, and
+       then they are given straight back — so every change WITHIN the sequence
+       still eases exactly as it did. Nothing here resizes .stagewin; the class
+       goes on .stage and comes off in the same task. */
+    el.classList.add('cut');
     el.classList.remove('flick', 'seek', 'burst', 'found');
     el.setAttribute('data-beat', '1'); frameBeat(1);
+    void el.offsetWidth;
+    el.classList.remove('cut');
     lines.forEach(function (l) { l.classList.remove('in'); });
     fills.forEach(function (f) { f.style.width = '0%'; });
     counts.forEach(function (c) { c.textContent = '0'; });
@@ -2120,14 +2235,43 @@ footer{border-top:1px solid var(--rule);padding:24px 0 32px}
     at(17650, play);
   }
 
-  var live = false;
+  /* WHAT IS WATCHED IS THE WINDOW, NOT THE CAMERA — and this is the fourth
+     bug on this page caused by measuring the stage through its own transform.
+     The observer used to watch .stage, and .stage carries
+     translate(--fx2,--fy2) scale(--fz). An intersection RATIO is the visible
+     area over the element's own area, and the element's own area is
+     1072*738*--fz*--fz, so the ratio is a function of the zoom the sequence
+     itself sets. Measured at 390px with the window's visible height held FIXED
+     at 100px, no scrolling at all: the resting camera (beat 4, --fz .574)
+     reads 0.129; beat 1's camera (--fz 1.013) reads 0.040. The single 0.05
+     threshold sat between the two. Entering the section started the sequence,
+     beat 1 zoomed in, the ratio fell under the threshold, the observer
+     reported it gone, rest() fired, the camera went back, the ratio rose, and
+     play() started it again — a loop that needs no input to keep running,
+     repainting the stage's background, its lift shadow and the whole finale
+     several times a second. That is the flashing at the section's edge, and
+     the band it happens in is 38px to 124px of window showing.
+     .stagewin carries no transform and never changes size, so its ratio
+     answers the only question worth asking: how much of the section is on
+     screen. (It never changes size and it never may: see frameBeat.)
+
+     AND TWO THRESHOLDS, NOT ONE. A single edge with no dead band flips on the
+     smallest jitter, and at 1440x800 that edge lands 10px above the foot of
+     the document — precisely where a reader who has scrolled all the way down
+     comes to rest. The sequence starts when a third of the window is showing
+     and stops only below a tenth of it: 134px of scroll between the two at
+     1440, 86px at 390. While it is running, nothing restarts it. */
+  var live = false, vis = false;
+  var IN = 0.34, OUT = 0.1;
   new IntersectionObserver(function (entries) {
-    var seen = entries[0].isIntersecting;
-    el.classList.toggle('play', seen);
-    var ok = seen && !(reduce && reduce.matches);
+    var e = entries[entries.length - 1];
+    var r = e.isIntersecting ? e.intersectionRatio : 0;
+    vis = vis ? (r > OUT) : (r >= IN);
+    el.classList.toggle('play', vis);
+    var ok = vis && !(reduce && reduce.matches);
     if (ok && !live) { live = true; play(); }
     else if (!ok && live) { live = false; rest(); }
-  }, { threshold: 0.05 }).observe(el);
+  }, { threshold: [0, OUT, IN] }).observe(win);
 })();
 </script>
 
@@ -2152,14 +2296,22 @@ footer{border-top:1px solid var(--rule);padding:24px 0 32px}
   /* Below the carousel breakpoint the row is swipeable and the reader drives
      it; an auto-play that advanced cards under their thumb would fight them. */
   var wide = window.matchMedia && window.matchMedia('(min-width: 641px)');
+  /* Two thresholds here for the same reason as the stage's: one edge with no
+     dead band restarts the row from card 01 every time a scroll dithers
+     across it, and now that the live card's caption is lit that dither is
+     something you can see. Enter at 0.4, leave below 0.15. */
+  var vis = false;
   new IntersectionObserver(function (e) {
-    var ok = e[0].isIntersecting && !(wide && !wide.matches);
+    var en = e[e.length - 1];
+    var r = en.isIntersecting ? en.intersectionRatio : 0;
+    vis = vis ? (r > 0.15) : (r >= 0.4);
+    var ok = vis && !(wide && !wide.matches);
     if (ok) { if (!live) { live = true; i = 0; step(); } }
     else if (live) {
       live = false; clearTimeout(t); t = null; i = 0;
       cards.forEach(function (c) { c.classList.remove('live'); });
     }
-  }, { threshold: 0.3 }).observe(grid);
+  }, { threshold: [0, 0.15, 0.4] }).observe(grid);
 })();
 </script>
 
