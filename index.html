@@ -385,9 +385,15 @@ h1 em{font-style:normal;color:var(--acid);display:block}
   padding:calc(var(--u)*12) calc(var(--u)*16);background:var(--ink2);
   min-height:calc(var(--u)*52);flex:none}
 .pnl .hd img{height:calc(var(--u)*19);width:auto}
+/* THE STAMP IS THE ONE HEADER ITEM ALLOWED TO GIVE GROUND, and it may never
+   wrap. A two-row header was built in the product once and the verdict was
+   "absolutely horrible": the wordmark and the icons hold their size, and this
+   narrows and clips instead of pushing anything onto a second line. The mock
+   had the padding and none of the guard. */
 .pnl .tag{font:600 calc(var(--u)*10)/1 var(--display);letter-spacing:.18em;
   text-transform:uppercase;background:var(--acid);color:var(--ink2);
-  padding:calc(var(--u)*5) calc(var(--u)*9) calc(var(--u)*4)}
+  padding:calc(var(--u)*5) calc(var(--u)*9) calc(var(--u)*4);
+  display:inline-block;flex:0 1 auto;min-width:0;overflow:hidden;white-space:nowrap}
 .pnl .icons{margin-left:auto;display:flex;gap:calc(var(--u)*12);
   font:400 calc(var(--u)*10)/1 var(--mono);letter-spacing:.06em;color:var(--dim)}
 .pnl .bd{flex:1;min-height:0;display:flex;flex-direction:column}
@@ -455,17 +461,26 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 
 .out{background:var(--ink2);padding:calc(var(--u)*16);
   margin:calc(var(--u)*16) calc(var(--u)*16) 0}
-.stamp{display:inline-block;background:var(--acid);color:var(--ink2);
+/* block, not inline-block: an inline-block sits on a line box and carries the
+   parent's descender under it — about 4px of phantom air, which made the 16px
+   gap beneath it measure 20. width:max-content keeps it shrink-wrapped to its
+   own text the way inline-block did. */
+.stamp{display:block;width:max-content;max-width:100%;background:var(--acid);color:var(--ink2);
   font:600 calc(var(--u)*11)/1 var(--display);letter-spacing:.18em;text-transform:uppercase;
   padding:calc(var(--u)*6) calc(var(--u)*10) calc(var(--u)*5)}
-.opic{width:100%;height:calc(var(--u)*132);object-fit:contain;background:var(--paper);
-  margin-top:calc(var(--u)*16)}
+/* and the same descender under the picture, for the same reason: an <img> is
+   inline by default, so its 16px top margin measured 20 as well */
+.opic{display:block;width:100%;height:calc(var(--u)*132);object-fit:contain;
+  background:var(--paper);margin-top:calc(var(--u)*16)}
 .buy{margin-top:calc(var(--u)*16)}
 .buy-m{display:flex;gap:calc(var(--u)*4);flex-wrap:wrap;margin-bottom:calc(var(--u)*8)}
 .buy-m span{background:var(--g);color:var(--ink);padding:calc(var(--u)*4) calc(var(--u)*8);
   font:500 calc(var(--u)*9.5)/1 var(--display);letter-spacing:.1em;text-transform:uppercase}
+/* Clamped at two lines. Merchant titles are written for search engines, and
+   an unclamped one pushes the price — the answer — off the bottom of the card. */
 .buy-t{font:600 calc(var(--u)*17)/1.08 var(--display);letter-spacing:.01em;
-  text-transform:uppercase;color:var(--ink)}
+  text-transform:uppercase;color:var(--ink);
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 /* The bill. A checkout is a list of numbers that add up, and it says which
    number is which by being a bill — no caption beside the total. */
 .rcp{display:grid;grid-template-columns:auto 1fr;gap:calc(var(--u)*6) calc(var(--u)*14);
@@ -473,7 +488,13 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 .rcp dt{font-size:calc(var(--u)*9.5);letter-spacing:.14em;text-transform:uppercase;
   color:var(--dim);align-self:center}
 .rcp dd{color:var(--ink);text-align:right;margin:0}
-.rcp .tot{font:600 calc(var(--u)*38)/1 var(--display);color:var(--acid);letter-spacing:-.015em}
+/* 44, not 38, and the product's own note says why: a bill total and a bare
+   price are the same number, so at 38 the best outcome — the one with a real
+   till behind it — printed the SMALLEST figure. Fixed in panel.js and not
+   here, until a drift test read both files and said so. .92 rather than 1 for
+   the leading, matching the product: 44px of display type wants slightly less
+   than its own body height on a line of its own. */
+.rcp .tot{font:600 calc(var(--u)*44)/.92 var(--display);color:var(--acid);letter-spacing:-.015em}
 .rcp .pend{color:var(--acid)}
 /* A button that opens the page you are already on does nothing. The next move
    is a few hundred pixels to the left, so point at it.
@@ -644,14 +665,39 @@ h1 em{font-style:normal;color:var(--acid);display:block}
    than 13px. That is what a screenshot of a 404px panel shown at 76% looks
    like, and it is what the camera comment two blocks up always claimed. */
 .stage .pnl{flex:0 0 calc(var(--px)*404);--u:var(--px)}
-/* the three pieces that move, and the only properties they move with */
+/* the two pieces that move, and the only properties they move with */
 .stage .page{transition:opacity .5s ease-out, transform .7s cubic-bezier(.3,.8,.3,1)}
-.stage .cbar{background:#E3E6EA;border-bottom:calc(var(--px)*1) solid #C8CCD3;
+/* ==========================================================================
+   THE CHROME BAR, PINNED. It is the frame, not the content.
+   --px IS REDEFINED HERE, and that one line is what makes the rest of this
+   work. Every metric inside the bar is already written as calc(var(--px)*N)
+   against a 44-tall design bar, so giving .chrome its own --px of one
+   forty-fourth of the bar's rendered height re-resolves all of them at once:
+   the pill, the lights, the chevrons, the icon and the type all scale to the
+   bar instead of to the composition, with no rule rewritten. The bar no
+   longer belongs to the 1400-design-px grid the camera flies over — it
+   belongs to the window.
+   THE HEIGHT IS 5% OF THE WINDOW, set by the driver. A real Chrome bar is
+   about 4.9% of an 800px-tall window, and 5% of this one lands within a pixel
+   of the height this bar already appeared to be — so what changes is not its
+   size, only that it is now whole and still.
+   z-index:4 puts it over the page, which is what chrome does: the composition
+   can pan up underneath it and is covered, never clipped by a frame edge. */
+.chrome{position:absolute;left:0;top:0;right:0;z-index:4;
+  --px:calc(var(--barh,25px)/44)}
+.chrome .cbar{background:#E3E6EA;border-bottom:calc(var(--px)*1) solid #C8CCD3;
   transition:opacity .5s ease-out, transform .7s cubic-bezier(.3,.8,.3,1)}
-/* the chrome bar is part of what arrives, not part of what was waiting */
-.stage[data-beat="1"] .cbar,.stage[data-beat="0"] .cbar{opacity:0;
+/* the chrome bar is part of what arrives, not part of what was waiting. Read
+   off the camera's beat through a sibling combinator now that the bar is not
+   inside it. */
+.stage[data-beat="1"] ~ .chrome .cbar,.stage[data-beat="0"] ~ .chrome .cbar{opacity:0;
   transform:translateX(calc(var(--px)*-498))}
-.stage .omni{box-shadow:inset 0 0 0 calc(var(--px)*1) #D6D9DE}
+/* .stage.cut kills every transition for the one frame of the wrap, and its
+   `.stage.cut *` cannot reach a sibling. Without this the bar would cross-fade
+   back to its beat-1 hidden state over half a second while everything else
+   cut. */
+.stage.cut ~ .chrome,.stage.cut ~ .chrome *{transition:none !important}
+.chrome .omni{box-shadow:inset 0 0 0 calc(var(--px)*1) #D6D9DE}
 /* One address at a time, stacked in place. These rules went missing in an
    earlier rewrite of this block, which left every domain rendering at once
    inside the pill. */
@@ -669,15 +715,19 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 .doms b{position:absolute;left:0;top:0;font-weight:400;color:#5F6368;opacity:0;
   white-space:nowrap}
 .doms b.final{opacity:1;color:#202124}
-.stage.flick .doms b.final{opacity:0}
-.stage.flick .doms b:not(.final):not(.home){animation:flick 1.6s steps(1,end) infinite;
+/* ~ .chrome, not a descendant: the address still changes with the beat, but
+   the beat is on the camera and the bar is beside it now. This is the one
+   thing inside the pinned bar that is allowed to change at all — the CONTENT
+   of the address, never its position or its size. */
+.stage.flick ~ .chrome .doms b.final{opacity:0}
+.stage.flick ~ .chrome .doms b:not(.final):not(.home){animation:flick 1.6s steps(1,end) infinite;
   animation-delay:calc(var(--i) * -320ms - 168ms)}
 /* the pill follows the winner: its own address while it sits there, then its
    checkout once the page navigates */
 .doms b.home{opacity:0}
-.stage[data-beat="3"] .doms b.home{opacity:1}
-.stage[data-beat="3"] .doms b.final{opacity:0}
-.stage.flick .doms b.home{opacity:0}
+.stage[data-beat="3"] ~ .chrome .doms b.home{opacity:1}
+.stage[data-beat="3"] ~ .chrome .doms b.final{opacity:0}
+.stage.flick ~ .chrome .doms b.home{opacity:0}
 .stage .pnl{transition:transform .7s cubic-bezier(.3,.8,.3,1), opacity .5s ease-out}
 .stage[data-beat="1"] .page,.stage[data-beat="0"] .page{opacity:0;
   transform:translateX(calc(var(--px)*-498))}
@@ -824,10 +874,108 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 }
 .stage[data-beat="4"] .pickring{opacity:0;transition:opacity .2s ease-out}
 
+/* ==========================================================================
+   AND THE SAME MARK FILLS THE FORM. This is the beat the sequence never had:
+   it went from finding the thing to a finished checkout, so the one action
+   the product actually performs on your behalf — filling the checkout — was
+   the one thing the demo skipped.
+   IT IS THE PICKRING, NOT A NEW EFFECT. The ring that closed on the chosen
+   tile is re-pointed at the form and stretched to its width: the same mark
+   that said "this is the one" now says "and this is filled", one hand doing
+   both. Nothing new is drawn and no second visual language is introduced.
+   ONE MOVEMENT, NOT SIX. Six fields each with their own animation is a light
+   show, in a beat that has to feel like one deliberate act. So the band makes
+   a single continuous pass down the form — one transform transition, linear,
+   because a wash travels at a steady rate — and each value simply fades in as
+   it goes by, on a transition-delay keyed to --n. That is one class and five
+   delays: zero extra timers, five opacity fades, one moving object.
+   Measured: the band crosses 262 design px in 900ms and the stops are 200ms
+   apart, so a value lands within about a tenth of a second of the band
+   reaching it — the wash appears to leave the value behind it.
+   THE CARD FIELDS DO NOT LIGHT, and they are in frame the whole time. That is
+   not an omission in the animation, it is the claim the animation exists to
+   make. The camera holds the WHOLE form for the full 1600ms, blank payment
+   section included, so the reader watches the wash stop.
+   ========================================================================== */
+/* .fill.filled, not .fill: the mark appears when it STARTS MOVING and not a
+   moment before. Parked on the first field it was on screen for the whole of
+   the product's arrival, sitting on a row nothing was happening to — which is
+   most of what "the magic is going over the wrong fields" was. */
+.stage.fill.filled .pickring{opacity:1;
+  transition:opacity .2s ease-out, transform 1.4s linear}
+/* ==========================================================================
+   TWO HANDS, TWO COLOURS, ONE CHECKOUT. This is the headline animated:
+   IT DOES THE SHOPPING — acid fills the item, the address and the delivery.
+   YOU DO THE BUYING — cobalt fills the card, with your cursor sitting on it.
+   It replaces a version that showed the payment being SKIPPED, dashed and
+   grey. A skip is an absence and an absence needs explaining; a handoff is
+   something you watch. Same checkout, two hands, and you can see at a glance
+   which did what.
+   WHY COBALT (--g #1B2CF0) AND NOT AMBER OR CORAL:
+   - It is already the user's colour on this stage. The cursor is drawn white
+     with a #0A1140 outline — the same blue family — so the association is
+     free rather than something the viewer has to be taught.
+   - Blue against acid separates on the BLUE-YELLOW axis, which protanopia and
+     deuteranopia both leave intact. Amber against acid separates on the
+     red-green axis, which is the one roughly 1 in 12 men cannot use, and both
+     are high-lightness yellows besides. Coral was out for the same reason and
+     for reading as an error.
+   - It carries no warning semantics. --warn and --halt do, elsewhere in the
+     product; --g is the page's own brand blue and means nothing but "ours".
+   - Measured on the card's white: cobalt 7.84:1, and cobalt against acid
+     7.01:1, so the two hands are unmistakable from each other as well as from
+     the ground. (Acid on white is 1.12:1, which is why acid is only ever a
+     fill and a ring here and never type.)
+   ========================================================================== */
+.stage.fill.pay .pickring{background:rgba(27,44,240,.12);
+  box-shadow:0 0 0 calc(var(--px)*3) var(--g);
+  transition:opacity .2s ease-out,
+             transform .5s cubic-bezier(.3,.8,.3,1),
+             height .5s cubic-bezier(.3,.8,.3,1),
+             background-color .25s ease-out, box-shadow .25s ease-out}
+
+/* THE ROWS, BEFORE THE HAND THAT FILLS THEM ARRIVES. The label and the box
+   stay: an empty field is a labelled empty field, not a missing one. */
+.stage.fill .cform .cfld span{opacity:0}
+.stage.fill .copt.on{border-color:var(--co-line)}
+.stage.fill .copt.on i{background:transparent;border-color:var(--co-line)}
+/* --d is written onto each row by the driver from its MEASURED position along
+   the band's travel, so a row lights when the band is on it. */
+.stage.fill.filled [data-by="k"] span{opacity:1;
+  transition:opacity .3s ease-out var(--d,0ms)}
+.stage.fill.filled .copt.on[data-by="k"]{border-color:var(--co-btn);
+  transition:border-color .3s ease-out var(--d,0ms)}
+.stage.fill.filled .copt.on[data-by="k"] i{background:var(--co-btn);border-color:var(--co-btn);
+  transition:background-color .3s ease-out var(--d,0ms),
+             border-color .3s ease-out var(--d,0ms)}
+/* and your hand, the same mechanism, the other colour */
+.stage.fill.paid [data-by="u"] span{opacity:1;
+  transition:opacity .3s ease-out var(--d,0ms)}
+/* the caret belongs to the field you are typing into and to nothing else:
+   off at rest, on while your fields are still empty, gone once they are not */
+.stage.fill:not(.paid) [data-by="u"] u{opacity:1;
+  animation:caret 1.06s steps(1,end) infinite}
+@keyframes caret{0%,49%{opacity:1}50%,100%{opacity:0}}
+.stage.fill.paid [data-by="u"] u{opacity:0;
+  transition:opacity .2s ease-out var(--d,0ms)}
+
+/* A .panning class used to live here, giving one camera move a longer ease
+   than the standard .45s because it was a long traverse. There are no camera
+   moves inside a beat any more — the closing frame holds the card and the
+   panel at once and never travels — so it is gone rather than left inert. */
+
 /* The tile is large and the summary's image is small, so the move carries a
    uniform scale as well as a translate — both squares, both object-fit:contain,
    so nothing distorts. */
-.stage[data-beat="4"] .co-item img{animation:travel .75s cubic-bezier(.2,.75,.3,1)}
+/* Back on [data-beat="4"], and the order is the point: the picture arrives in
+   the card FIRST, and only then do the details fill. A card that fills before
+   it has the product in it is the wrong story. The camera opens on the top of
+   the card, which is where the thumbnail lands, so the flight is on screen. */
+/* A SECOND, NOT 750ms, and then stillness. This is the moment the errand
+   becomes a purchase — the thing you asked for arriving in a cart — and it was
+   flicking past. It travels for 1s and then nothing moves for 700ms before the
+   filling starts. */
+.stage[data-beat="4"] .co-item img{animation:travel 1s cubic-bezier(.2,.75,.3,1)}
 @keyframes travel{
   from{transform:translate(var(--fx,0),var(--fy,0)) scale(var(--fs,1))}
   to{transform:none}}
@@ -848,12 +996,23 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 .cform{transition:opacity .4s ease-out .16s, transform .4s ease-out .16s}
 .stage[data-beat="2"] .cform,.stage[data-beat="3"] .cform{opacity:0;
   transform:translateY(calc(var(--px)*12))}
-.checkout .co > *{max-width:none}
+/* ONE COLUMN, and the card is the only thing in it. .co is the shop's page
+   body; the card is centred in it with a measured width so the page's own
+   ground still shows on both sides — the reader has to keep seeing that this
+   is a shop's page and not Knili's. */
+
 /* centred in a much taller page now — which also pulls the summary and the
    panel's CTA closer together, and that pair is what the seam beat frames */
-.checkout .co{flex:1;background:#FAFBFC;display:grid;align-content:center;align-items:start;
-  grid-template-columns:1fr calc(var(--px)*300);gap:calc(var(--px)*24);
-  padding:calc(var(--px)*24)}
+/* RIGHT-ALIGNED, NOT CENTRED, and that is a composition decision rather than
+   a taste one: the card and the panel have to be in one frame together, so the
+   less page there is between them the more of the window is left for the two
+   objects. Centred, the union was 851 stage px wide and fitted at .505; sat
+   against the panel it is 685 and fits at .608, which is the difference
+   between 8.5px of type in the card and 10.2. The shop's own ground still
+   shows to the left of it, which is what says whose page this is. */
+.checkout .co{flex:1;background:#FAFBFC;display:flex;flex-direction:column;
+  align-items:flex-end;justify-content:center;
+  padding:calc(var(--px)*12) calc(var(--px)*16)}
 /* ==========================================================================
    THE CHECKOUT, WRITTEN OUT. This column used to be grey placeholder bars —
    .flab / .fld2 / .frow / .opt — which reads as a page that has not LOADED,
@@ -867,12 +1026,16 @@ h1 em{font-style:normal;color:var(--acid);display:block}
    Design pixels times --px like the rest of the composition, so it scales as
    one object with everything around it.
    ========================================================================== */
+/* 18/10 -> 13/7 and .cfld 8/8 -> 6/6. The card holds everything now — goods,
+   details, card, bill, button — and it has to fit inside the shop's own page,
+   which is 641 stage px tall. The type is untouched; only the air between the
+   rows is, and it is the air a real checkout is set at. */
 .ch{font-size:calc(var(--px)*13);letter-spacing:.08em;text-transform:uppercase;
-  color:var(--co-dim);margin:calc(var(--px)*18) 0 calc(var(--px)*10)}
+  color:var(--co-dim);margin:calc(var(--px)*13) 0 calc(var(--px)*7)}
 .cform > .ch:first-child{margin-top:0}
 .cfld{background:var(--co-card);border:calc(var(--px)*1) solid var(--co-line);
-  border-radius:calc(var(--px)*4);padding:calc(var(--px)*8) calc(var(--px)*12);
-  margin-bottom:calc(var(--px)*8);min-width:0}
+  border-radius:calc(var(--px)*4);padding:calc(var(--px)*6) calc(var(--px)*12);
+  margin-bottom:calc(var(--px)*6);min-width:0}
 .cfld i{display:block;font-style:normal;font-size:calc(var(--px)*11);
   color:var(--co-dim);letter-spacing:.04em}
 .cfld span{display:block;font-size:calc(var(--px)*15);color:var(--co-ink);
@@ -891,37 +1054,33 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 .copt span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .copt b{font-weight:600;flex:none}
 /* the one field nobody filled — an empty input with the caret still in it */
-.cfld.blank span{height:calc(var(--px)*18);margin-top:calc(var(--px)*4)}
-.cfld.blank u{display:block;width:calc(var(--px)*2);height:calc(var(--px)*15);
-  background:var(--co-ink);opacity:.5}
+.cfld.blank span{min-height:calc(var(--px)*18);margin-top:calc(var(--px)*4)}
+.cfld.blank u{display:inline-block;width:calc(var(--px)*2);height:calc(var(--px)*15);
+  vertical-align:calc(var(--px)*-2);background:var(--co-ink);opacity:0;margin-right:calc(var(--px)*1)}
 .checkout .co-card{padding:calc(var(--px)*20)}
 /* the product is the subject of this card, so it is drawn at a size worth
    looking at now that the card has the room — and flip() reads both widths
    off the DOM, so the arriving thumbnail still lands on it exactly. */
 .checkout .co-item img{width:calc(var(--px)*72);height:calc(var(--px)*72)}
 /* ==========================================================================
-   THE SUMMARY COLUMN, FILLED. It was one short card at the top of a full-
-   height column: measured at 1440, 208px of card over a 503px track, a 41%
-   fill and 295px of bare page under it. Two things were wrong and both are
-   fixed here. The card said `Total` and nothing else, which is not what an
-   order summary is; it now carries the bill. And it sat at the top of a
-   column it did not use; it now stretches to the column.
-
-   IT MAY STRETCH TO THE FORM'S HEIGHT AND NOT ONE PIXEL FURTHER, and that is
-   a hard constraint, not a preference. FRAME[4] frames union('.csum','.out')
-   and takes the union's TOP edge from .csum. The grid centres its single row,
-   so a .csum taller than .cform grows the row, lifts that top edge, and the
-   union outgrows the window and the whole seam beat zooms out. Stretching to
-   the row .csum is already in moves nothing. align-self, therefore, and never
-   a height.
+   THE CARD. It was a summary COLUMN beside a form column, and the long note
+   that stood here was about how tall that column was allowed to grow before
+   it moved the top edge of a union that framed it. There is no union and no
+   second column: the card holds everything, is centred in the shop's page,
+   and the camera fits its width and rides down it.
    ========================================================================== */
-.checkout .csum{align-self:stretch;display:flex}
-.checkout .csum > .co-card{flex:1;display:flex;flex-direction:column}
+/* A --px:calc(var(--cpx)*.78) used to sit here, shrinking the whole card so it
+   would fit the page. It is gone: the card is short enough now to be drawn at
+   the composition's own scale, and it has to be, because a card drawn at 78%
+   is a card the camera has to get 28% closer to — and getting closer is
+   exactly what pushed the extension out of frame. */
+.checkout .ccard{width:100%;max-width:calc(var(--px)*470);
+  padding:calc(var(--px)*14) calc(var(--px)*20)}
 /* Whatever room the column has spare is SPLIT between two auto margins rather
    than opening as one hole: half above the bill and half above the button, so
    the card reads as goods / money / act with air between the three, and no
    single gap is large enough to look like a mistake. */
-.checkout .cdisc,.checkout .csum .co-pay{margin-top:auto}
+
 .cdisc{display:flex;align-items:center;gap:calc(var(--px)*8);
   background:var(--co-card);border:calc(var(--px)*1) solid var(--co-line);
   border-radius:calc(var(--px)*4);padding:calc(var(--px)*10) calc(var(--px)*12);
@@ -969,31 +1128,39 @@ h1 em{font-style:normal;color:var(--acid);display:block}
   filter:drop-shadow(0 calc(var(--px)*2) calc(var(--px)*4) rgba(10,17,64,.45))}
 .stage[data-beat="1"] .hand,.stage[data-beat="2"] .hand,
 .stage[data-beat="3"] .hand,.stage[data-beat="0"] .hand{opacity:0}
-/* A beat of stillness first. The thumbnail's flight is 750ms and the form
-   settles at 560ms, so the delay starts the cursor 400ms after the page has
-   finished arriving — one thing moving at a time. `both` matters: without the
-   backwards fill the cursor would sit at its resting position on the button
-   for the whole delay instead of waiting off-frame. */
-.stage[data-beat="4"] .hand{animation:handoff 3s cubic-bezier(.4,0,.2,1) 1.15s both}
+/* 1.15s -> 1.6s, and the beat of stillness it used to buy is now the fill.
+   Beat 4 opens on the form and washes it for 1600ms; the cursor's animation
+   is anchored to the start of the beat, so its delay is that 1600 — it starts
+   moving while the card is still settling and arrives as the wash finishes.
+   One thing moving at a time still holds; there is simply something worth
+   watching in the time that used to be empty.
+   `both` matters: without the backwards fill the cursor would sit at its
+   resting position on the button for the whole delay instead of off-frame. */
+.stage[data-beat="4"] .hand{animation:handoff 2.7s cubic-bezier(.4,0,.2,1) 1.7s both}
 /* In from beyond the right edge of the whole composition — off-frame, past the
    panel — and left across it to the near side of the button. It is the
    reader's hand arriving from outside, never something the panel emits. */
+/* TWO DESTINATIONS NOW, BECAUSE YOU DO TWO THINGS. In from off-frame right,
+   down to the card fields — where it sits still while they fill in your
+   colour — then down to the button and press. --kx/--ky is the offset from
+   the button to the card block, measured in place() and never guessed. */
 @keyframes handoff{
   0%{opacity:0;transform:translate(calc(var(--px)*980),calc(var(--px)*30))}
-  4%{opacity:1;transform:translate(calc(var(--px)*980),calc(var(--px)*30))}
-  46%,55%{opacity:1;transform:translate(0,0) scale(1)}
-  60%{transform:translate(0,calc(var(--px)*4)) scale(.84)}
-  66%{transform:translate(0,0) scale(1)}
+  5%{opacity:1;transform:translate(calc(var(--px)*980),calc(var(--px)*30))}
+  25%,58%{opacity:1;transform:translate(var(--kx,0),var(--ky,0)) scale(1)}
+  70%{opacity:1;transform:translate(0,0) scale(1)}
+  75%{transform:translate(0,calc(var(--px)*4)) scale(.84)}
+  80%{transform:translate(0,0) scale(1)}
   100%{opacity:1;transform:translate(0,0) scale(1)}
 }
-.stage[data-beat="4"] .co-pay{animation:press 3s cubic-bezier(.4,0,.2,1) 1.15s both}
+.stage[data-beat="4"] .co-pay{animation:press 2.7s cubic-bezier(.4,0,.2,1) 1.7s both}
 @keyframes press{
-  0%,40%{box-shadow:0 0 0 0 rgba(232,255,58,0);transform:scale(1);filter:none}
-  46%,55%{box-shadow:0 0 0 calc(var(--px)*4) rgba(232,255,58,.65);transform:scale(1);
-          filter:none}
-  60%{box-shadow:0 0 0 calc(var(--px)*4) rgba(232,255,58,.65);transform:scale(.955);
+  0%,62%{box-shadow:0 0 0 0 rgba(232,255,58,0);transform:scale(1);filter:none}
+  70%{box-shadow:0 0 0 calc(var(--px)*4) rgba(232,255,58,.65);transform:scale(1);
+      filter:none}
+  75%{box-shadow:0 0 0 calc(var(--px)*4) rgba(232,255,58,.65);transform:scale(.955);
       filter:brightness(.72)}
-  66%{box-shadow:0 0 0 calc(var(--px)*4) rgba(232,255,58,.65);transform:scale(1);
+  80%{box-shadow:0 0 0 calc(var(--px)*4) rgba(232,255,58,.65);transform:scale(1);
       filter:none}
   100%{box-shadow:0 0 0 calc(var(--px)*4) rgba(232,255,58,0);transform:scale(1)}
 }
@@ -1028,7 +1195,11 @@ h1 em{font-style:normal;color:var(--acid);display:block}
   font:600 calc(var(--px)*24)/1 var(--ui);opacity:0;
   box-shadow:0 calc(var(--px)*10) calc(var(--px)*26) rgba(10,17,64,.2)}
 .placed svg{width:calc(var(--px)*26);height:calc(var(--px)*26)}
-.stage.burst .placed{animation:chip 1.9s ease-out forwards}
+/* 1.9s -> 1.5s, and this is where the new fill beat was paid for. The chip is
+   a confirmation stamp: it is fully up from 14% to 74%, which at 1.5s is
+   900ms of complete stillness on ORDER PLACED — ample — against 1140ms
+   before. 400 of the fill beat's 450 came from here. */
+.stage.burst .placed{animation:chip 1.5s ease-out forwards}
 @keyframes chip{0%{opacity:0;transform:translateY(calc(var(--px)*8)) scale(.92)}
                 14%,74%{opacity:1;transform:none}
                 100%{opacity:0;transform:none}}
@@ -1327,9 +1498,19 @@ h1 em{font-style:normal;color:var(--acid);display:block}
    the picture was instructing people into Chrome's "Could not unzip extension
    for install". It is a folder now, named knili, and card 01 ends on the same
    chip — the object you are given is the object you drag. */
-.fold{display:inline-flex;align-items:center;gap:8px;font-size:11px;color:#3C4043;
+/* span.fold, NOT .fold, and this is a real bug caught in the wild: the hero
+   panel's collapsible rows are <h3 class="fold"> — YOUR RULES, STEPS, RULED
+   OUT, CHECKOUTS TRIED — and this rule was unscoped, so a chip belonging to
+   the install section was painting all four of them. What the owner saw in
+   beat 4 was four solid #F1F3F4 bars with acid text nearly invisible on them.
+   background, gap and padding all leaked; the panel's own .pnl h3 outranks
+   this on display, colour and font, which is why only those three showed.
+   Two unrelated objects were sharing a class name. The chip is a <span> in
+   both places it appears and the panel's rows are <h3>, so the element name
+   is the honest discriminator. */
+span.fold{display:inline-flex;align-items:center;gap:8px;font-size:11px;color:#3C4043;
   background:#F1F3F4;padding:7px 10px}
-.fold svg{width:13px;height:13px;color:#5F6368}
+span.fold svg{width:13px;height:13px;color:#5F6368}
 /* THE ARCHIVE BECOMING THE FOLDER, at the foot of card 01. An arrow and the
    chip, centred under the downloads panel, because "becomes" is a thing a
    picture can say and a 10px caption inside a mock could not. */
@@ -1630,27 +1811,47 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
    from where box() measures it, so beats 0 and 1 framed bare cream. Layout
    space cannot see a transform that is about to be applied; the cure is to
    not apply one. Any future frame subject must stay untransformed too. */
+/* .cbar is off this list because it is off the stage: it is not a frame
+   subject any more, so nothing measures it in layout space and it is free to
+   carry the slide-in transform that beats 0 and 1 give it. */
 .stage[data-beat="1"] .pnl,.stage[data-beat="0"] .pnl,
-.stage[data-beat="1"] .page,.stage[data-beat="0"] .page,
-.stage[data-beat="1"] .cbar,.stage[data-beat="0"] .cbar{transform:none}
+.stage[data-beat="1"] .page,.stage[data-beat="0"] .page{transform:none}
 /* the ground the window shows wherever the cropped composition does not reach */
 .stagewin{background:var(--co-bg)}
 /* Two frames zoom out below the panel's own scale, so the things those beats
    are about get sized for the frame they appear in: the shop's name while the
    pages flick, and the two labels either side of the seam. These are the shot's
    own units, not pixel floors — they scale with everything around them. */
-/* The address bar has to survive a .49 zoom, so it is drawn larger inside the
-   composition rather than pinned to a pixel size outside it — the same move
-   the shop's wordmark makes two lines down. The pill grows with its type and
-   stays inside the bar's own 44 design px; nothing here is absolute. */
-.stage .omni{height:calc(var(--px)*38);border-radius:calc(var(--px)*19);
+/* The hero's bar is drawn heavier than the install section's — a 38 design px
+   pill in a 44 design px bar rather than 28 in 44 — because it is read at a
+   glance across a whole shot rather than pointed at. It used to need that to
+   survive a .49 camera zoom; the bar is outside the camera now and these
+   numbers stay for the first reason, not the second. Scoped to .chrome so
+   they follow the bar out and leave the install section's copy alone. */
+.chrome .omni{height:calc(var(--px)*38);border-radius:calc(var(--px)*19);
   font-size:calc(var(--px)*28);padding:0 calc(var(--px)*16)}
-.stage .omni svg{width:calc(var(--px)*22);height:calc(var(--px)*22)}
-.stage .lights i{width:calc(var(--px)*16);height:calc(var(--px)*16)}
-.stage .cbar .nav{width:calc(var(--px)*24);height:calc(var(--px)*24)}
-.stage .cbar img{width:calc(var(--px)*30);height:calc(var(--px)*30)}
+.chrome .omni svg{width:calc(var(--px)*22);height:calc(var(--px)*22)}
+.chrome .lights i{width:calc(var(--px)*16);height:calc(var(--px)*16)}
+.chrome .cbar .nav{width:calc(var(--px)*24);height:calc(var(--px)*24)}
+.chrome .cbar img{width:calc(var(--px)*30);height:calc(var(--px)*30)}
 .stage .wm{font-size:calc(var(--px)*26)}
-.stage .co-pay{font-size:calc(var(--px)*22)}
+.stage .co-pay{font-size:calc(var(--px)*26);height:calc(var(--px)*52)}
+/* THE CARD IS READ FROM WHERE THE PANEL IS READ, so it is set at the sizes
+   that survive that distance — the same move the panel makes with its pay bar
+   and the address bar makes with its pill. A 15px value in a checkout is a
+   15px value on a monitor a foot away; at .608 of zoom it is 8.5px on this
+   page. These are the numbers that put it at 10.2. */
+.stage .cfld span{font-size:calc(var(--px)*22)}
+.stage .cfld i{font-size:calc(var(--px)*14)}
+.stage .ch{font-size:calc(var(--px)*15)}
+.stage .co-h{font-size:calc(var(--px)*15)}
+.stage .co-item b{font-size:calc(var(--px)*18)}
+.stage .co-item em{font-size:calc(var(--px)*14)}
+.stage .co-item .p{font-size:calc(var(--px)*20)}
+.stage .co-item img{width:calc(var(--px)*64);height:calc(var(--px)*64)}
+.stage .copt{font-size:calc(var(--px)*18)}
+.stage .co-tot{font-size:calc(var(--px)*17)}
+.stage .co-tot b{font-size:calc(var(--px)*30)}
 /* The tight camera zooms this bar out, so its two lines are set larger than
    the product's — but the shaft is what pays for it, and the shaft is the
    thing that makes the arrow POINT. Measured: the old 22px override left the
@@ -2038,16 +2239,6 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
     <div class="demo">
     <div class="stagewin">
     <div class="stage" id="stage" data-anim="stage">
-      <div class="cbar">
-        <span class="lights"><i></i><i></i><i></i></span>
-        <svg class="nav" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 5 8 12l7 7"/></svg>
-        <svg class="nav" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg>
-        <span class="omni">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
-          <span class="doms"><b style="--i:0">tarjet.example</b><b style="--i:1">wallmarq.example</b><b style="--i:2">ebuy.example</b><b style="--i:3">zonda.example</b><b style="--i:4">bestly.example</b><b class="final">shopheathotsauce.com/checkout/</b><b class="home">shopheathotsauce.com</b></span>
-        </span>
-        <img src="icon.png" alt="Knili">
-      </div>
 
       <div class="sbody">
         <div class="page">
@@ -2065,53 +2256,79 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
             <div class="nav"><i></i><i></i><i></i><i></i><i></i></div>
             <div class="cobody">
               <div class="co">
-                <!-- Stand-in data throughout. example.com is the reserved
-                     domain, the street is not one, and the only true value on
-                     the page is the city the panel was asked for. -->
-                <div class="cform">
-                  <p class="ch">Contact</p>
-                  <div class="cfld"><i>Email</i><span>dana@example.com</span></div>
-                  <p class="ch">Shipping address</p>
-                  <div class="cfld"><i>Name</i><span>Dana Levi</span></div>
-                  <div class="cfld"><i>Address</i><span>1 Example Street, Apt 4</span></div>
-                  <div class="crow">
-                    <div class="cfld"><i>City</i><span>Jerusalem</span></div>
-                    <div class="cfld"><i>Country</i><span>Israel</span></div>
-                  </div>
-                  <p class="ch">Delivery</p>
-                  <div class="copt on"><i></i><span>Standard &middot; 3&ndash;5 days</span><b>Free</b></div>
-                  <div class="copt"><i></i><span>Express &middot; next day</span><b>$12.00</b></div>
-                  <p class="ch">Payment</p>
-                  <div class="cfld blank"><i>Card number</i><span><u></u></span></div>
-                  <div class="crow">
-                    <div class="cfld blank"><i>Expiry</i><span><u></u></span></div>
-                    <div class="cfld blank"><i>CVC</i><span><u></u></span></div>
-                  </div>
-                </div>
-                <div class="csum">
-                <div class="co-card">
+                <!-- ONE CARD, NOT TWO COLUMNS. This used to be a shipping form
+                     on the left and an order summary on the right, and every
+                     framing problem beat 4 has had came from that: two objects
+                     at opposite ends of a 1400px composition, and a camera
+                     trying to hold both. A union of them dragged the zoom to
+                     .29; pinning the top edge to reach the browser left a gap;
+                     a pan with a measured bleed showed "a little of the form"
+                     and cropped the rest. One card is one subject, and the
+                     frame gets simple and gets bigger.
+                     The order it reads in is the order it happens in: what you
+                     are buying, then the details Knili fills, then the card it
+                     will not touch, then the bill, then the button you press.
+                     The discount row and the returns line went with the second
+                     column — shop furniture, and this card has to fit inside
+                     the page it sits on. -->
+                <div class="co-card ccard">
                   <p class="co-h">Order summary</p>
                   <div class="co-item">
                     <img src="shot-sauce.png" alt="Father&rsquo;s Day Hot Sauce Gift Set">
                     <div><b>Father&rsquo;s Day Hot Sauce Gift Set</b><em>Qty 1 &middot; Jerusalem, Israel</em></div>
                     <span class="p">$6.00</span>
                   </div>
-                  <!-- The bill, itemised, and every line of it lands on the
-                       $6.00 the panel beside it is claiming: free is the
-                       delivery option the form has selected, and the tax is
-                       the one figure a checkout cannot know until the card is
-                       in — which is the half of this the reader does. -->
-                  <div class="cdisc"><span>Discount code</span><b>Apply</b></div>
-                  <dl class="co-sum">
-                    <dt>Subtotal</dt><dd>$6.00</dd>
-                    <dt>Delivery</dt><dd>Standard, 3&ndash;5 days</dd>
-                    <dt>Shipping</dt><dd>Free</dd>
-                    <dt>Estimated tax</dt><dd>At payment</dd>
-                  </dl>
+                  <!-- data-by SAYS WHOSE HAND FILLED IT, and it is the whole
+                       third act in one attribute. k is Knili, u is you. The
+                       rows carry no timing of their own: the driver measures
+                       where each sits along the band's travel and writes a --d
+                       onto it, so a row lights when the band is ACTUALLY on it
+                       rather than on its ordinal turn. A linear delay per index
+                       is a constant pretending to be a measurement, and it is
+                       what put the wash on the wrong fields the moment the card
+                       was restructured and the rows stopped being evenly spaced. -->
+  <div class="cform">
+                    <!-- The section headings for Contact, Shipping address and
+                         Delivery are gone, and so is the Express option. Every
+                         one of them was verisimilitude, and verisimilitude is
+                         what was costing us the panel: a taller card forces the
+                         camera closer, and once it is close there is no room
+                         for the extension beside it. Email / Name / Address /
+                         City / Country are self-evident from their own labels.
+                         PAYMENT keeps its heading, because the handoff between
+                         the two hands happens there and it is the one place the
+                         reader has to be told which section they are looking
+                         at. 140 design px came off the card for that. -->
+                    <div class="cfld" data-by="k"><i>Email</i><span>dana@example.com</span></div>
+                    <div class="cfld" data-by="k"><i>Name</i><span>Dana Levi</span></div>
+                    <div class="cfld" data-by="k"><i>Address</i><span>1 Example Street, Apt 4</span></div>
+                    <div class="crow" data-by="k">
+                      <div class="cfld"><i>City</i><span>Jerusalem</span></div>
+                      <div class="cfld"><i>Country</i><span>Israel</span></div>
+                    </div>
+                    <div class="copt on" data-by="k"><i></i><span>Standard &middot; 3&ndash;5 days</span><b>Free</b></div>
+                    <p class="ch">Payment</p>
+                    <!-- 4242 4242 4242 4242 is the number every payment
+                         processor on earth publishes as its test card. Anything
+                         else here would draw something that looks like
+                         somebody's real card, and this page is stand-in data on
+                         that principle throughout: example.com, a street that
+                         is not one, and only Jerusalem true. The CVC is dotted
+                         because that is what a CVC field does. -->
+                    <div class="cfld blank" data-by="u"><i>Card number</i><span><u></u>4242 4242 4242 4242</span></div>
+                    <div class="crow" data-by="u">
+                      <div class="cfld blank"><i>Expiry</i><span><u></u>04 / 29</span></div>
+                      <div class="cfld blank"><i>CVC</i><span><u></u>&bull;&bull;&bull;</span></div>
+                    </div>
+                  </div>
+                  <!-- The itemised bill — subtotal, delivery, shipping,
+                       estimated tax — went the way of the discount code and the
+                       returns line. It was four rows of a checkout being a
+                       checkout, and the only number in it the page actually
+                       claims is the total, which the panel beside it is
+                       printing at the same moment. The total stays. -->
                   <div class="co-tot"><span>Total</span><b>$6.00</b></div>
                   <div class="co-pay">Place order</div>
-                  <p class="cfine">Free returns within 30 days.</p>
-                </div>
                 </div>
               </div>
             </div>
@@ -2181,6 +2398,31 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
       <div class="ripple" aria-hidden="true"><i></i></div>
       <div class="confetti" aria-hidden="true"><i style="--x:-99;--y:-53;--r:-166deg;--c:var(--acid);animation-delay:50ms"></i><i style="--x:-107;--y:-83;--r:-246deg;--c:#FFFFFF;animation-delay:68ms"></i><i style="--x:-66;--y:-71;--r:276deg;--c:var(--g);animation-delay:7ms"></i><i style="--x:-85;--y:-128;--r:-101deg;--c:#3B2C25;animation-delay:4ms"></i><i style="--x:-39;--y:-88;--r:108deg;--c:var(--acid);animation-delay:8ms"></i><i style="--x:-26;--y:-104;--r:244deg;--c:#FFFFFF;animation-delay:54ms"></i><i style="--x:-8;--y:-94;--r:259deg;--c:var(--g);animation-delay:15ms"></i><i style="--x:13;--y:-156;--r:276deg;--c:var(--acid);animation-delay:7ms"></i><i style="--x:32;--y:-126;--r:86deg;--c:#FFFFFF;animation-delay:6ms"></i><i style="--x:64;--y:-145;--r:-273deg;--c:var(--g);animation-delay:71ms"></i><i style="--x:83;--y:-125;--r:-24deg;--c:#3B2C25;animation-delay:53ms"></i><i style="--x:68;--y:-73;--r:-200deg;--c:var(--acid);animation-delay:73ms"></i><i style="--x:88;--y:-68;--r:-135deg;--c:#FFFFFF;animation-delay:13ms"></i><i style="--x:115;--y:-61;--r:-128deg;--c:var(--g);animation-delay:47ms"></i></div>
       <div class="placed" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M4 13l5 5L20 6"/></svg>Order placed</div>
+    </div>
+    <!-- THE CHROME IS OUTSIDE THE CAMERA, and this is the whole reason it is
+         here rather than as the stage's first child where it lived until now.
+         In a real browser the chrome stays put and the page moves underneath
+         it. Inside .stage it was part of the composition the camera pans, so
+         every camera move dragged it and cropped it: pinning the frame's top
+         edge to reach it opened a gap above the bar, putting it in a union
+         shrank the whole shot to fit 1400 design px of bar, and the pan cut
+         its right end off. Three attempts to make a moving thing look still.
+         Out here it is pinned to the top of the window at a fixed height and
+         the camera cannot touch it. It cannot move, cannot crop, and never
+         needs re-fitting per beat. It comes AFTER .stage in the source so the
+         beat can be read off a sibling combinator — .stage[data-beat] ~ .chrome
+         — since data-beat lives on the camera and the bar is no longer in it. -->
+    <div class="chrome" aria-hidden="true">
+      <div class="cbar">
+        <span class="lights"><i></i><i></i><i></i></span>
+        <svg class="nav" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 5 8 12l7 7"/></svg>
+        <svg class="nav" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg>
+        <span class="omni">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+          <span class="doms"><b style="--i:0">tarjet.example</b><b style="--i:1">wallmarq.example</b><b style="--i:2">ebuy.example</b><b style="--i:3">zonda.example</b><b style="--i:4">bestly.example</b><b class="final">shopheathotsauce.com/checkout/</b><b class="home">shopheathotsauce.com</b></span>
+        </span>
+        <img src="icon.png" alt="Knili">
+      </div>
     </div>
     </div>
 
@@ -2573,7 +2815,7 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
      against beats; this is the number the pass ends on, and the loop track
      under the window is driven from it (see progress()) so the bar and the
      wrap cannot disagree. The last thing that moves — the ORDER PLACED chip —
-     settles at 11150 and beat 4 is then held for 1100ms; see the note beside
+     settles at 11740 and beat 4 is then held for 1100ms; see the note beside
      at(LOOP, play) for why that hold is 1100.
      16750 -> 12250, and every millisecond of that is measured rather than
      trimmed by feel. Beat 1 gives up 800 because the ask is 41 characters
@@ -2581,7 +2823,11 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
      after the last letter goes UP, from 1276ms to ~1440, which is what the
      first outside reader was actually asking for. The scan gives up the other
      3700: see beat 2. */
-  var LOOP = 12250;
+  /* how long Knili's pass down the form takes. It was 900ms and read as a
+     flash; at 1400 you can follow it filling. The 500 came out of the beat's
+     own dead time, not off the loop — see the sub-phase list in beat 4. */
+  var KWASH = 1400;
+  var LOOP = 12840;
   var T = [], raf = null;
 
   /* Where the cursor has to land is a fact about the rendered button, not a
@@ -2608,6 +2854,17 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
     el.style.setProperty('--hx', (b.x + b.h / 2) + 'px');
     el.style.setProperty('--cx', (b.x + b.w / 2) + 'px');
     el.style.setProperty('--hy', (b.y + b.h / 2) + 'px');
+    /* THE CURSOR'S FIRST STOP, measured rather than guessed. It sits on the
+       card fields while they fill in your colour, then travels down to the
+       button — so its keyframes need the offset from the button back up to the
+       card block, in the stage's own untransformed units, which is what box()
+       returns. A constant here would be wrong the moment the card changes, and
+       the card has changed three times. */
+    var c = box('.cfld.blank');
+    if (c) {
+      el.style.setProperty('--kx', ((c.x + c.w * 0.28) - (b.x + b.h / 2)) + 'px');
+      el.style.setProperty('--ky', ((c.y + c.h * 0.72) - (b.y + b.h / 2)) + 'px');
+    }
   }
 
   /* The item that was found and the item being bought are the same picture at
@@ -2635,6 +2892,11 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
      the composition is already carrying a transform from the previous beat and
      getBoundingClientRect would measure through it. */
   var win = el.parentNode;
+  /* The chrome, which is the window's and not the camera's. Queried off win
+     rather than el for exactly that reason — if this ever comes back as null
+     the bar has been put back inside the composition and the frames below are
+     reserving a strip for something that is going to move again. */
+  var bar = win.querySelector('.chrome');
   function box(sel) {
     var n = el.querySelector(sel);
     if (!n || !n.offsetWidth) return null;
@@ -2720,36 +2982,31 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
        centred rather than being clamped. Beat 0 falls through to this one. */
     1: { sel: ['.hd', '.ztop'],   fit: 'contain', ax: 0.5, ay: 0, bare: true,
          air: 0 },
-    2: { sel: ['.cbar', '.page'], fit: 'cover',   ax: 0,   ay: 0 },
-    3: { sel: ['.cbar', '.page'], fit: 'cover',   ax: 0,   ay: 0 },
-    /* THE CLOSING FRAME HOLDS THE ASK, THE ANSWER AND THE BROWSER — and each
-       of those three was measured before it was let in.
-       THE ASK. .composer, not .ztop: the box of the text is what was asked
-       for. It costs the union 545x560 -> 545x640 and the fit .855 -> .769,
-       and it earns that by making the frame read "you asked for this, here it
-       is, ready to pay" instead of only showing the answer.
-       THE BROWSER, and this is why pinTop exists rather than a fourth
-       selector. The address bar is not an object that can join a union: it is
-       1072 design px wide, the full width of the shot, so including it drags
-       the frame out to the whole composition — measured, .40 of zoom, a 7.4px
-       pay label and 5.6px figures in the bill, which is the same refusal this
-       beat made once before at .29 and 4.7px. Pinning the top edge to y=0
-       instead grows the subject upward only: 545x640 -> 545x726, the fit goes
-       .707 -> .623, and the pay label lands at 11.45px against the ~11 this
-       page holds readable things to. Twelve per cent of zoom for a browser
-       frame across the top of the payoff.
-       WHAT IS NOT IN IT. The URL TEXT. .doms starts at x=194 and this frame
-       starts at 515, so what shows is the right of the address pill and the
-       Knili icon — a browser, not a readable address. Reaching the domain
-       means starting the frame at 194, which is a 866px union, a .496 fit and
-       a 9.1px pay label: under the floor, and reported rather than taken.
-       ay is 0 now, not .5: the subject's top IS the frame's top, so there is
-       nothing to centre. air drops to .03 for the same reason — three of the
-       edges are still crops and want their margin, but a 4.5% inset above a
-       pinned bar would have shown a band of the window's own cream above the
-       browser, which is the "mat" this file already refused once at beat 1. */
-    4: { sel: ['.csum', '.out', '.composer'], fit: 'contain', ax: 0.5, ay: 0,
-         pinTop: true, air: 0.03 }
+    /* .sbody, not ['.cbar','.page']. The bar is no longer in the composition
+       to put in a union, and .sbody is what is left of the shot: the page and
+       the panel side by side, the full 1400 design px, so the cover fit is the
+       same KIND of shot it always was — fill the window, crop what spills.
+       What changed is that the window it fills is now the window less the
+       bar, and the bar above it is whole instead of cut off at the right. */
+    2: { sel: ['.sbody'], fit: 'cover',   ax: 0,   ay: 0 },
+    3: { sel: ['.sbody'], fit: 'cover',   ax: 0,   ay: 0 },
+    /* THE CLOSING SHOT HOLDS THE SHOP'S CARD AND THE EXTENSION, TOGETHER,
+       AND IT DOES NOT MOVE. Both of those are the same decision.
+       The panel is the product — it is the thing this page is selling — and
+       it had been dropping out of the third act while the camera went in to
+       the checkout. A closing shot of a shop's checkout with no Knili in it is
+       a demo of a checkout. So the frame is the union of the two objects, and
+       the card was cut until that union fitted at a size both survive.
+       AND THERE IS NO CAMERA TRAVEL. A '4a' at the card's top and a fit:'width'
+       ride down to its bottom used to sit here; they existed because the card
+       was too tall to hold at once, which is the same problem. One frame for
+       the whole act: nothing scrolls, nothing squooshes, and everything that
+       happens, happens inside a picture that is already still.
+       Measured at a 472x495 window: the union is 685x704 stage px and fits at
+       .608 — height-bound by the panel, which is the composition's full
+       height, so the horizontal is slack and the card was widened into it for
+       free. */
+    4:  { sel: ['.ccard', '.pnl'], fit: 'contain', ax: 0.5, ay: 0.5 }
   };
   /* The window is a size the CSS owns, and the driver MUST NOT touch it. An
      earlier version resized it per beat, which resized the very box the
@@ -2770,17 +3027,29 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
     var f = FRAME[n] || FRAME[1];
     var b = union(f.sel);
     if (!b) return;
-    /* THE TOP EDGE CAN BE PINNED TO THE COMPOSITION'S OWN TOP, which is where
-       the browser's address bar is. One beat uses it — see FRAME[4] — and it
-       exists because the alternative was putting .cbar in that beat's union,
-       and .cbar is 1072 design px wide: the WHOLE composition. Adding it as a
-       subject does not add an object to the frame, it widens the frame to the
-       entire shot. Measured at 1440: the union goes 545x640 -> 1072x726 and
-       the fit 0.71 -> 0.40, which renders the pay label at 7.4px and the
-       bill's figures at 5.6. Growing the subject UPWARDS instead keeps the
-       width the beat already had. */
-    if (f.pinTop) { b.h += b.y; b.y = 0; }
-    var W = win.clientWidth, H = win.clientHeight;
+    /* bleedLeft used to sit here — a measured slice of the object next along,
+       so a frame could show "a little of the form" beside the Place order
+       card. It went the way pinTop went, and for the same reason: both were
+       machinery for holding two distant objects in one frame, and the
+       checkout is one card now. There is nothing left to bleed towards. */
+    /* THE BAR'S STRIP IS NOT THE CAMERA'S TO USE. .chrome is pinned outside
+       the transform, so the page area is the window less the bar's height:
+       everything below fits into that reduced box and is then pushed down past
+       it. The bar's own height is set here, in one place, as 5% of the window
+       — the only number about the chrome that depends on anything. */
+    var W = win.clientWidth, H0 = win.clientHeight;
+    var BAR = bar ? Math.max(18, Math.round(H0 * 0.05)) : 0;
+    if (bar) { win.style.setProperty('--barh', BAR + 'px'); }
+    /* AND THE STRIP IS ONLY RESERVED WHERE THERE IS A BROWSER. At the ask
+       there is none — f.bare is the flag that already says so — and reserving
+       it anyway put 25px of the window's own cream between the frame's top
+       edge and the panel's navy header. That is the white gap: not a fitting
+       error, the camera holding a seat for a bar that has not arrived. The
+       bar is opacity:0 at beats 0 and 1 and, now that it is out of the
+       composition, it takes no layout space there either — so at those beats
+       the panel starts at the top of the frame with nothing above it. */
+    var TOP = f.bare ? 0 : BAR;
+    var H = H0 - TOP;
     if (!W || !H || !b.w || !b.h) return;
     /* THE FRAME BREATHES. A contain fit that exactly fits is still a frame with
        its subject jammed against all four edges, and that reads as a crop, not
@@ -2792,17 +3061,26 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
        than a pixel value that is generous on one and invisible on the other.
        cover keeps the whole window: it is meant to fill and crop, because a
        storefront shrunk to leave a margin is a storefront nobody can read. */
+    /* A fit:'width' branch used to sit here, for a camera that fitted a tall
+       card by its width and then rode down it. The card and the panel share
+       one still frame now and nothing rides anywhere, so it went too. */
     var cover = f.fit === 'cover';
     var m = cover ? 0 : Math.round(Math.min(W, H) * (f.air == null ? AIR : f.air));
     var IW = W - m * 2, IH = H - m * 2;
     var z = cover ? Math.max(W / b.w, H / b.h)
                   : Math.min(IW / b.w, IH / b.h);
     var tx = m - b.x * z + (IW - b.w * z) * f.ax;
-    var ty = m - b.y * z + (b.h * z < IH ? (IH - b.h * z) * f.ay : 0);
+    /* ay reads the same way whichever side of the frame the subject is on:
+       0 is its top against the frame's top, 1 is its bottom against the
+       frame's bottom. It used to do nothing at all once the subject was
+       taller than the frame, which is exactly the case the travelling camera
+       is made of. */
+    var slack = IH - b.h * z;
+    var ty = m - b.y * z + slack * f.ay;
     /* THE COMPOSITION HAS TO REACH ALL FOUR EDGES OF THE FRAME, and until now
        nothing made it. A contain fit centres the SUBJECT, and the subject is
-       not the middle of the composition: beat 4 frames .csum and .out, which
-       live in the panel at the right of a 1400-wide shot. Centring them pulls
+       not the middle of the composition: beat 4 framed a summary column and the
+       panel's answer card, which lived at the right of a 1400-wide shot. Centring them pulls
        the whole stage left and up until its own right and bottom edges land
        INSIDE the window — measured at beat 4, the stage stopped 8.8px short on
        the right and 13.3px short at the bottom at 390px, 8.4/12.3 at 360,
@@ -2822,9 +3100,23 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
       var CW = el.offsetWidth * z, CH = el.offsetHeight * z;
       tx = CW >= W ? Math.min(0, Math.max(tx, W - CW)) : (W - CW) / 2;
       ty = CH >= H ? Math.min(0, Math.max(ty, H - CH)) : (H - CH) / 2;
+      /* AND THE PAGE'S TOP EDGE BELONGS AGAINST THE CHROME. This page does not
+         scroll, so there is no reason for its top to be tucked under the bar —
+         and once the bar was pinned there, beat 4 did exactly that: the frame
+         placed .composer its 21px of air below the window's top, the panel's
+         own header is 34.8px above .composer at that zoom, and the difference
+         went under the bar. What a reader saw was the Knili header sliced in
+         half by the browser chrome, which looks like a crop because it is one.
+         So the camera only pans down when the subject genuinely will not fit
+         from the top. Measured at beat 4: the subject ends 462.7px down a
+         470px page area, so it fits, and ty is 0 — the 23.5px given up at the
+         bottom instead is the composition's own empty padding. The fill frame
+         needs 540px for its form and still pans, unchanged. */
+      if (ty < 0 && (b.y + b.h) * z <= H) ty = 0;
     }
     el.style.setProperty('--fz', z);
     el.style.setProperty('--fx2', tx + 'px');
+    ty += TOP;
     el.style.setProperty('--fy2', ty + 'px');
   }
   /* Beat 4 is the resting frame: with no data-beat the markup draws the
@@ -2844,7 +3136,7 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
   /* AND AGAIN WHEN THE TYPE ARRIVES. The two calls above run against fallback
      metrics: the faces are font-display:swap and `load` fires before they have
      necessarily swapped in, so every box the camera measures — .hd, .ztop,
-     .csum, .out — is the wrong size when it is measured. Measured at 390px, the
+     the checkout card — is the wrong size when it is measured. Measured at 390px, the
      resting frame came out at --fz .5743 against the .5982 the same call
      produces once Oswald is in, and nothing ever recomputed it: the camera the
      reader sees first was framed for a font the page does not use. That is 15px
@@ -2883,6 +3175,65 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
      with --fz .511, ring() was handed 9.4,56.1 at 183x113 for a tile that
      actually sits at 18,110 at 358x221. Half the position and half the size
      is how a ring meant for the bottles ended up over the shop's header. */
+  /* THE BAND THE WASH IS. Same four custom properties the pickring already
+     uses, pointed at the form instead of at a product tile: the full width of
+     .cform, one field tall, starting on the first field and ending flush with
+     the bottom of the last one it fills. box(), not getBoundingClientRect —
+     these are written back into the stage's own untransformed space and the
+     stage carries the camera, which is the bug that has been made four times
+     in this file already. */
+  /* fillBand, not band: `band` is already taken in this driver by the .now
+     strip's element, and a function declaration loses to a var of the same
+     name — measured the hard way, "band is not a function" at beat 4. */
+  function fillBand() {
+    var f = box('.cform'), a = box('.cform > .cfld');
+    if (!f || !a) return null;
+    /* The band is the form's width and one field tall, and it starts on the
+       first row. Same four properties the pickring already uses. */
+    el.style.setProperty('--rx', f.x + 'px');
+    el.style.setProperty('--rw', f.w + 'px');
+    el.style.setProperty('--rh', a.h + 'px');
+
+    /* EVERY STOP IS MEASURED, NOTHING IS ORDINAL. The rows are not evenly
+       spaced — a .cfld is 33 stage px, a .crow 41, a .copt 27, and there are
+       section headings between them — so `--n * 185ms` put the wash on the
+       wrong fields as soon as the card was restructured. Each row's delay is
+       now the fraction of the band's own travel at which the band's centre
+       reaches that row's centre, times the pass's duration. Move a row, add a
+       row, change the card, and the timing follows it. */
+    var rows = el.querySelectorAll('.cform [data-by]');
+    var k = [], u = [];
+    for (var q = 0; q < rows.length; q++) {
+      var r = box2(rows[q]);
+      (rows[q].getAttribute('data-by') === 'u' ? u : k).push({ el: rows[q], y: r.y, h: r.h });
+    }
+    if (!k.length || !u.length) return null;
+    var kTop = k[0].y, kEnd = k[k.length - 1].y + k[k.length - 1].h;
+    var uTop = u[0].y, uEnd = u[u.length - 1].y + u[u.length - 1].h;
+
+    /* Knili's pass: the band's TOP edge runs kTop -> kEnd - band, so the row a
+       given moment is over is found from where the band's centre is. */
+    var run = (kEnd - a.h) - kTop;
+    for (var w = 0; w < k.length; w++) {
+      var mid = k[w].y + k[w].h / 2 - a.h / 2;      /* --ry when centred on it */
+      var frac = run > 0 ? Math.min(1, Math.max(0, (mid - kTop) / run)) : 0;
+      k[w].el.style.setProperty('--d', Math.round(frac * KWASH) + 'ms');
+    }
+    /* your pass fills the card block as one, staggered only enough to read as
+       typing rather than as a stamp */
+    for (var v = 0; v < u.length; v++) {
+      u[v].el.style.setProperty('--d', (v * 190) + 'ms');
+    }
+    return { from: kTop, wash: (kEnd - a.h) - 0,
+             card: uTop, cardH: uEnd - uTop };
+  }
+  /* box(), for an element already in hand */
+  function box2(n) {
+    var x = 0, y = 0, q = n;
+    while (q && q !== el) { x += q.offsetLeft; y += q.offsetTop; q = q.offsetParent; }
+    return { x: x, y: y, w: n.offsetWidth, h: n.offsetHeight };
+  }
+
   function ring() {
     var b = box('.card.pick');
     if (!b) return;
@@ -2922,7 +3273,8 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
   function rest() {
     clear();
     el.removeAttribute('data-beat');
-    el.classList.remove('flick', 'seek', 'burst', 'found');
+    el.classList.remove('flick', 'seek', 'burst', 'found',
+                        'fill', 'filled', 'pay', 'paid');
     if (ask) ask.textContent = full;
     lines.forEach(function (l) { l.classList.add('in'); });
     fills.forEach(function (f, i) { f.style.width = widths[i]; });
@@ -2956,7 +3308,10 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
        still eases exactly as it did. Nothing here resizes .stagewin; the class
        goes on .stage and comes off in the same task. */
     el.classList.add('cut');
-    el.classList.remove('flick', 'seek', 'burst', 'found');
+    /* every class the fill beat sets comes off inside the .cut frame, so the
+       wrap has nothing left easing and nothing half-lit */
+    el.classList.remove('flick', 'seek', 'burst', 'found',
+                        'fill', 'filled', 'pay', 'paid');
     el.setAttribute('data-beat', '1'); frameBeat(1);
     void el.offsetWidth;
     el.classList.remove('cut');
@@ -3054,29 +3409,44 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
        comfortable fixation per shop with a little to spare; 250 would be the
        floor and there is nothing above it worth the risk. The way to make a
        search look quicker is to show fewer shops, not to strobe them. */
+    /* THE BROWSER ARRIVES, AND THEN IT IS LOOKED AT. The flick used to start
+       on the same frame the shop landed on — "BOOBOOSH, second screen,
+       SQUOOSH" — so the second scene was never a scene, it was a wipe. 900ms
+       of nothing now sits between the arrival and the search: the chrome bar
+       slides in, the page settles, and a reader gets to see WHOSE page it is
+       before it starts being flicked through.
+       This is not a reversal of "make the search faster". That was about dead
+       time; this is an arrival, and an arrival has to land. The 900 is paid
+       for below, out of the scan itself. */
     at(3000, function () {
       if (ask) ask.textContent = full;
       el.setAttribute('data-beat', '2'); frameBeat(2);
-      el.classList.add('flick');
     });
+    at(3900, function () { el.classList.add('flick'); });
 
     /* 03 — shops flick past while the log fills, then the rejects are counted */
-    at(3700, function () {
+    at(4000, function () {
       el.setAttribute('data-beat', '3'); frameBeat(3);
     });
     lines.forEach(function (l, n) {
-      at(3820 + n * 470, function () {
+      at(4020 + n * 330, function () {
         l.classList.add('in');
         if (band) band.textContent = l.textContent;
       });
     });
     /* Four separate events, each long enough to be seen as one: the winning
        page simply sits there; then the sweep reads it once; then the ring
-       closes on the tile; then it holds. */
-    at(5300, function () { el.classList.remove('flick'); ring(); });
-    at(5500, function () { el.classList.add('seek'); });
-    at(5950, function () { el.classList.remove('seek'); el.classList.add('found'); });
-    at(5350, function () {
+       closes on the tile; then it holds.
+       AND THE SCAN IS WHERE THE TWO NEW HOLDS WERE PAID FOR. The flick ran
+       1600ms and now runs 1100; the log lines were 470ms apart and are 330.
+       Nothing was removed and nothing strobes — the pages simply stop being
+       shown for longer than it takes to see that they are being rejected,
+       which is the thing he has asked twice to be quicker. 680ms out of the
+       search, 1600 into the two arrivals. */
+    at(5000, function () { el.classList.remove('flick'); ring(); });
+    at(5220, function () { el.classList.add('seek'); });
+    at(5620, function () { el.classList.remove('seek'); el.classList.add('found'); });
+    at(5060, function () {
       fills.forEach(function (f, n) { f.style.width = widths[n]; });
       var t0 = null;
       raf = requestAnimationFrame(function cnt(ts) {
@@ -3090,15 +3460,70 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
     /* 04 — the answer lands, and the reader's own cursor comes in from
        off-stage to buy it. Knili filled the checkout; the person clicks. */
     /* the winner is held, bars settled, before the page navigates */
-    at(6300, function () {
+    /* 04 — THE CHECKOUT BEING FILLED, WHICH THE SEQUENCE USED TO SKIP. It
+       went from finding the thing to a finished checkout, so the one action
+       the product performs on your behalf was never shown. The beat opens on
+       the form, washes it, and only then pans to the payoff.
+       The 1600ms it takes is almost entirely time the sequence was already
+       spending: 1150 of it was the "beat of stillness" the cursor used to
+       wait through, and 400 more came off the ORDER PLACED chip, which was
+       1.9s and is 1.5. Net cost to the loop: 50ms, 12250 -> 12300.
+       Sub-phases inside beat 4, relative to its start:
+         0     the checkout arrives and the thumbnail flies into the card,
+               over a full second. The camera does not move again all beat.
+         1000  IT LANDS, AND EVERYTHING STOPS. 700ms of stillness with the
+               thing you asked for sitting in a cart, which is the moment the
+               errand became a purchase and used to flick past.
+         1700  Knili's acid pass starts at the first field BELOW the product —
+               Knili does not type the product, it was carried in — and runs
+               1400ms; each row lights on its own measured --d
+         1700  your cursor sets off from off-frame right
+         3100  the wash reaches the last field Knili fills
+         3200  the mark turns cobalt and moves onto the card block; your
+               cursor is already sitting on it
+         3300  the card fields fill in your colour, 190ms apart
+         4050  the marks go
+         4300  the click (handoff's 1.7s delay, its 75% of 2.7s) */
+    at(5940, function () {
       place(); flip();
       /* On a phone the shop arrives by sliding in, so the button's rect is only
          true once it has landed — measure again after the move. */
       at(700, place);
       el.classList.remove('found');
-      el.setAttribute('data-beat', '4'); frameBeat(4);
+      /* the band is parked on the first field with no transition yet — .fill
+         is what brings the transition in, so it cannot ease in from wherever
+         the item ring happened to be sitting */
+      var b = fillBand();
+      if (b) el.style.setProperty('--ry', b.from + 'px');
+      el.setAttribute('data-beat', '4');
+      el.classList.add('fill');
+      frameBeat(4);
+      void el.offsetWidth;                    /* commit the band's start */
+      /* one class, five delays: the values fill in order off --n */
+      /* 800, not 0: the thumbnail's flight into the card is 750ms and it
+         goes FIRST. Nothing fills until the thing being bought is in the card.
+         The camera sets off down the card on the same frame the wash does and
+         takes 1.5s over the wash's 1.4 — one movement, trailing the mark
+         slightly, so the wash is never above the middle of the shot. */
+      at(1700, function () {
+        el.classList.add('filled');
+        if (b) el.style.setProperty('--ry', b.wash + 'px');
+      });
+      /* AND THE HANDOFF. The mark changes colour and moves onto the card
+         block; your cursor is already sitting there when it does. */
+      at(3200, function () {
+        el.classList.add('pay');
+        if (b) {
+          el.style.setProperty('--ry', b.card + 'px');
+          el.style.setProperty('--rh', b.cardH + 'px');
+        }
+      });
+      at(3300, function () { el.classList.add('paid'); });
+      /* the mark has done its work; it goes before the click so the button is
+         the only thing left to look at */
+      at(4050, function () { el.classList.remove('fill', 'filled', 'pay', 'paid'); });
     });
-    at(9250, function () { el.classList.add('burst'); });
+    at(10240, function () { el.classList.add('burst'); });
 
     /* THE ENDING IS THE PAYOFF, HELD — and it used to be a title card. Beat 5
        faded a plate carrying the lockup and IT DOES THE SHOPPING. / YOU DO THE
@@ -3109,13 +3534,13 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
        page now (see .heromark) and the sequence ends on the thing only the
        sequence can show — a checkout with the order in it.
        So beat 4 keeps the ending instead, and the budget moves rather than
-       being deleted. .burst lands at 9250 and the ORDER PLACED chip's `chip`
-       animation runs 1.9s, so the last thing that MOVES stops at 11150.
+       being deleted. .burst lands at 10240 and the ORDER PLACED chip's `chip`
+       animation runs 1.5s, so the last thing that MOVES stops at 11740.
        Then 1100ms of nothing — the same hold the closing card was given,
        because the reader needs a beat on the filled bill and the pay bar, and
        an ending that cuts on the frame the motion stops reads as a dropped
-       shot rather than as an ending. 11150 + 1100 = 12250, and the loop runs
-       16.75s -> 12.25s.
+       shot rather than as an ending. 11740 + 1100 = 12840, and the loop runs
+       16.75s -> 12.84s.
        There is no fade left at the seam and there must not be one: with the
        card gone the only honest transition from a finished checkout back to an
        empty ask is a cut, and .cut above is what makes it one. */
