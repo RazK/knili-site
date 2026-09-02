@@ -1509,6 +1509,21 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 .ustage.p1 .ukey:nth-child(1),.ustage.p2 .ukey:nth-child(2),
 .ustage.p3 .ukey:nth-child(3){transform:translateY(calc(var(--px)*8));
   box-shadow:0 0 0 0 var(--acid-ink)}
+/* THE RING ON THE PINNED ICON. It appears, holds, and fades in place — it
+   does not grow and it does not repeat. A ring that expands outward is a
+   pulse, and a pulse asks for attention over and over; this says one thing
+   once, at the frame the chord completes, while the panel is arriving. The
+   geometry never changes, only the alpha, so there is nothing to read as
+   motion beyond the colour arriving and leaving.
+   Scoped to .ustage, because .cbar img is shared with the hero's browser bar
+   and that one must not light. */
+.ustage .cbar img{border-radius:calc(var(--px)*4)}
+.ustage.pinlit .cbar img{animation:pinring 1.1s ease-out}
+@keyframes pinring{
+  0%{box-shadow:0 0 0 calc(var(--px)*5) rgba(232,255,58,0)}
+  12%,54%{box-shadow:0 0 0 calc(var(--px)*5) rgba(232,255,58,1)}
+  100%{box-shadow:0 0 0 calc(var(--px)*5) rgba(232,255,58,0)}}
+
 /* THE CURSOR IS IN THE BOX AND NOT ON THE WORDS. It used to rest at 764,158,
    which is inside the composer and directly over the middle of the typed
    string — the arrow covered a letter for the whole beat. It sits at 838,196
@@ -1773,6 +1788,12 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
   .ustage[data-u="0"] .upage,.ustage[data-u="1"] .upage{
     flex-basis:calc(var(--px)*640)}
   .upage .body{grid-template-columns:repeat(1,1fr)}
+  /* The shop keeps 236 design px of itself here and its header wants 187 of
+     the 172 that leaves — the search pill alone is 150. Measured, it hung 15px
+     past the edge and the pill came out cut in half, which reads as damage
+     rather than as a page continuing (the frame's right edge is the panel, not
+     a crop). The pill is furniture; it goes. */
+  .upage .pill{display:none}
   .ustage[data-u="0"] .upage .body,.ustage[data-u="1"] .upage .body{
     grid-template-columns:repeat(3,1fr)}
   .ukeys{width:calc(var(--px)*236);gap:calc(var(--px)*9)}
@@ -2369,7 +2390,15 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
             <span class="udom">shopheathotsauce.com</span>
           </span>
-          <img src="icon.png" alt="Knili">
+          <!-- THE PINNED ICON, AND THE ONE FACT THE DELETED PARAGRAPH WAS
+               CARRYING. The alt says it in words for anything reading the
+               page, and .pinlit says it in a picture: the ring lights on this
+               icon at the exact frame the K goes down, so the keystroke and
+               the icon are shown to be the same door. It matters because
+               &#8984;&#8679;K is a suggested_key — Chrome drops it without a
+               word when those keys are already taken — and the icon always
+               works. -->
+          <img src="icon.png" alt="The Knili icon, pinned in the toolbar &mdash; clicking it opens the panel too">
         </div>
         <div class="ubody">
           <!-- SCENERY, AND IT IS THE STAGE'S OWN SCENERY. This was a cream
@@ -2401,8 +2430,18 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
               <span class="icons"><span>profile</span><span>close</span></span>
             </div>
             <div class="bd">
+              <!-- No ASK heading here either. It came out of the hero mock
+                   first and out of the extension's own panel separately, and
+                   three drawings of one panel that disagree about whether it
+                   has a title is worse than any of the three.
+                   Nothing here needed the word as a LABEL: .ask and .go are
+                   divs, not controls — no role, no tabindex, nothing
+                   focusable anywhere in this scene — so removing it leaves no
+                   control unnamed. That was the real risk on the product
+                   side, where the composer is a field and ASK was its
+                   placeholder and therefore its accessible name; it does not
+                   transfer to a picture of one. Checked, not assumed. -->
               <div class="ztop">
-                <h3>Ask</h3>
                 <div class="composer">
                   <div class="ask" id="uask">hot sauce</div>
                   <div class="go">Go</div>
@@ -3206,7 +3245,7 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
 
   function rest() {
     clear();
-    st.classList.remove('p1', 'p2', 'p3');
+    st.classList.remove('p1', 'p2', 'p3', 'pinlit');
     st.removeAttribute('data-u');
     if (ask) ask.textContent = full;
   }
@@ -3216,7 +3255,7 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
     /* one frame with no transitions, so winding back to the start is a cut and
        not a half-second of the panel sliding backwards out of the window */
     st.classList.add('ucut');
-    st.classList.remove('p1', 'p2', 'p3');
+    st.classList.remove('p1', 'p2', 'p3', 'pinlit');
     st.setAttribute('data-u', '0');
     if (ask) ask.textContent = '';
     void st.offsetWidth;
@@ -3229,7 +3268,12 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
     at(920,  function () { st.classList.add('p1'); });
     at(1040, function () { st.classList.add('p2'); });
     at(1160, function () { st.classList.add('p3'); });
+    /* The chord completes on the K, so that is the frame the icon lights.
+       These two keys and this icon are the same door, said once, in a
+       picture, in a section that has twice been asked to lose its prose. */
+    at(1161, function () { st.classList.add('pinlit'); });
     at(1440, function () { st.classList.remove('p1', 'p2', 'p3'); });
+    at(2300, function () { st.classList.remove('pinlit'); });
     /* released, and Knili comes in from the side — 500ms of transform */
     at(1600, function () { st.setAttribute('data-u', '2'); });
     /* then the reader's own cursor crosses to the composer — 600ms */
