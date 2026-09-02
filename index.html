@@ -980,22 +980,53 @@ h1 em{font-style:normal;color:var(--acid);display:block}
    the card FIRST, and only then do the details fill. A card that fills before
    it has the product in it is the wrong story. The camera opens on the top of
    the card, which is where the thumbnail lands, so the flight is on screen. */
-/* 1.4s, AND THIS IS THE THIRD TIME IT HAS BEEN SLOWED — 750ms, then 1s, and
-   the owner asked again. This is the moment the errand becomes a purchase —
-   the thing you asked for arriving in a cart.
+/* TWO EVENTS, NOT ONE, AND THE DELAY IS WHAT SEPARATES THEM. This rule used to
+   have no delay at all, so beat 4 opened on the checkout arriving AND the
+   thumbnail flying into it in the same instant — the owner read the pair as a
+   single line in the timeline and asked for two. The card is the first thing
+   the reader has ever seen of this checkout; it has to land and be looked at
+   before anything moves inside it.
+   THE 1s IS MEASURED OFF THE ARRIVAL'S OWN MOTION. At beat 4 three things move
+   at once: the camera's transform (.45s), .checkout's opacity (.3s) and .cform
+   (.4s after a .16s delay) — so the last of the arrival settles at 560ms. The
+   flight sets off at 1000, which leaves 440ms in which NOTHING on the stage is
+   moving. That is not a round number picked for looks: one fixation is
+   250-300ms, so 440 is comfortably more than one, and it is the same stillness
+   beat 2's arrival gets — the browser lands at 3000, its camera settles at
+   3450, and the flick starts at 3900. The sequence's two arrivals now read the
+   same way.
+   `backwards` IS LOAD-BEARING AND IT IS ALSO WHY THE HOLD IS CLEAN. Without a
+   fill mode the element sits at its UNANIMATED transform during the delay —
+   which is `none`, i.e. already landed — and then jumps out to the tile and
+   flies back. With `backwards` it holds the `from` keyframe instead, which is
+   the picked tile's own box. Measured, that box is x 27..368 of the
+   composition and beat 4's frame starts at x 366.3 at every width (the fit is
+   height-bound at the window's 20/21, so W/z is a constant 705.7 stage px and
+   the clamp pins the composition's right edge): the waiting thumbnail is
+   off-frame to within 1.7px. So the reader sees an empty picture slot in the
+   summary row, then the picture flies into it from outside the frame — which
+   is the same entrance it always had, just started later.
+   1.4s -> 1.6s, THE FOURTH TIME IT HAS BEEN SLOWED — 750ms, then 1s, then 1.4.
    THE DISTANCE IS NOT THE PROBLEM; THE SCALE IS. Measured, flip() sets
    --fx -233 / --fy 43, so the tile travels 237 stage px — which at 1s is a
-   speed the eye tracks easily. But --fs comes out at 6.96: the thing is SEVEN
-   TIMES its landing size when it sets off and shrinks the whole way down. A
-   target changing size by that factor cannot be held in smooth pursuit while
-   it moves, so the flight is read as a start state and an end state with a
-   blur between them, and a second is not long enough to fixate either. 1.4s
-   is what makes the middle of the move legible, which is where the meaning is
+   speed the eye tracks easily. But --fs comes out at 6.9592: the thing is
+   SEVEN TIMES its landing size when it sets off and shrinks the whole way
+   down. A target changing size by that factor cannot be held in smooth pursuit
+   while it moves, so the flight is read as a start state and an end state with
+   a blur between them, and a second is not long enough to fixate either. 1.4s
+   was what made the middle of the move legible, which is where the meaning is
    — the thing you searched for turning into the thing you are paying for.
+   AND THE 200ms ON TOP IS THE COST OF THE SEPARATION ITSELF. The flight used
+   to begin while the eye was already tracking the arrival; it now begins out
+   of a still frame, so the eye has to ACQUIRE a target that appears in motion,
+   and saccadic latency to an abrupt onset is 200-250ms. At 1.4s that left
+   ~1.15-1.2s actually tracked, under the 1.4 the previous pass established as
+   the minimum for a 6.96x shrink. 1.6s puts the tracked portion back at ~1.4s.
    The 700ms of stillness AFTER it lands is untouched — it is a separate beat
    doing a separate job — so everything downstream of the landing simply moves
-   400ms later. Nothing was shortened to pay for it; see LOOP. */
-.stage[data-beat="4"] .co-item img{animation:travel 1.4s cubic-bezier(.2,.75,.3,1)}
+   1200ms later. Nothing was shortened to pay for it; see LOOP. */
+.stage[data-beat="4"] .co-item img{
+  animation:travel 1.6s cubic-bezier(.2,.75,.3,1) 1s backwards}
 @keyframes travel{
   from{transform:translate(var(--fx,0),var(--fy,0)) scale(var(--fs,1))}
   to{transform:none}}
@@ -1148,11 +1179,13 @@ h1 em{font-style:normal;color:var(--acid);display:block}
   filter:drop-shadow(0 calc(var(--px)*2) calc(var(--px)*4) rgba(10,17,64,.45))}
 .stage[data-beat="1"] .hand,.stage[data-beat="2"] .hand,
 .stage[data-beat="3"] .hand,.stage[data-beat="0"] .hand{opacity:0}
-/* 2.7s -> 3.4s, AND THE DELAY 1.7s -> 2.1s, WHICH ARE TWO DIFFERENT FACTS.
-   The delay is anchored to the start of beat 4 and the flight in front of it
-   got 400ms longer, so 2.1 is the old 1.7 carried along — the cursor still
-   sets off on the same frame Knili's wash does, and nothing about the
-   relationship changed.
+/* 2.7s -> 3.4s, AND THE DELAY 1.7s -> 2.1s -> 3.3s, WHICH ARE TWO DIFFERENT
+   FACTS. The delay is anchored to the start of beat 4 and everything in front
+   of it keeps getting longer — first the flight by 400ms, then the card's own
+   arrival hold by 1000 and the flight by another 200 — so 3.3 is the old 1.7
+   carried along twice. The cursor still sets off on the same frame Knili's
+   wash does, and nothing about the relationship changed. The DURATION has not
+   moved since it was derived; only the delay tracks the beats in front of it.
    The 700ms of extra DURATION is the owner's second ask: the moves read as
    jumps. Both of them are now paced as movement rather than as a cut, and
    because the percentages below were re-derived rather than left alone, the
@@ -1165,8 +1198,8 @@ h1 em{font-style:normal;color:var(--acid);display:block}
      travel to the pay  66.2 -> 80.9%  500ms   (was 324)
      press down / up    80.9 -> 89.7%  150+150 (was 135+135)
    AND THE DWELL IS NOT PADDING. It is what puts the cursor on the card block
-   at beat-relative 3049 — 451ms BEFORE the mark hands over at 3500 — and
-   keeps it there until 4351, which is the frame the marks come off at. That
+   at beat-relative 4249 — 451ms BEFORE the mark hands over at 4700 — and
+   keeps it there until 5551, which is the frame the marks come off at. That
    is the "already sitting on it" the handoff comment claims and the old
    numbers had quietly stopped delivering: at 2.7s/1.7s the cursor left the
    card at 3266, thirty-four milliseconds BEFORE your own fields began filling
@@ -1174,7 +1207,7 @@ h1 em{font-style:normal;color:var(--acid);display:block}
    which is two things moving at once.
    `both` matters: without the backwards fill the cursor would sit at its
    resting position on the button for the whole delay instead of off-frame. */
-.stage[data-beat="4"] .hand{animation:handoff 3.4s cubic-bezier(.4,0,.2,1) 2.1s both}
+.stage[data-beat="4"] .hand{animation:handoff 3.4s cubic-bezier(.4,0,.2,1) 3.3s both}
 /* In from beyond the right edge of the whole composition — off-frame, past the
    panel — and left across it to the near side of the button. It is the
    reader's hand arriving from outside, never something the panel emits. */
@@ -1202,7 +1235,7 @@ h1 em{font-style:normal;color:var(--acid);display:block}
    same delay, same stops — or the ring lights on a button the cursor has not
    reached. Its lit ring grows over exactly the second travel, 66.2 -> 80.9%,
    so the button comes alive as the cursor crosses to it. */
-.stage[data-beat="4"] .co-pay{animation:press 3.4s cubic-bezier(.4,0,.2,1) 2.1s both}
+.stage[data-beat="4"] .co-pay{animation:press 3.4s cubic-bezier(.4,0,.2,1) 3.3s both}
 @keyframes press{
   0%,66.2%{box-shadow:0 0 0 0 rgba(232,255,58,0);transform:scale(1);filter:none}
   80.9%{box-shadow:0 0 0 calc(var(--px)*4) rgba(232,255,58,.65);transform:scale(1);
@@ -1754,15 +1787,44 @@ span.fold svg{width:13px;height:13px;color:#5F6368}
   12%,54%{box-shadow:0 0 0 calc(var(--px)*5) rgba(232,255,58,1)}
   100%{box-shadow:0 0 0 calc(var(--px)*5) rgba(232,255,58,0)}}
 
-/* THE CURSOR IS IN THE BOX AND NOT ON THE WORDS. It used to rest at 764,158,
-   which is inside the composer and directly over the middle of the typed
-   string — the arrow covered a letter for the whole beat. It sits at 838,196
-   now: still inside the field (684-936 across, 151-227 down, in the scene's
-   design pixels), past the end of the text at any length it reaches — nine
-   characters of 27px condensed run to about 821 — and low enough that the
-   glyph, which is 20 wide by 32 tall from its tip, stays clear of the words
-   above it and inside the box below them. Where a real pointer rests after
-   you have clicked into a field.
+/* THE CURSOR IS IN THE BOX AND NOT ON THE WORDS — BOTH, AND THE SECOND ONE
+   COST THE FIRST FOR A WHILE. Three positions, in order:
+     764,158  inside the composer and directly over the middle of the typed
+              string. The arrow covered a letter for the whole beat, and the
+              owner asked for it to go in the box WITHOUT hiding the text.
+     838,196  moved right and DOWN to clear the words — and it left the field
+              altogether. The owner: "doesn't even cursor in the box."
+     838,152  this one. Both constraints, and neither was satisfied by moving
+              the arrow further from the text.
+   THE NUMBER THAT WAS WRONG WAS IN THE COMMENT, NOT ONLY IN THE RULE. The
+   previous version of this note claimed the field ran "151-227 down". It does
+   not, and never did; that is where the arrow was put on the strength of the
+   claim. Measured on the running page at both scenes, with the field, the
+   text and the glyph taken as three separate boxes:
+     field .ask      112.0 -> 188.1 down, 684.3 -> 936.4 across (wide)
+                     112.0 -> 188.0 down, 252.0 -> 504.0 across (narrow)
+     text, 9 chars   123.5 -> 163.2 down, ending at 817.6 (wide) / 385.3
+     text baseline   155.5, the same in both
+     the glyph       20 wide, 31.66 tall, and its TIP is its top-left corner
+   The old 196 put the tip 8 design px BELOW the field's floor at 188, which
+   is the whole of the bug: the arrow was hanging in the panel's bare cobalt
+   under the composer. The vertical geometry is identical in both scenes, so
+   one wrong number was wrong twice.
+   WHY 152 AND NOT THE BASELINE ITSELF. Tip on the baseline is the natural
+   spot — it is where a pointer sits after you click into a field — and 155.5
+   does fit: the glyph would end at 187.2 against a floor of 188.1. That is
+   0.9px of clearance, less than the arrow's own 1.1px stroke, so the outline
+   would read as sitting ON the edge, and any change in the face's metrics
+   (the stack falls back to Impact) pushes it back out. 152 is the baseline
+   less 3.5 — an eighth of the 27px em, still on the line by eye — and it
+   leaves the glyph 4.4px of the field's floor beneath it.
+   THE HORIZONTAL WAS ALREADY RIGHT AND IS NOW MEASURED RATHER THAN ASSERTED.
+   838.3 is 20.7 design px past the end of the finished string and 78.1 inside
+   the field's right edge; the string only ever grows towards it (per
+   character: 716, 731.1, 742.7, 742.7, 762.7, 776.5, 791.6, 806.1, 817.6), so
+   the arrow is clear of the words at every frame of the typing, not just the
+   last. It is entirely to the RIGHT of the text, which is why the vertical is
+   free to be the natural resting spot rather than a dodge.
    Then it goes to GO, which is where the gesture actually ends. Its resting
    place is therefore GO, not the composer: the markup is the last frame, so
    with no script or under reduced motion the picture shows the whole
@@ -1771,7 +1833,7 @@ span.fold svg{width:13px;height:13px;color:#5F6368}
   transform:translate(calc(var(--px)*985),calc(var(--px)*178));
   transition:transform .6s cubic-bezier(.4,0,.2,1),opacity .3s ease-out}
 .ustage[data-u="3"] .ucur{
-  transform:translate(calc(var(--px)*838),calc(var(--px)*196))}
+  transform:translate(calc(var(--px)*838),calc(var(--px)*152))}
 .ustage[data-u="0"] .ucur,.ustage[data-u="1"] .ucur{opacity:0}
 .ustage[data-u="0"] .ucur,.ustage[data-u="1"] .ucur,.ustage[data-u="2"] .ucur{
   transform:translate(calc(var(--px)*300),calc(var(--px)*300))}
@@ -2054,10 +2116,13 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
   .ustage.p1 .ukey:nth-child(1),.ustage.p2 .ukey:nth-child(2),
   .ustage.p3 .ukey:nth-child(3){transform:translateY(calc(var(--px)*7))}
   /* the same three places, in the 640-wide scene: the panel starts at 236
-     here rather than 668, so everything inside it shifts by -432 */
+     here rather than 668, so everything inside it shifts by -432. The VERTICAL
+     geometry is not shifted at all — measured, the field is 112->188 and the
+     baseline 155.5 in both scenes — so the composer stop takes the same 152 as
+     the wide one, and the 196 that missed the box missed it identically here. */
   .ucur{transform:translate(calc(var(--px)*553),calc(var(--px)*178))}
   .ustage[data-u="3"] .ucur{
-    transform:translate(calc(var(--px)*406),calc(var(--px)*196))}
+    transform:translate(calc(var(--px)*406),calc(var(--px)*152))}
   .ustage[data-u="0"] .ucur,.ustage[data-u="1"] .ucur,.ustage[data-u="2"] .ucur{
     transform:translate(calc(var(--px)*110),calc(var(--px)*300))}
   .ustage.gopress .ucur{
@@ -2864,9 +2929,27 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
      against beats; this is the number the pass ends on, and the loop track
      under the window is driven from it (see progress()) so the bar and the
      wrap cannot disagree. The last thing that moves — the ORDER PLACED chip —
-     settles at 12440 and beat 4 is then held for 1100ms; see the note beside
+     settles at 13640 and beat 4 is then held for 1100ms; see the note beside
      at(LOOP, play) for why that hold is 1100.
-     12840 -> 13540, AND THIS IS THE FIRST TIME THE LOOP HAS BEEN LET GROW.
+     13540 -> 14740, AND IT IS REPORTED RATHER THAN HIDDEN. The owner read the
+     timeline as a numbered list and said of the line "beat 4 — card arrives,
+     thumbnail flies in" that it needed to be slower and split into two steps.
+     That is 1000ms of card-arrival-and-hold in front of a flight that is
+     itself 200ms longer: +1200, exactly, and nothing downstream was
+     compressed to disguise it.
+     AND NOTHING WAS FOUND TO PAY FOR IT, WHICH IS ALSO THE HONEST ANSWER.
+     Every gap in this sequence was walked with a stopwatch looking for dead
+     air and there is none left of any size: the typing dwell (~1430ms) was
+     asked for by a reader; the 900ms before the flick is beat 2's arrival and
+     was asked for; the flick is 1100ms at the fixed 320ms per shop, which is
+     3.4 storefronts and the floor (see beat 2); the 219/400/324ms of settle,
+     sweep and hold on the winner are four separate events each sized to be
+     seen; the cursor's 451ms on the card and the 700ms landing hold are the
+     two stillnesses the beat is built on; and the 1100ms at the end is the
+     reader's beat on the finished bill. The only slack in the file is the
+     trailing 350ms of the handoff keyframes after the cursor's last stop, and
+     the burst is running underneath it, so it costs the loop nothing.
+     12840 -> 13540 WAS THE FIRST TIME THE LOOP HAD BEEN LET GROW.
      The owner asked for the cart flight and the cursor to be slower; both are
      moments a viewer reads as "something is being done", and both were being
      sampled rather than watched. The flight takes 400ms of that and the
@@ -2891,7 +2974,7 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
      flash; at 1400 you can follow it filling. The 500 came out of the beat's
      own dead time, not off the loop — see the sub-phase list in beat 4. */
   var KWASH = 1400;
-  var LOOP = 13540;
+  var LOOP = 14740;
   var T = [], raf = null;
 
   /* Where the cursor has to land is a fact about the rendered button, not a
@@ -3564,26 +3647,38 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
        wait through, and 400 more came off the ORDER PLACED chip, which was
        1.9s and is 1.5. Net cost to the loop: 50ms, 12250 -> 12300.
        Sub-phases inside beat 4, relative to its start. EVERY NUMBER AFTER THE
-       FLIGHT IS 400ms LATER THAN IT WAS, because the flight is 1.4s instead
-       of 1s and the 700ms of stillness behind it was not touched:
-         0     the checkout arrives and the thumbnail flies into the card,
-               over 1.4s. The camera does not move again all beat.
-         1400  IT LANDS, AND EVERYTHING STOPS. 700ms of stillness with the
-               thing you asked for sitting in a cart, which is the moment the
-               errand became a purchase and used to flick past.
-         2100  Knili's acid pass starts at the first field BELOW the product —
+       FLIGHT IS 1200ms LATER THAN IT WAS. The owner read the old line 0 —
+       "the checkout arrives and the thumbnail flies into the card" — and said
+       it had to be slower and split in two, so it is two events with a hold
+       between them and a hold after, and the flight itself is 200ms longer:
+         0     THE CHECKOUT ARRIVES, and that is all that happens. The camera
+               moves (.45s), the page fades in (.3s) and the form column
+               paints in behind (.4s at .16s) — last of it settles at 560.
+               The camera does not move again all beat.
+         560   440ms in which nothing on the stage moves at all. This is the
+               first time the reader has seen this checkout and it is held
+               long enough to be seen as a thing that has appeared. Same
+               stillness beat 2's arrival gets before the flick starts.
+         1000  THE THUMBNAIL FLIES IN, over 1.6s, out of a still frame and in
+               from off the frame's left edge — see the travel rule for why
+               1.6 and why `backwards` keeps the waiting tile off-camera.
+         2600  IT LANDS, AND EVERYTHING STOPS AGAIN. 700ms of stillness with
+               the thing you asked for sitting in a cart, which is the moment
+               the errand became a purchase and used to flick past. This hold
+               is unchanged.
+         3300  Knili's acid pass starts at the first field BELOW the product —
                Knili does not type the product, it was carried in — and runs
                1400ms; each row lights on its own measured --d
-         2100  your cursor sets off from off-frame right
-         3049  your cursor reaches the card block and stops there
-         3500  the wash reaches the last field Knili fills
-         3500  the mark turns cobalt and moves onto the card block; your
+         3300  your cursor sets off from off-frame right
+         4249  your cursor reaches the card block and stops there
+         4700  the wash reaches the last field Knili fills
+         4700  the mark turns cobalt and moves onto the card block; your
                cursor has been sitting on it for 451ms
-         3600  the card fields fill in your colour, 190ms apart
-         4350  the marks go — and on the same frame your cursor leaves the
+         4800  the card fields fill in your colour, 190ms apart
+         5550  the marks go — and on the same frame your cursor leaves the
                card for the button, so nothing else is moving while it travels
-         4851  it arrives on Place order
-         5000  the click, and .burst fires WITH it.
+         6051  it arrives on Place order
+         6200  the click, and .burst fires WITH it.
        THAT LAST LINE USED TO BE A LIE AND IT IS WORTH SAYING SO. The comment
        computed the click as "handoff's 1.7s delay, its 75% of 2.7s" = 3725,
        and then at() below fired .burst at beat-relative 4300 — the ripple and
@@ -3609,35 +3704,37 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
       frameBeat(4);
       void el.offsetWidth;                    /* commit the band's start */
       /* one class, five delays: the values fill in order off --n */
-      /* 2100, not 0: the thumbnail's flight into the card is 1.4s and it goes
-         FIRST, then 700ms of stillness. Nothing fills until the thing being
-         bought is in the card and has been seen to arrive. This is 1700 + the
-         400 the flight gained; the 700ms hold is unchanged. */
-      at(2100, function () {
+      /* 3300, not 0: the card arrives, is held, THEN the thumbnail flies in
+         over 1.6s, and only then does anything fill. Nothing fills until the
+         thing being bought is in the card and has been seen to arrive. This
+         is 1000 (arrival + hold) + 1600 (flight) + 700 (the landing hold,
+         which is unchanged and is the one number here nobody has moved). */
+      at(3300, function () {
         el.classList.add('filled');
         if (b) el.style.setProperty('--ry', b.wash + 'px');
       });
       /* AND THE HANDOFF. The mark changes colour and moves onto the card
          block; your cursor is already sitting there when it does. */
-      at(3500, function () {
+      at(4700, function () {
         el.classList.add('pay');
         if (b) {
           el.style.setProperty('--ry', b.card + 'px');
           el.style.setProperty('--rh', b.cardH + 'px');
         }
       });
-      at(3600, function () { el.classList.add('paid'); });
+      at(4800, function () { el.classList.add('paid'); });
       /* the mark has done its work; it goes before the click so the button is
          the only thing left to look at — and the cursor's 66.2% stop is set to
          this same instant, so the marks leaving and the cursor setting off for
          the button are one event rather than two overlapping ones */
-      at(4350, function () { el.classList.remove('fill', 'filled', 'pay', 'paid'); });
+      at(5550, function () { el.classList.remove('fill', 'filled', 'pay', 'paid'); });
     });
-    /* 5940 + 5000: the frame the button is at the bottom of its press. Read
-       off the handoff/press stops (2.1s delay + 85.3% of 3.4s), not guessed —
+    /* 5940 + 6200: the frame the button is at the bottom of its press. Read
+       off the handoff/press stops (3.3s delay + 85.3% of 3.4s), not guessed —
        see the sub-phase list above for the 575ms of drift that guessing
-       accumulated. */
-    at(10940, function () { el.classList.add('burst'); });
+       accumulated. The delay moved with the two new holds in front of it and
+       this number moved with the delay, because it is derived from it. */
+    at(12140, function () { el.classList.add('burst'); });
 
     /* THE ENDING IS THE PAYOFF, HELD — and it used to be a title card. Beat 5
        faded a plate carrying the lockup and IT DOES THE SHOPPING. / YOU DO THE
@@ -3648,15 +3745,16 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
        page now (see .heromark) and the sequence ends on the thing only the
        sequence can show — a checkout with the order in it.
        So beat 4 keeps the ending instead, and the budget moves rather than
-       being deleted. .burst lands at 10940 and the ORDER PLACED chip's `chip`
-       animation runs 1.5s, so the last thing that MOVES stops at 12440.
+       being deleted. .burst lands at 12140 and the ORDER PLACED chip's `chip`
+       animation runs 1.5s, so the last thing that MOVES stops at 13640.
        Then 1100ms of nothing — the same hold the closing card was given,
        because the reader needs a beat on the filled bill and the pay bar, and
        an ending that cuts on the frame the motion stops reads as a dropped
-       shot rather than as an ending. 12440 + 1100 = 13540, and the loop runs
-       16.75s -> 13.54s. It was 12.84s before the cart flight and the cursor
-       were slowed; the 1100 hold is the one number at this end that did NOT
-       move, because it is the reader's beat on the finished bill and it was
+       shot rather than as an ending. 13640 + 1100 = 14740, and the loop runs
+       16.75s -> 14.74s. It was 12.84s before the cart flight and the cursor
+       were slowed and 13.54s before the checkout's arrival was split off from
+       the flight; the 1100 hold is the one number at this end that has NEVER
+       moved, because it is the reader's beat on the finished bill and it was
        already the minimum that reads as an ending rather than a cut.
        There is no fade left at the seam and there must not be one: with the
        card gone the only honest transition from a finished checkout back to an
@@ -3761,7 +3859,7 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
 </script>
 
 <script>
-/* HOW TO USE, IN THREE AND A THIRD SECONDS. The hero's sequence is 16.75s and
+/* HOW TO USE, IN THREE AND A THIRD SECONDS. The hero's sequence is 14.74s and
    is the page's loudest object; this one is deliberately shorter, calmer, and
    it plays ONCE when it comes into view rather than looping. Two loops on one
    page compete, and the one that should win is the one that carries the
@@ -3852,7 +3950,7 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
        gap because it is the page's argument; this is the second animation on
        the same screen and a hard immediate restart made it the busier of the
        two, which it must not be. 4780 + 900 = 5680, so it comes round about
-       two and a half times for every one turn of the hero's 14550. */
+       two and a half times for every one turn of the hero's 14740. */
     at(ULOOP, play);
   }
 
