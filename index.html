@@ -607,13 +607,22 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 .stage{--u:var(--px);--fz:1;--fx2:0px;--fy2:0px;
   transform-origin:0 0;
   transform:translate(var(--fx2),var(--fy2)) scale(var(--fz));
-  /* 924 = 44 chrome bar + 920 body. The body was 640, which is shorter than a
-     finished panel's own content stack — header, ask, and a result card with an
-     image, a bill and the CTA come to roughly 880 design px. The overflow was
-     clipped by .pnl, and what fell off the bottom was the last ~190px: the
-     PAY ON THE PAGE bar. Beat 4 was framing an element that was never painted.
-     A window is as tall as a window; this is what a real one measures. */
-  position:relative;width:calc(var(--px)*var(--dw));height:calc(var(--px)*964);
+  /* 920, AND IT IS .sbody'S HEIGHT BECAUSE .sbody IS THE WHOLE COMPOSITION.
+     The body is 920 because 640 was shorter than a finished panel's own
+     content stack — header, ask, and a result card with an image, a bill and
+     the CTA come to roughly 880 design px. The overflow was clipped by .pnl,
+     and what fell off the bottom was the last ~190px: the PAY ON THE PAGE bar.
+     Beat 4 was framing an element that was never painted.
+     IT USED TO BE 964 = 44 CHROME BAR + 920 BODY, AND THAT 44 WAS THE BUG.
+     The bar moved out of the composition and got pinned to the window, but
+     this height kept its seat: .sbody is the only in-flow child of .stage —
+     .hand, .pickring, .ripple, .confetti and .placed are all absolute — so the
+     last 44 design px were an empty strip painting the stage's own background,
+     which is the shop's cream. Measured at a 472x495 window it was 20.5px of
+     cream between the checkout card's foot and the bottom of the browser.
+     Exactly the shape of the beat-1 bug two blocks down in frameBeat(): space
+     reserved for a box that is not there any more. */
+  position:relative;width:calc(var(--px)*var(--dw));height:calc(var(--px)*920);
   background:var(--co-bg);overflow:hidden;
   /* ONE transition declaration, because there were two. `transition:transform
      .45s` used to sit up beside the transform itself and this line, later in
@@ -971,11 +980,22 @@ h1 em{font-style:normal;color:var(--acid);display:block}
    the card FIRST, and only then do the details fill. A card that fills before
    it has the product in it is the wrong story. The camera opens on the top of
    the card, which is where the thumbnail lands, so the flight is on screen. */
-/* A SECOND, NOT 750ms, and then stillness. This is the moment the errand
-   becomes a purchase — the thing you asked for arriving in a cart — and it was
-   flicking past. It travels for 1s and then nothing moves for 700ms before the
-   filling starts. */
-.stage[data-beat="4"] .co-item img{animation:travel 1s cubic-bezier(.2,.75,.3,1)}
+/* 1.4s, AND THIS IS THE THIRD TIME IT HAS BEEN SLOWED — 750ms, then 1s, and
+   the owner asked again. This is the moment the errand becomes a purchase —
+   the thing you asked for arriving in a cart.
+   THE DISTANCE IS NOT THE PROBLEM; THE SCALE IS. Measured, flip() sets
+   --fx -233 / --fy 43, so the tile travels 237 stage px — which at 1s is a
+   speed the eye tracks easily. But --fs comes out at 6.96: the thing is SEVEN
+   TIMES its landing size when it sets off and shrinks the whole way down. A
+   target changing size by that factor cannot be held in smooth pursuit while
+   it moves, so the flight is read as a start state and an end state with a
+   blur between them, and a second is not long enough to fixate either. 1.4s
+   is what makes the middle of the move legible, which is where the meaning is
+   — the thing you searched for turning into the thing you are paying for.
+   The 700ms of stillness AFTER it lands is untouched — it is a separate beat
+   doing a separate job — so everything downstream of the landing simply moves
+   400ms later. Nothing was shortened to pay for it; see LOOP. */
+.stage[data-beat="4"] .co-item img{animation:travel 1.4s cubic-bezier(.2,.75,.3,1)}
 @keyframes travel{
   from{transform:translate(var(--fx,0),var(--fy,0)) scale(var(--fs,1))}
   to{transform:none}}
@@ -1128,15 +1148,33 @@ h1 em{font-style:normal;color:var(--acid);display:block}
   filter:drop-shadow(0 calc(var(--px)*2) calc(var(--px)*4) rgba(10,17,64,.45))}
 .stage[data-beat="1"] .hand,.stage[data-beat="2"] .hand,
 .stage[data-beat="3"] .hand,.stage[data-beat="0"] .hand{opacity:0}
-/* 1.15s -> 1.6s, and the beat of stillness it used to buy is now the fill.
-   Beat 4 opens on the form and washes it for 1600ms; the cursor's animation
-   is anchored to the start of the beat, so its delay is that 1600 — it starts
-   moving while the card is still settling and arrives as the wash finishes.
-   One thing moving at a time still holds; there is simply something worth
-   watching in the time that used to be empty.
+/* 2.7s -> 3.4s, AND THE DELAY 1.7s -> 2.1s, WHICH ARE TWO DIFFERENT FACTS.
+   The delay is anchored to the start of beat 4 and the flight in front of it
+   got 400ms longer, so 2.1 is the old 1.7 carried along — the cursor still
+   sets off on the same frame Knili's wash does, and nothing about the
+   relationship changed.
+   The 700ms of extra DURATION is the owner's second ask: the moves read as
+   jumps. Both of them are now paced as movement rather than as a cut, and
+   because the percentages below were re-derived rather than left alone, the
+   extra time lands on the two travels and on the dwell that separates them,
+   not on the trailing dead frames.
+   Measured against the stops below, at 3400ms:
+     off-frame hold      0 -> 4.4%     150ms   (was 135)
+     travel to the card  4.4 -> 27.9%  799ms   (was 540)
+     sits on the card   27.9 -> 66.2% 1302ms   (was 891)
+     travel to the pay  66.2 -> 80.9%  500ms   (was 324)
+     press down / up    80.9 -> 89.7%  150+150 (was 135+135)
+   AND THE DWELL IS NOT PADDING. It is what puts the cursor on the card block
+   at beat-relative 3049 — 451ms BEFORE the mark hands over at 3500 — and
+   keeps it there until 4351, which is the frame the marks come off at. That
+   is the "already sitting on it" the handoff comment claims and the old
+   numbers had quietly stopped delivering: at 2.7s/1.7s the cursor left the
+   card at 3266, thirty-four milliseconds BEFORE your own fields began filling
+   at 3300. It was travelling to the button while the card filled behind it,
+   which is two things moving at once.
    `both` matters: without the backwards fill the cursor would sit at its
    resting position on the button for the whole delay instead of off-frame. */
-.stage[data-beat="4"] .hand{animation:handoff 2.7s cubic-bezier(.4,0,.2,1) 1.7s both}
+.stage[data-beat="4"] .hand{animation:handoff 3.4s cubic-bezier(.4,0,.2,1) 2.1s both}
 /* In from beyond the right edge of the whole composition — off-frame, past the
    panel — and left across it to the near side of the button. It is the
    reader's hand arriving from outside, never something the panel emits. */
@@ -1144,23 +1182,34 @@ h1 em{font-style:normal;color:var(--acid);display:block}
    down to the card fields — where it sits still while they fill in your
    colour — then down to the button and press. --kx/--ky is the offset from
    the button to the card block, measured in place() and never guessed. */
+/* THE STOPS ARE PERCENTAGES OF 3.4s AND EVERY ONE OF THEM IS A ROUNDED
+   MILLISECOND, not a tidy number. Percentages are what a keyframe rule can
+   say, but the thing being designed is durations, so they are derived from
+   ms and the ms are in the comment above the rule: 150 / 949 / 2251 / 2751 /
+   2900 / 3050 of 3400. Change the duration and these all have to be redone —
+   that is the cost of expressing a timeline as fractions, and it is why the
+   milliseconds are written down. */
 @keyframes handoff{
   0%{opacity:0;transform:translate(calc(var(--px)*980),calc(var(--px)*30))}
-  5%{opacity:1;transform:translate(calc(var(--px)*980),calc(var(--px)*30))}
-  25%,58%{opacity:1;transform:translate(var(--kx,0),var(--ky,0)) scale(1)}
-  70%{opacity:1;transform:translate(0,0) scale(1)}
-  75%{transform:translate(0,calc(var(--px)*4)) scale(.84)}
-  80%{transform:translate(0,0) scale(1)}
+  4.4%{opacity:1;transform:translate(calc(var(--px)*980),calc(var(--px)*30))}
+  27.9%,66.2%{opacity:1;transform:translate(var(--kx,0),var(--ky,0)) scale(1)}
+  80.9%{opacity:1;transform:translate(0,0) scale(1)}
+  85.3%{transform:translate(0,calc(var(--px)*4)) scale(.84)}
+  89.7%{transform:translate(0,0) scale(1)}
   100%{opacity:1;transform:translate(0,0) scale(1)}
 }
-.stage[data-beat="4"] .co-pay{animation:press 2.7s cubic-bezier(.4,0,.2,1) 1.7s both}
+/* The button's own reaction rides the same clock as the hand — same duration,
+   same delay, same stops — or the ring lights on a button the cursor has not
+   reached. Its lit ring grows over exactly the second travel, 66.2 -> 80.9%,
+   so the button comes alive as the cursor crosses to it. */
+.stage[data-beat="4"] .co-pay{animation:press 3.4s cubic-bezier(.4,0,.2,1) 2.1s both}
 @keyframes press{
-  0%,62%{box-shadow:0 0 0 0 rgba(232,255,58,0);transform:scale(1);filter:none}
-  70%{box-shadow:0 0 0 calc(var(--px)*4) rgba(232,255,58,.65);transform:scale(1);
+  0%,66.2%{box-shadow:0 0 0 0 rgba(232,255,58,0);transform:scale(1);filter:none}
+  80.9%{box-shadow:0 0 0 calc(var(--px)*4) rgba(232,255,58,.65);transform:scale(1);
       filter:none}
-  75%{box-shadow:0 0 0 calc(var(--px)*4) rgba(232,255,58,.65);transform:scale(.955);
+  85.3%{box-shadow:0 0 0 calc(var(--px)*4) rgba(232,255,58,.65);transform:scale(.955);
       filter:brightness(.72)}
-  80%{box-shadow:0 0 0 calc(var(--px)*4) rgba(232,255,58,.65);transform:scale(1);
+  89.7%{box-shadow:0 0 0 calc(var(--px)*4) rgba(232,255,58,.65);transform:scale(1);
       filter:none}
   100%{box-shadow:0 0 0 calc(var(--px)*4) rgba(232,255,58,0);transform:scale(1)}
 }
@@ -2815,8 +2864,23 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
      against beats; this is the number the pass ends on, and the loop track
      under the window is driven from it (see progress()) so the bar and the
      wrap cannot disagree. The last thing that moves — the ORDER PLACED chip —
-     settles at 11740 and beat 4 is then held for 1100ms; see the note beside
+     settles at 12440 and beat 4 is then held for 1100ms; see the note beside
      at(LOOP, play) for why that hold is 1100.
+     12840 -> 13540, AND THIS IS THE FIRST TIME THE LOOP HAS BEEN LET GROW.
+     The owner asked for the cart flight and the cursor to be slower; both are
+     moments a viewer reads as "something is being done", and both were being
+     sampled rather than watched. The flight takes 400ms of that and the
+     cursor's two travels and the dwell between them take 875, less the 575
+     reclaimed from the ripple's drift: +700.
+     IT WAS NOT TAKEN OUT OF THE SCAN, AND HERE IS THE NUMBER. He has asked
+     twice for the search to feel quicker and it has twice been paid for out
+     of the scan — most recently 651ms. What is left of the flick is 1100ms at
+     the fixed 320ms per shop, which is 3.4 storefronts. Funding 700ms from
+     there leaves 400ms, or 1.25 storefronts, and one and a quarter pages is
+     not a search; the alternative, dropping the per-shop rate, is barred
+     below 250ms because a fixation is 250-300ms and images fuse under 200.
+     So the scan is untouched and the loop is 700ms longer. Nothing else was
+     quietly shortened to protect the total.
      16750 -> 12250, and every millisecond of that is measured rather than
      trimmed by feel. Beat 1 gives up 800 because the ask is 41 characters
      instead of 58 and types in ~1370ms instead of 2326 — while the DWELL
@@ -2827,7 +2891,7 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
      flash; at 1400 you can follow it filling. The 500 came out of the beat's
      own dead time, not off the loop — see the sub-phase list in beat 4. */
   var KWASH = 1400;
-  var LOOP = 12840;
+  var LOOP = 13540;
   var T = [], raf = null;
 
   /* Where the cursor has to land is a fact about the rendered button, not a
@@ -2968,8 +3032,10 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
      grid of products and a checkout with no browser anywhere around them.
      Measured, it costs 4.5%: the cover fit goes from .511 to .488 at 390px and
      the bar lands 16.6px tall with the domain inside the visible 703 design px.
-     Beat 4 cannot have it. Its subject already spans 541x556 of a 1072x738
-     composition; adding the chrome bar makes that 1072x722 and the contain fit
+     Beat 4 cannot have it. Its subject already spans 541x556 of the
+     composition — 1072x738 when this was measured, 1072x704 since the dead
+     chrome strip came out of .stage's height — and adding the chrome bar to
+     the frame makes that 1072x722 and the contain fit
      falls from .579 to .292 — the panel would render 90px wide and the pay bar
      4.7px. Half the zoom to put a strip of grey at the top is not a trade, and
      it is reported rather than taken.
@@ -3006,7 +3072,36 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
        .608 — height-bound by the panel, which is the composition's full
        height, so the horizontal is slack and the card was widened into it for
        free. */
-    4:  { sel: ['.ccard', '.pnl'], fit: 'contain', ax: 0.5, ay: 0.5 }
+    /* AND THE CLOSING FRAME TAKES NO AIR EITHER, FOR BEAT 1'S REASON WORKED
+       OUT ON THE OTHER AXIS. AIR is an inner margin the SUBJECT is fitted
+       inside, and it is only honest where there is composition left over to
+       show in it. Here there is not, on either axis:
+         vertical — .pnl runs the composition's full height, so the subject's
+           height IS the composition's height and a vertical margin can only
+           ever be the window's own cream. Measured at a 472x495 window: the
+           21px margin bound the fit at z .608, the composition rendered
+           448.8px into a 470px page area, the clamp below could not pull it
+           (it only bites when the composition is at least as tall as the
+           frame) and the else-branch centred it — 10.66px of cream under the
+           chrome bar and 10.6px more at the foot, on top of the 20.5px of
+           dead strip the stage was still reserving. That is the band.
+         horizontal — the panel's right edge IS the composition's right edge,
+           so the clamp already ate the horizontal margin whole: measured, tx
+           came out at -209.2 unclamped and was pinned to -179.7, the
+           composition's right edge against the frame's. The margin was doing
+           nothing there before this change.
+       With air 0 the fit is z = min(W/subject.w, H/subject.h), and since the
+       subject is never larger than the composition on either axis, the
+       composition is guaranteed to cover the frame — 704x1072 design px at
+       z .6676 is 470 tall against a 470px page area and 715.7 wide against
+       472, flush top and bottom, clamped flush right. The card keeps its air
+       from the shop's own page beside it (17.4px at this width), which is
+       composition rather than cream, and the whole picture is 9.8% larger
+       than it was. Beat 4 is also the only contain fit left with a subject
+       that spans the composition, so this is not a general retreat from AIR;
+       beat 1 already carries air:0 for the same argument stated the other way
+       up ("a panel inset from its frame reads as a mat, not a fit"). */
+    4:  { sel: ['.ccard', '.pnl'], fit: 'contain', ax: 0.5, ay: 0.5, air: 0 }
   };
   /* The window is a size the CSS owns, and the driver MUST NOT touch it. An
      earlier version resized it per beat, which resized the very box the
@@ -3468,22 +3563,36 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
        spending: 1150 of it was the "beat of stillness" the cursor used to
        wait through, and 400 more came off the ORDER PLACED chip, which was
        1.9s and is 1.5. Net cost to the loop: 50ms, 12250 -> 12300.
-       Sub-phases inside beat 4, relative to its start:
+       Sub-phases inside beat 4, relative to its start. EVERY NUMBER AFTER THE
+       FLIGHT IS 400ms LATER THAN IT WAS, because the flight is 1.4s instead
+       of 1s and the 700ms of stillness behind it was not touched:
          0     the checkout arrives and the thumbnail flies into the card,
-               over a full second. The camera does not move again all beat.
-         1000  IT LANDS, AND EVERYTHING STOPS. 700ms of stillness with the
+               over 1.4s. The camera does not move again all beat.
+         1400  IT LANDS, AND EVERYTHING STOPS. 700ms of stillness with the
                thing you asked for sitting in a cart, which is the moment the
                errand became a purchase and used to flick past.
-         1700  Knili's acid pass starts at the first field BELOW the product —
+         2100  Knili's acid pass starts at the first field BELOW the product —
                Knili does not type the product, it was carried in — and runs
                1400ms; each row lights on its own measured --d
-         1700  your cursor sets off from off-frame right
-         3100  the wash reaches the last field Knili fills
-         3200  the mark turns cobalt and moves onto the card block; your
-               cursor is already sitting on it
-         3300  the card fields fill in your colour, 190ms apart
-         4050  the marks go
-         4300  the click (handoff's 1.7s delay, its 75% of 2.7s) */
+         2100  your cursor sets off from off-frame right
+         3049  your cursor reaches the card block and stops there
+         3500  the wash reaches the last field Knili fills
+         3500  the mark turns cobalt and moves onto the card block; your
+               cursor has been sitting on it for 451ms
+         3600  the card fields fill in your colour, 190ms apart
+         4350  the marks go — and on the same frame your cursor leaves the
+               card for the button, so nothing else is moving while it travels
+         4851  it arrives on Place order
+         5000  the click, and .burst fires WITH it.
+       THAT LAST LINE USED TO BE A LIE AND IT IS WORTH SAYING SO. The comment
+       computed the click as "handoff's 1.7s delay, its 75% of 2.7s" = 3725,
+       and then at() below fired .burst at beat-relative 4300 — the ripple and
+       the confetti went off 575ms after the button had finished being pressed,
+       with the cursor's whole animation already over. The ripple is the click;
+       it is now derived from the same stops as the press (2.1s delay + 85.3%
+       of 3.4s = 5000) rather than carried along by hand, which is where the
+       drift came from. Reclaiming those 575ms is why the loop grows by 700
+       and not by 1275. */
     at(5940, function () {
       place(); flip();
       /* On a phone the shop arrives by sliding in, so the button's rect is only
@@ -3500,30 +3609,35 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
       frameBeat(4);
       void el.offsetWidth;                    /* commit the band's start */
       /* one class, five delays: the values fill in order off --n */
-      /* 800, not 0: the thumbnail's flight into the card is 750ms and it
-         goes FIRST. Nothing fills until the thing being bought is in the card.
-         The camera sets off down the card on the same frame the wash does and
-         takes 1.5s over the wash's 1.4 — one movement, trailing the mark
-         slightly, so the wash is never above the middle of the shot. */
-      at(1700, function () {
+      /* 2100, not 0: the thumbnail's flight into the card is 1.4s and it goes
+         FIRST, then 700ms of stillness. Nothing fills until the thing being
+         bought is in the card and has been seen to arrive. This is 1700 + the
+         400 the flight gained; the 700ms hold is unchanged. */
+      at(2100, function () {
         el.classList.add('filled');
         if (b) el.style.setProperty('--ry', b.wash + 'px');
       });
       /* AND THE HANDOFF. The mark changes colour and moves onto the card
          block; your cursor is already sitting there when it does. */
-      at(3200, function () {
+      at(3500, function () {
         el.classList.add('pay');
         if (b) {
           el.style.setProperty('--ry', b.card + 'px');
           el.style.setProperty('--rh', b.cardH + 'px');
         }
       });
-      at(3300, function () { el.classList.add('paid'); });
+      at(3600, function () { el.classList.add('paid'); });
       /* the mark has done its work; it goes before the click so the button is
-         the only thing left to look at */
-      at(4050, function () { el.classList.remove('fill', 'filled', 'pay', 'paid'); });
+         the only thing left to look at — and the cursor's 66.2% stop is set to
+         this same instant, so the marks leaving and the cursor setting off for
+         the button are one event rather than two overlapping ones */
+      at(4350, function () { el.classList.remove('fill', 'filled', 'pay', 'paid'); });
     });
-    at(10240, function () { el.classList.add('burst'); });
+    /* 5940 + 5000: the frame the button is at the bottom of its press. Read
+       off the handoff/press stops (2.1s delay + 85.3% of 3.4s), not guessed —
+       see the sub-phase list above for the 575ms of drift that guessing
+       accumulated. */
+    at(10940, function () { el.classList.add('burst'); });
 
     /* THE ENDING IS THE PAYOFF, HELD — and it used to be a title card. Beat 5
        faded a plate carrying the lockup and IT DOES THE SHOPPING. / YOU DO THE
@@ -3534,13 +3648,16 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
        page now (see .heromark) and the sequence ends on the thing only the
        sequence can show — a checkout with the order in it.
        So beat 4 keeps the ending instead, and the budget moves rather than
-       being deleted. .burst lands at 10240 and the ORDER PLACED chip's `chip`
-       animation runs 1.5s, so the last thing that MOVES stops at 11740.
+       being deleted. .burst lands at 10940 and the ORDER PLACED chip's `chip`
+       animation runs 1.5s, so the last thing that MOVES stops at 12440.
        Then 1100ms of nothing — the same hold the closing card was given,
        because the reader needs a beat on the filled bill and the pay bar, and
        an ending that cuts on the frame the motion stops reads as a dropped
-       shot rather than as an ending. 11740 + 1100 = 12840, and the loop runs
-       16.75s -> 12.84s.
+       shot rather than as an ending. 12440 + 1100 = 13540, and the loop runs
+       16.75s -> 13.54s. It was 12.84s before the cart flight and the cursor
+       were slowed; the 1100 hold is the one number at this end that did NOT
+       move, because it is the reader's beat on the finished bill and it was
+       already the minimum that reads as an ending rather than a cut.
        There is no fade left at the seam and there must not be one: with the
        card gone the only honest transition from a finished checkout back to an
        empty ask is a cut, and .cut above is what makes it one. */
@@ -3552,7 +3669,7 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
      The observer used to watch .stage, and .stage carries
      translate(--fx2,--fy2) scale(--fz). An intersection RATIO is the visible
      area over the element's own area, and the element's own area is
-     1072*738*--fz*--fz, so the ratio is a function of the zoom the sequence
+     1072*704*--fz*--fz, so the ratio is a function of the zoom the sequence
      itself sets. Measured at 390px with the window's visible height held FIXED
      at 100px, no scrolling at all: the resting camera (beat 4, --fz .574)
      reads 0.129; beat 1's camera (--fz 1.013) reads 0.040. The single 0.05
