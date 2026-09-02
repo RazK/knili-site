@@ -115,12 +115,41 @@ h2{font:600 clamp(28px,4vw,44px)/1.08 var(--display);letter-spacing:.01em;
 .barin > img{height:22px;width:auto}
 /* Everything in the bar is there from the first frame — only the plate under
    it changes on scroll. Nothing arrives, so nothing has to be choreographed. */
-.barnav{margin-left:auto;display:flex;gap:20px}
+/* TWO LINKS AND AN ACTION, NOT THREE PEERS. The row's gaps were 20 / 20 /
+   20 — mark, then a stretch of auto, then How to install, How to use and Add
+   to Chrome all spaced identically. Measured, that is even; read, it is
+   wrong, because it tells the eye the three are the same kind of thing and
+   one of them is a button. The links close up to 24 as one group and the
+   button steps back to 48, which is the same grammar the panel's own header
+   uses: one statement at the left, one kind of control at the right. */
+.barnav{margin-left:auto;display:flex;gap:24px}
 /* Wayfinding, not a second ask: the mark is the acid these links already take
    on hover, and the rule under it is reserved at all times so nothing in the
-   bar moves when the highlight changes. */
-.barnav a:after{content:"";display:block;height:1px;margin-top:5px;
-  background:transparent}
+   bar moves when the highlight changes.
+   IN FLOW IT WAS ALSO SIX PIXELS OF THE LINK'S OWN BOX — 1px of rule and 5 of
+   margin, below the text and inside the anchor — so align-items:center centred
+   a 21.6px box whose text occupied the top 15.6 of it, and the link rode 3px
+   high of the mark and the button either side. Out of flow, the anchor is its
+   line box and the three centres agree. */
+.barnav a{position:relative}
+/* AND THE RULE IS THERE AT REST, WHICH IS THE AFFORDANCE. It used to be
+   transparent until hover, and an affordance nobody can see until they hover
+   is not an affordance on a page most people scan once — beside a solid acid
+   button, two static mono labels read as furniture, the same treatment
+   `profile` and `close` get inside the panel.
+   A rule, not a second button: the CTA has to stay the only thing in this bar
+   that looks like an action, so the links are marked as a different category
+   — unmistakably interactive, deliberately quieter. --body at 45% on the
+   bar's ink2 measures 3.6:1 as a 1px rule, which is a non-text boundary and
+   over the 3.0 that asks for; the LABEL is --body at 12.88:1. Hover, focus
+   and the current section all take it to full acid at 12.6:1. */
+.barnav a:after{content:"";position:absolute;left:0;right:0;bottom:-6px;
+  height:1px;background:rgba(211,216,255,.45);transition:background .2s ease-out}
+.barnav a:hover:after,.barnav a:focus-visible:after{background:var(--acid)}
+.barnav a:focus-visible{outline:2px solid var(--acid);outline-offset:6px}
+/* the section you are in, with three of them to be in */
+.barnav a[aria-current="true"]{color:var(--acid)}
+.barnav a[aria-current="true"]:after{background:var(--acid)}
 /* The hero's jump nav is gone. It existed for one reason — below 660 the bar
    was display:none and the three section links had nowhere else to be — and
    that reason went when the bar came back on phones carrying them. Above 660
@@ -254,7 +283,12 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--acid);outline-offse
 h1{font:600 var(--h1)/.94 var(--display);letter-spacing:.005em;
   text-transform:uppercase;color:var(--ink);margin:0 0 24px}
 h1 em{font-style:normal;color:var(--acid);display:block}
-.lede{font:400 17px/1.45 var(--mono);color:var(--body);letter-spacing:0;margin:0 0 32px}
+/* Under the button now, not above it — its 32px of space below was the gap
+   between the copy and the ask and is not needed under the last line of the
+   column. Above it, the 14 that pairs it with the button it explains. */
+.lede{font:400 17px/1.45 var(--mono);color:var(--body);letter-spacing:0;
+  margin:14px 0 0}
+.hero .btn{margin-top:26px}
 /* THE WHOLE ARGUMENT ON ONE SCREEN, AND THE ARGUMENT IS THE THING RUNNING.
    There used to be a still photograph of the product here and a HOW IT WORKS
    section under it holding the demo. A picture of the thing beside the thing
@@ -370,8 +404,17 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 .pnl h3.fold[data-open="1"]:after{content:"\2013"}
 
 .composer{display:grid;grid-template-columns:1fr auto;margin:calc(var(--u)*16)}
+/* 13.5 -> 18, AND THE STRING GOT SHORTER TO PAY FOR IT. The ask was 58
+   characters — "hot sauce gift set under $35, shipped to Jerusalem, Israel" —
+   and 58 characters only fit that box at a size the owner could not read.
+   It is 41 now and keeps all three facts the product is built on: what you
+   want, what you will spend, where it has to arrive. "shipped to" and
+   ", Israel" were the words carrying none of them.
+   Size in --u like everything in this composition; the beat's own camera then
+   magnifies it further, which is why the rendered figure is the one reported
+   and 18 is only the design number. */
 .ask{background:var(--ink2);padding:calc(var(--u)*14) calc(var(--u)*16);color:var(--ink);
-  font:400 calc(var(--u)*13.5)/1.35 var(--display);text-transform:uppercase;
+  font:400 calc(var(--u)*18)/1.32 var(--display);text-transform:uppercase;
   letter-spacing:.02em;min-height:calc(var(--u)*76)}
 /* The extension pins this at 120px so the ask field does not resize as the
    label cycles Go / Stop / Stopping… / Done. The drawn panel holds the same
@@ -1072,24 +1115,70 @@ h1 em{font-style:normal;color:var(--acid);display:block}
    ground carrying 19px of ink. The section still opens on 88, because that is
    the gap that separates it from what came before; what it stops doing is
    holding a screen open after it has finished talking. */
-.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;
+/* THREE AND THREE, AND SIX ACROSS WAS MEASURED AND REJECTED. The row gained
+   an Unzip step, and the obvious move was a sixth column. Measured at 1440:
+   the wrap is 1120 with 24 of padding, so the row has 1072 and six columns of
+   it are 168.7px — 137px inside the card's own 16px padding. The omnibox mock
+   in step 03 needs 181px to draw chrome://extensions AND its COPY chip, so at
+   137 the chip was sliced in half, and step 05's rescue line overflowed the
+   card by 13px. (172.8 was already 8px short of that omnibox at five columns;
+   six only made a hairline clip into a broken picture.) The alternative was a
+   zoom on the mocks, as the phone does — but the phone zooms PICTURES, and
+   step 05's line is prose a stuck reader has to read, at 8.3px.
+   Three columns give 349px, 317px inside, and every mock draws whole at full
+   size. It costs one more row of height and it reads as a grid of steps
+   rather than a strip; the numbers carry the order either way.
+   minmax(0,1fr) rather than 1fr: 1fr floors at min-content, and the mocks
+   have nowrap parts, so plain 1fr handed the row six different widths
+   (measured: 201.9 / 144.1 / 240.3 / 165.2 / 130.3 / 130.3).
+   The class name still says five and is left alone deliberately: it is on one
+   element and in a dozen selectors, and renaming it buys nothing. */
+.grid5{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;
   margin-bottom:20px}
 .grid5 .cap{font-size:13px;letter-spacing:.12em;margin-bottom:12px;
   transition:color .25s ease-out}
-/* The card that is moving says so. The row plays one card at a time and the
-   only sign of which one was inside the mockup, so the eye had to find the
-   motion before it could know where to look. The live card's caption lights
-   in acid instead: a colour, and nothing that has to track geometry — a
-   travelling highlight over these titles was tried here once and withdrawn
-   for exactly that reason. Auto-play is off below 640px, where the reader
-   drives the row with a thumb, so no card is .live there and nothing lights. */
-.grid5 > figure:has(.mk.live) .cap{color:var(--acid)}
+/* The card that is moving says so — and it is the CARD that says it, not its
+   caption. The row plays one card at a time and the only sign of which one
+   was inside the mockup, so the eye had to find the motion before it could
+   know where to look. A coloured caption was the first answer and it was the
+   wrong object: the reader is looking at the picture, and a word above it
+   cannot mark the picture. The ring is on .mk, below.
+   Auto-play is off below 640px, where the reader drives the row with a thumb,
+   and it never runs under prefers-reduced-motion, so no card is .live in
+   either case and nothing is marked — which is correct, because with no
+   sequence running there is no "current" card to point at. */
 /* Near-white cards on white paper need an edge of their own. This was the
    page's --lift token, which had exactly one user left once the window took
    its own shadow and the hero shot was deleted, so it is written here. */
-.mk{background:var(--paper);height:220px;padding:16px;font-family:var(--ui);
+/* 220 -> 208, because the cards got wider and 220 left them looking empty —
+   but not as far as the 192 the widest layout would have allowed. The tallest
+   card is step 05, whose rescue line wraps with the card: measured, its
+   content is 187px at a 349px card (1440) and 202px at a 271px card (901,
+   the narrowest three-column arrangement). 208 clears the worse of the two
+   with a little air, and every card keeps the same height — a row of steps
+   whose boxes are different sizes reads as six unrelated pictures. */
+.mk{background:var(--paper);height:208px;padding:16px;font-family:var(--ui);
   color:#202124;overflow:hidden;
-  box-shadow:0 28px 60px -20px rgba(10,17,64,.34), 0 0 0 1px rgba(10,17,64,.16)}
+  box-shadow:0 28px 60px -20px rgba(10,17,64,.34), 0 0 0 1px rgba(10,17,64,.16);
+  transition:box-shadow .25s ease-out}
+/* THIS ONE, NOW — a glow, not a border. A solid acid band bounded in cobalt
+   was the first answer and it read as an outline drawn round the card rather
+   than as attention landing on it. This is the same mechanism with no hard
+   edge: box-shadow, so it costs no box space at all and the card's geometry
+   is identical lit or unlit (measured: 349.3 x 208 at the same x and y in
+   both states). A real border would have inset every mock by its own width as
+   the highlight travelled and made the row twitch six times a pass.
+   Two shadows, because one cannot be both bright and soft: a tight bloom
+   carries the colour at the card's edge, a wider one carries the reach. The
+   card's own hairline stays underneath so the box keeps its edge on paper.
+   The spread is held to 5 and the blur to 18 for a reason — the row's gap is
+   12px, and a glow that reaches further than that stops being this card's
+   halo and starts being a wash over the next one.
+   .25s, the old caption duration: an orientation cue, not an alarm. */
+.mk.live{box-shadow:0 28px 60px -20px rgba(10,17,64,.34),
+  0 0 0 1px rgba(10,17,64,.16),
+  0 0 10px 2px rgba(232,255,58,.95),
+  0 0 18px 5px rgba(232,255,58,.6)}
 .mknote{font:400 10.5px/1.45 var(--ui);color:#5F6368;margin-top:10px}
 .mknote b{font-weight:600;color:#3C4043}
 
@@ -1104,9 +1193,17 @@ h1 em{font-style:normal;color:var(--acid);display:block}
    the page and becomes the one object on it.
    ========================================================================== */
 .install{background:var(--paper);padding:88px 0 36px}
-/* The live card says so in cobalt rather than acid: acid on white measures
-   1.1:1 and disappears. Cobalt on white is 7.88:1 and is the page's own. */
-.grid5 > figure:has(.mk.live) .cap{color:var(--g)}
+/* AND THE CAPTION LIGHTS WITH IT — as a field, never as ink. Acid text on
+   this paper measures 1.5:1 and is the reason the live caption was cobalt for
+   as long as it was coloured at all. Navy on acid is the panel's own device,
+   the one CHECKOUT READY is drawn with, and it measures 14.9:1.
+   Nothing here moves: the caption is inline-block at every state so the block
+   hugs the words, and the field is widened past the text with a box-shadow
+   spread rather than padding, which would have shifted the card below it by
+   the height of the padding the moment the highlight arrived. */
+.grid5 .cap{display:inline-block}
+.grid5 > figure:has(.mk.live) .cap{background:var(--acid);color:var(--ink2);
+  box-shadow:0 0 0 4px var(--acid)}
 /* DESKTOP ONLY, SAID OUT LOUD. It used to be implied — by a collapsed
    disclosure labelled WHEN YOU ARE AT YOUR COMPUTER — which a reader on a
    phone can miss entirely and then work through five steps they cannot
@@ -1144,37 +1241,47 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 .mk1.live .tick{animation:tickin 1.8s ease-out}
 @keyframes tickin{0%,58%{opacity:0;transform:scale(.3)}72%,100%{opacity:1;transform:none}}
 
-.mk2.live .mkomni{animation:ring2 1.8s ease-out}
+/* 02 — the archive becomes the folder. The arrow draws itself down and the
+   folder lands after it, so the card plays the sentence rather than showing
+   its two ends at once. Same 1.8s window every other card gets. */
+.mk2.live .arw{animation:arrowdn 1.8s ease-out}
+@keyframes arrowdn{0%,18%{opacity:0;transform:translateY(-6px)}
+                   38%,100%{opacity:1;transform:none}}
+.mk2.live .fold{animation:landed 1.8s cubic-bezier(.3,1.5,.5,1)}
+@keyframes landed{0%,44%{opacity:0;transform:translateY(-8px) scale(.94)}
+                  62%,100%{opacity:1;transform:none}}
+
+.mk3.live .mkomni{animation:ring2 1.8s ease-out}
 @keyframes ring2{0%,20%{box-shadow:0 0 0 2px var(--g)}
                  32%,72%{box-shadow:0 0 0 2px var(--g),0 0 0 6px rgba(232,255,58,.6)}
                  86%,100%{box-shadow:0 0 0 2px var(--g)}}
-.mk2.live .cpill{animation:took 1.8s ease-out}
+.mk3.live .cpill{animation:took 1.8s ease-out}
 @keyframes took{0%,24%{background:#F1F3F4;color:#3C4043}
                 36%,72%{background:var(--g);color:#fff}
                 86%,100%{background:#F1F3F4;color:#3C4043}}
 
-.mk3.live .sw{animation:track 1.8s ease-out}
+.mk4.live .sw{animation:track 1.8s ease-out}
 @keyframes track{0%,26%{background:#D6D9E0}42%,100%{background:#BFC6FA}}
-.mk3.live .sw i{animation:knob 1.8s cubic-bezier(.3,1.5,.5,1)}
+.mk4.live .sw i{animation:knob 1.8s cubic-bezier(.3,1.5,.5,1)}
 @keyframes knob{0%,26%{transform:translateX(-17px);background:#9AA0A6}
                 42%,100%{transform:translateX(0);background:var(--g)}}
-.mk3.live .xb{animation:fadeup 1.8s ease-out}
+.mk4.live .xb{animation:fadeup 1.8s ease-out}
 @keyframes fadeup{0%,44%{opacity:0;transform:translateY(6px)}
                   60%,100%{opacity:1;transform:none}}
 
-.mk4.live .zip{animation:carry 1.8s cubic-bezier(.4,0,.2,1)}
+.mk5.live .fold{animation:carry 1.8s cubic-bezier(.4,0,.2,1)}
 @keyframes carry{0%,12%{transform:translate(0,0);opacity:1}
                  52%{transform:translate(16px,52px);opacity:1}
                  66%,100%{transform:translate(16px,52px);opacity:0}}
-.mk4.live .drop{animation:lit 1.8s ease-out}
+.mk5.live .drop{animation:lit 1.8s ease-out}
 @keyframes lit{0%,40%{background:transparent}58%,84%{background:rgba(27,44,240,.07)}
                100%{background:transparent}}
-.mk4.live .drop svg,.mk4.live .drop > span{animation:fadeup 1.8s ease-out}
+.mk5.live .drop svg,.mk5.live .drop > span{animation:fadeup 1.8s ease-out}
 
-.mk5.live .pop svg{animation:pinin 1.8s ease-out}
+.mk6.live .pop svg{animation:pinin 1.8s ease-out}
 @keyframes pinin{0%,32%{opacity:.2;transform:rotate(-40deg) scale(.7)}
                  50%,100%{opacity:1;transform:none}}
-.mk5.live .tbar img{animation:popin 1.8s cubic-bezier(.3,1.6,.5,1)}
+.mk6.live .tbar img{animation:popin 1.8s cubic-bezier(.3,1.6,.5,1)}
 @keyframes popin{0%,54%{opacity:0;transform:scale(.3)}70%,100%{opacity:1;transform:none}}
 .dl{width:100%;background:#fff;box-shadow:0 1px 8px rgba(32,33,36,.3);padding:10px 0}
 .dl .ttl{font-size:10.5px;color:#5F6368;padding:0 12px 6px}
@@ -1186,7 +1293,7 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 .dl .row > span > span{display:block;font-size:10.5px;color:#5F6368;margin-top:2px}
 .dl .tick{width:14px;height:14px;color:#2E9E4B;flex:none}
 
-.mk2{background:#F1F3F4}
+.mk3{background:#F1F3F4}
 .mkomni{width:100%;display:flex;align-items:center;gap:6px;background:#fff;height:34px;
   border-radius:17px;padding:0 4px 0 10px;font:400 11px/1 var(--ui);color:#202124;
   white-space:nowrap;overflow:hidden;border:0;cursor:pointer;text-align:left;
@@ -1214,10 +1321,33 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 .xb{display:inline-block;margin-top:14px;font-size:11.5px;color:var(--g);
   border:1px solid #D2D6EF;padding:8px 12px;border-radius:3px;white-space:nowrap}
 
-.zip{display:inline-flex;align-items:center;gap:8px;font-size:11px;color:#3C4043;
+/* ONE CHIP, ONE OBJECT, TWO CARDS. This was .zip and it drew a file: card 04
+   carried a chip labelled knili-extension.zip into the drop zone under a
+   caption reading "Load the folder". Load unpacked cannot take an archive, so
+   the picture was instructing people into Chrome's "Could not unzip extension
+   for install". It is a folder now, named knili, and card 01 ends on the same
+   chip — the object you are given is the object you drag. */
+.fold{display:inline-flex;align-items:center;gap:8px;font-size:11px;color:#3C4043;
   background:#F1F3F4;padding:7px 10px}
-.zip svg{width:13px;height:13px;color:#5F6368}
-.drop{margin-top:12px;height:84px;border:2px dashed var(--g);display:flex;
+.fold svg{width:13px;height:13px;color:#5F6368}
+/* THE ARCHIVE BECOMING THE FOLDER, at the foot of card 01. An arrow and the
+   chip, centred under the downloads panel, because "becomes" is a thing a
+   picture can say and a 10px caption inside a mock could not. */
+/* the archive, for the one card that still has one to show */
+.zipf{display:inline-flex;align-items:center;gap:8px;font-size:11px;color:#3C4043;
+  background:#F1F3F4;padding:7px 10px}
+.zipf svg{width:13px;height:13px;color:#5F6368}
+/* THE WHOLE OF STEP 02, AS A PICTURE: one object above, an arrow, the other
+   object below. Centred, because the arrow is the verb and a verb between two
+   nouns wants them stacked on its axis. */
+.becomes{display:flex;flex-direction:column;align-items:center;gap:3px;
+  margin:6px 0 0}
+.arw{width:16px;height:16px;color:#9AA0A6;flex:none}
+/* 84 -> 72. The drop zone gave up twelve pixels so the rescue line below it
+   has somewhere to sit inside the card's fixed 220. The carried chip still
+   lands well inside the zone: it travels 52px down into a zone that starts at
+   41 and now ends at 113. */
+.drop{margin-top:12px;height:72px;border:2px dashed var(--g);display:flex;
   align-items:center;gap:10px;padding:0 12px}
 .drop svg{width:28px;height:28px;color:var(--g);flex:none}
 .drop b{font-size:12.5px;color:#111}
@@ -1234,6 +1364,190 @@ h1 em{font-style:normal;color:var(--acid);display:block}
 .pop .row{display:flex;align-items:center;gap:8px;padding:7px 10px;font-size:12px;color:#202124}
 .pop .row img{width:15px;height:15px;flex:none}
 .pop .row svg{width:13px;height:13px;margin-left:auto;color:var(--g);flex:none}
+
+/* ==========================================================================
+   THE BAR'S OWN CTA. Not .btn: that button is 18px type in 20px of padding
+   and stands 58px tall, which in a bar whose whole height is 47 would have
+   made the strip 82. Measured, this one is 35px in a 59px bar. The tap target
+   is brought back to 45 with an overlapping ::after rather than more padding,
+   the same device the footer's GitHub link uses, so the height it needs is
+   not height the bar has to find. */
+.barcta{margin-left:48px;flex:none;position:relative;white-space:nowrap;
+  background:var(--acid);color:var(--ink2);text-decoration:none;
+  font:600 13px/1 var(--display);letter-spacing:.06em;text-transform:uppercase;
+  padding:11px 16px}
+.barcta:hover{filter:brightness(1.06)}
+.barcta:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.barcta:after{content:"";position:absolute;left:-6px;right:-6px;top:-5px;bottom:-5px}
+.barcta.onmob{display:none}
+
+/* ==========================================================================
+   AND THEN THE FIRST ERRAND. The install row ends with a pinned icon and, up
+   to now, nothing to do with it. This is the payoff, not step seven: it takes
+   the full width, carries no number and no mock, and puts the reader's first
+   sentence in the same dark composer the demo types into — so the thing they
+   watched at the top of the page is the thing they are told to do at the
+   bottom of it, in the same type on the same ground.
+   ========================================================================== */
+/* =============================================================== how to use */
+/* THREE SECTIONS AND THE THIRD GROUND IS THE FIRST ONE AGAIN: cobalt hero,
+   paper install, cobalt use. Installing is a chore printed on paper; using it
+   is the product, and the product's ground is the cobalt the demo runs on.
+   The scene inside is NOT on that cobalt directly. .pnl's own body IS
+   var(--g) — a panel on a cobalt section is a panel with no edges — so it
+   gets what the hero's shot gets: a light window with the same lift shadow. */
+.usesec{background:var(--g);padding:72px 0 56px}
+.usesec h2{color:var(--ink)}
+/* The window and the scene are two boxes for the same reason the hero's are:
+   the shadow and the clip belong to the frame, the design pixels belong to
+   what is inside it. --px is the scene's whole scale — 1072 design px wide at
+   1440 and proportionally less below, so every part shrinks together and the
+   picture stays itself rather than being re-laid-out small. */
+.ustagewin{position:relative;background:#fff;overflow:hidden;container-type:inline-size;
+  box-shadow:0 40px 90px -30px rgba(2,4,26,.7), 0 0 0 1px rgba(2,4,26,.35)}
+/* --px IS MEASURED OFF THE FRAME, NOT OFF THE VIEWPORT. It was
+   min(1px, (100vw - 48px)/1072) and 100vw INCLUDES the scrollbar: at a 614px
+   window the wrap gives the frame 551px and that formula handed it 566, so
+   the scene was drawn 15px wider than the box it lives in and 10px taller —
+   measured, .ubody overflowed 15 and .ustage 10. Container query units answer
+   the only question that matters, which is how wide this frame actually is:
+   1cqw is 1% of .ustagewin, so 1cqw/10.72 is exactly frame ÷ 1072 design px
+   and the scene can never be wider than what holds it. The wrap's own
+   max-width caps it at 1 without a min() — 1120 less 48 of padding is 1072.
+   The vw form stays as the fallback for anything without cqw. */
+.ustage{--px:min(1px, calc((100vw - 63px) / 1072));
+  position:relative;width:100%;aspect-ratio:1072 / 430;overflow:hidden;
+  background:#fff}
+@supports (width:1cqw){ .ustage{--px:calc(1cqw / 10.72)} }
+.ubody{display:flex;height:calc(var(--px)*386);overflow:hidden}
+/* The shop is scenery and it is the stage's scenery — .hdr/.nav/.body/.card
+   and the rest are shared with the hero's six storefronts, which were made
+   quiet for exactly this reason. One definition, no second placeholder style.
+
+   AND IT IS PUSHED, NOT COVERED. Chrome's side panel — which is what
+   manifest.json declares — takes width off the tab: the page really does
+   reflow into less room, and a reader will see that happen for themselves
+   within a minute of leaving this page. So the shop starts at the browser's
+   full 1072, the panel sits beyond the right edge of a clipped .ubody with no
+   transform on it at all, and the ONLY thing that animates is the page's own
+   width. The panel is not moved; it is uncovered. That is both cheaper and
+   truer than sliding a panel over a page.
+   The reflow is made legible by one column dropping: four tiles across at
+   full width, three across once the panel has taken its 404. A width change
+   on its own is a slide; a column disappearing is something that can only
+   happen because the width changed, and it is what a real grid does. It snaps
+   rather than easing, because a real reflow snaps too. */
+.upage{flex:0 0 calc(var(--px)*668);min-width:0;background:#fff;
+  display:flex;flex-direction:column;overflow:hidden;
+  transition:width .5s cubic-bezier(.2,.85,.3,1),
+             flex-basis .5s cubic-bezier(.2,.85,.3,1)}
+.upage .body{grid-template-columns:repeat(3,1fr)}
+.upage .card .blk{height:calc(var(--px)*74)}
+.ustage[data-u="0"] .upage,.ustage[data-u="1"] .upage{
+  flex-basis:calc(var(--px)*1072)}
+.ustage[data-u="0"] .upage .body,.ustage[data-u="1"] .upage .body{
+  grid-template-columns:repeat(4,1fr)}
+/* No transform, ever. The hero's beats 0 and 1 carry a comment about an
+   entrance transform that put a beat's subject 381px from where the camera
+   measured it, and the fix there was to delete the transform rather than
+   compensate for it. Nothing measures this scene, but the same discipline
+   costs nothing here and the push is a better animation anyway. */
+.upnl{--u:var(--px);flex:0 0 calc(var(--px)*404)}
+/* THE COMPOSER IS SET TWICE THE PANEL'S OWN SIZE, and the string is short so
+   that it can be. The hero types the whole errand — budget, destination, the
+   lot — at the panel's true 13.5; this section is not teaching the shape of
+   an ask, it is teaching where the panel comes from, so two words are enough
+   and two words can be set at 27 without leaving the box. In --u, never in
+   screen pixels: a hardcoded size inside a scaled composition is the exact
+   bug that made the hero shot unreadable on a phone. */
+.upnl .ask{font-size:calc(var(--u)*27)}
+.ustage[data-u="0"] .ukeys{opacity:0;transform:translateY(calc(var(--px)*14))}
+/* THE KEYS ARRIVE; THEY ARE NOT THERE FROM THE FIRST FRAME. The sequence
+   opens on a shop page, full width, and holds it — that is where a real
+   person is standing when they press this. Knili comes to the page you are
+   already on; it is not something you launch.
+   AND IT MUST NOT READ AS THE HERO'S BEAT 2. That shot flicks six storefronts
+   past a cycling address bar; this one is a single page, held, with a fixed
+   domain, no .flick anywhere, and a pair of objects over it that the hero
+   never has. A search moves; this waits.
+   The keys are centred in whatever the page currently is — the whole window
+   while it is full width, the remaining 668 once the panel has taken its
+   room — so they are never over the panel and the rest frame carries both. */
+.ukeys{opacity:1;transform:none;
+  transition:opacity .34s ease-out, transform .34s cubic-bezier(.2,.9,.3,1),
+             width .5s cubic-bezier(.2,.85,.3,1);
+  position:absolute;left:0;top:calc(var(--px)*44);
+  width:calc(var(--px)*668);height:calc(var(--px)*386);
+  display:flex;align-items:center;justify-content:center;
+  gap:calc(var(--px)*14);pointer-events:none}
+.ustage[data-u="0"] .ukeys,.ustage[data-u="1"] .ukeys{width:calc(var(--px)*1072)}
+/* FLAT 3D: DEPTH FROM GEOMETRY, NOT FROM LIGHT. The first version of these
+   had a gradient face, an inset highlight along the top edge and a blurred
+   drop shadow — lighting, which this page has nowhere. Everything in the
+   Kiosk language is a solid block with a hard edge: the acid GO, the CHECKOUT
+   READY stamp, the pay bar, the navy header. None of them is shaded.
+   So a key is two flat shapes. A face — one solid fill — and a body: the same
+   fill's dark partner, offset straight down and drawn with a ZERO blur, which
+   is the side of the key and the whole of the effect. The device already
+   exists in this file: .bar carries `0 -16px 0 0 var(--ink2)`, a hard offset
+   block with no blur, and this is that, pointing the other way.
+   The two tones are the palette's own acid pair — --acid for the face and
+   --acid-ink for the body, the two the tokens define together — because
+   pressing these keys IS the action in this frame and acid is what this page
+   paints actions in. Radius 6, off the shop mocks' own ladder (.card is 6).
+   THE PRESS IS THE BODY DISAPPEARING: the face travels down by exactly the
+   8px offset until the side wall is gone and the key is flat on the surface
+   it stood on. Nothing darkens and nothing glows. Linear and 80ms, because a
+   key bottoming out is a hard stop; the driver holds it 280ms and lets it up. */
+.ukey{display:grid;place-items:center;min-width:calc(var(--px)*66);
+  height:calc(var(--px)*60);padding:0 calc(var(--px)*17);
+  background:var(--acid);color:var(--ink2);
+  font:600 calc(var(--px)*22)/1 var(--display);letter-spacing:.06em;
+  text-transform:uppercase;border-radius:calc(var(--px)*6);
+  box-shadow:0 calc(var(--px)*8) 0 0 var(--acid-ink);
+  transition:transform .08s linear, box-shadow .08s linear}
+.ustage.p1 .ukey:nth-child(1),.ustage.p2 .ukey:nth-child(2),
+.ustage.p3 .ukey:nth-child(3){transform:translateY(calc(var(--px)*8));
+  box-shadow:0 0 0 0 var(--acid-ink)}
+/* THE CURSOR IS IN THE BOX AND NOT ON THE WORDS. It used to rest at 764,158,
+   which is inside the composer and directly over the middle of the typed
+   string — the arrow covered a letter for the whole beat. It sits at 838,196
+   now: still inside the field (684-936 across, 151-227 down, in the scene's
+   design pixels), past the end of the text at any length it reaches — nine
+   characters of 27px condensed run to about 821 — and low enough that the
+   glyph, which is 20 wide by 32 tall from its tip, stays clear of the words
+   above it and inside the box below them. Where a real pointer rests after
+   you have clicked into a field.
+   Then it goes to GO, which is where the gesture actually ends. Its resting
+   place is therefore GO, not the composer: the markup is the last frame, so
+   with no script or under reduced motion the picture shows the whole
+   instruction including the button that starts it. */
+.ucur{position:absolute;left:0;top:0;width:calc(var(--px)*20);height:auto;
+  transform:translate(calc(var(--px)*985),calc(var(--px)*178));
+  transition:transform .6s cubic-bezier(.4,0,.2,1),opacity .3s ease-out}
+.ustage[data-u="3"] .ucur{
+  transform:translate(calc(var(--px)*838),calc(var(--px)*196))}
+.ustage[data-u="0"] .ucur,.ustage[data-u="1"] .ucur{opacity:0}
+.ustage[data-u="0"] .ucur,.ustage[data-u="1"] .ucur,.ustage[data-u="2"] .ucur{
+  transform:translate(calc(var(--px)*300),calc(var(--px)*300))}
+/* THE PRESS, IN THE PAGE'S OWN LANGUAGE FOR A PRESS. The hero dips the shop's
+   pay button to .955 under the reader's cursor; this dips GO by the same
+   amount, with the cursor dropping 4 design px into it, so a click looks like
+   a click wherever it happens on this page. Nothing continues past it: the
+   hero owns the errand, this section owns starting one. */
+.upnl .go{transition:transform .12s ease-out}
+.ustage.gopress .upnl .go{transform:scale(.955)}
+.ustage.gopress .ucur{
+  transform:translate(calc(var(--px)*985),calc(var(--px)*182))}
+/* one frame with no transitions, so a replay is a new scene rather than a
+   rewind of the old one — the hero's .cut, at this scene's scale */
+.ustage.ucut *{transition:none!important;animation:none!important}
+.udom{font-weight:400;color:#5F6368;overflow:hidden;text-overflow:ellipsis}
+/* .usefoot stood here — 15px mono under the scene. Removed with the
+   paragraph it styled; see the note in the markup for the one fact that went
+   with it. The section's bottom padding drops from 76 to 56 so the scene sits
+   inside the section rather than floating above the gap the paragraph used to
+   fill: measured, the section is 616.6px at 1440 instead of 763.5. */
 
 /* =============================================================== footer */
 /* 64px below the last line of the spec was 64px of ground with nothing on it
@@ -1256,10 +1570,26 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
 
 /* =========================================================== responsive */
 @media (max-width:1023px){
-  /* two, then three — never a stranded row */
-  .grid5{grid-template-columns:repeat(6,1fr)}
-  .grid5 > figure:nth-child(-n+2){grid-column:span 3}
-  .grid5 > figure:nth-child(n+3){grid-column:span 2}
+  /* Nothing to say any more. With five cards this band ran two then three —
+     spans of 3 and 2 over six columns, because five will not divide. Six
+     divides, so the base grid is already three and three at every width down
+     to the carousel, and an override here would only be a second opinion. */
+}
+/* TWO ACROSS, BECAUSE THREE STOPS FITTING BEFORE THE CAROUSEL DOES. The
+   omnibox mock in step 03 needs 181px to draw chrome://extensions and its
+   COPY chip whole; the suggestion row under it needs 208 for
+   chrome://extensions/shortcuts; and step 05's rescue line needs the card to
+   be wide enough not to run past 192px of height. All three are satisfied at
+   276px of card and none of them at 225: measured at 761, the suggestion row
+   was cut 15px short and step 05 overflowed its card by 10, and at 660 it was
+   49px and 25px with the COPY chip hanging 18.5px outside the bar as well.
+   Three columns clear 276 only above a 900px viewport, so that is where they
+   stop. Two columns at 641 are 290.5px and at 900 are 420 — wider, at every
+   width in the band, than three would have been. Three rows of two costs
+   height that nobody at this width is short of. Below 641 the row becomes the
+   swipe carousel and this stops applying. */
+@media (min-width:641px) and (max-width:900px){
+  .grid5{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media (max-width:1000px){
   .hero-grid{grid-template-columns:1fr;gap:40px}
@@ -1382,8 +1712,24 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
   .bar{padding:0}
   .barin > img{display:none}
   .bar .barin{padding:10px 16px}
-  .barnav{display:flex;margin-left:0;width:100%;gap:12px;
-    justify-content:space-between}
+  /* THE BAR'S RIGHTMOST ELEMENT KEEPS ITS PLACE AND ITS WEIGHT AND CHANGES
+     WHAT IT PROMISES. Chrome has no extensions on a phone and unpacked ones
+     additionally need Developer mode, which is desktop-only, so ADD TO CHROME
+     here would hand a reader a zip their device cannot open — the same defect
+     that got the COPY THE LINK button deleted. The acid block keeps the
+     desktop button's place and weight and says the thing that is true on this
+     device; the plain nav link goes, because it would then be the same three
+     words twice in one strip.
+     THIS BLOCK, NOT THE 660 BLOCK ABOVE IT. .barnav is re-declared here, so a
+     display:none written up there is overruled four hundred lines later by a
+     rule with the same specificity — the cascade trap this file has been
+     caught by more than once. */
+  .barnav{display:none}
+  .barcta.onmob{display:inline-block;margin-left:auto;
+    font-size:11px;padding:8px 11px}
+  /* the same out-of-flow target the nav links use, for the same reason: 11px
+     of type must not cost the strip 44px of height */
+  .barcta.onmob:after{left:-9px;right:-9px;top:-8px;bottom:-8px}
   .barnav a{font-size:11px;position:relative}
   /* The target fills the bar and stops there. Out of the flow like the
      footer's, so 11px of type does not cost 44px of strip — but bounded to
@@ -1414,6 +1760,44 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
    target here for a thumb to miss and nothing under 44px to answer for.
    ========================================================================== */
 .swipe{display:none}
+/* A NARROWER SCENE, NOT A SMALLER ONE — the camera moves in rather than the
+   type going down. At 390 a 1072-wide composition renders at --px .334, which
+   puts the composer's 27 at 9px and most of the picture under the floor this
+   page holds readable things to. The scene is 640 design px wide here: the
+   panel keeps its real 404, the shop keeps 236 of itself, and --px lands near
+   .56. Same objects, same units, a tighter frame. */
+@media (max-width:700px){
+  .ustage{--px:min(1px, calc((100vw - 63px) / 640));aspect-ratio:640 / 430}
+  @supports (width:1cqw){ .ustage{--px:calc(1cqw / 6.4)} }
+  .upage{flex-basis:calc(var(--px)*236)}
+  .ustage[data-u="0"] .upage,.ustage[data-u="1"] .upage{
+    flex-basis:calc(var(--px)*640)}
+  .upage .body{grid-template-columns:repeat(1,1fr)}
+  .ustage[data-u="0"] .upage .body,.ustage[data-u="1"] .upage .body{
+    grid-template-columns:repeat(3,1fr)}
+  .ukeys{width:calc(var(--px)*236);gap:calc(var(--px)*9)}
+  .ustage[data-u="0"] .ukeys,.ustage[data-u="1"] .ukeys{width:calc(var(--px)*640)}
+  .ukey{min-width:calc(var(--px)*54);height:calc(var(--px)*52);
+    padding:0 calc(var(--px)*9);font-size:calc(var(--px)*18);
+    box-shadow:0 calc(var(--px)*7) 0 0 var(--acid-ink)}
+  .ustage.p1 .ukey:nth-child(1),.ustage.p2 .ukey:nth-child(2),
+  .ustage.p3 .ukey:nth-child(3){transform:translateY(calc(var(--px)*7))}
+  /* the same three places, in the 640-wide scene: the panel starts at 236
+     here rather than 668, so everything inside it shifts by -432 */
+  .ucur{transform:translate(calc(var(--px)*553),calc(var(--px)*178))}
+  .ustage[data-u="3"] .ucur{
+    transform:translate(calc(var(--px)*406),calc(var(--px)*196))}
+  .ustage[data-u="0"] .ucur,.ustage[data-u="1"] .ucur,.ustage[data-u="2"] .ucur{
+    transform:translate(calc(var(--px)*110),calc(var(--px)*300))}
+  .ustage.gopress .ucur{
+    transform:translate(calc(var(--px)*553),calc(var(--px)*182))}
+}
+@media (max-width:560px){
+  /* only the fallback needs this: the wrap's padding drops to 16 a side here,
+     so the vw arithmetic has to stop reserving 24. The cqw form already
+     measures the frame itself and has nothing to adjust. */
+  .ustage{--px:min(1px, calc((100vw - 47px) / 640))}
+}
 @media (max-width:640px){
   /* Both mechanisms, because they do not coexist: Chrome 121+ honours the
      standard scrollbar-width and IGNORES every ::-webkit-scrollbar rule the
@@ -1471,7 +1855,22 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
      phone can actually use are the hero's copy-the-link and nothing here. */
   .grid5 > figure{flex:0 0 144px;min-width:0;grid-column:auto;scroll-snap-align:start}
   .grid5 .cap{font-size:11px;letter-spacing:.1em;margin-bottom:8px}
-  .mk{zoom:.72;height:204px}
+  /* THE TWO STRINGS THAT DO NOT FIT THE 200 DESIGN PX THE ZOOM DRAWS AT.
+     The card gives its mock 168px inside the padding; the omnibox with its
+     COPY chip wants 181 and the suggestion rows 194, so both were sliced
+     mid-word — the copy control, which is the one real control in this
+     section, came out as a bare half-glyph. These step the type down to fit
+     rather than letting the card cut it, which is what the zoom is already
+     doing to everything else in the picture. Measured after: 161.8 and 161. */
+  .mkomni{font-size:10px;padding:0 4px 0 8px;gap:4px}
+  .cpill{padding:4px 6px;font-size:8px;gap:2px}
+  .cpill svg{width:10px;height:10px}
+  .mkdrop div{font-size:9px;padding:6px 7px;gap:5px}
+  .mkdrop i{width:9px;height:9px}
+  /* 204 -> 222. The card is drawn at 200 design px and zoomed to .72, so the
+     rescue line in step 05 wraps to more rows here than anywhere else and ran
+     13px past the old height. 222 drawn is 160 on screen. */
+  .mk{zoom:.72;height:222px}
 }
 @media (max-width:660px){
   /* ==========================================================================
@@ -1542,6 +1941,14 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
   html{scroll-behavior:auto}
   .bar,.steps div,.bars i,.grid5 .cap{transition:none}
   .stage *,.stage{animation:none!important;transition:none!important}
+  /* the How to use scene, on the same terms: its driver never runs here, so
+     the markup's last frame — panel in, keys up, cursor at the composer, the
+     first words typed — is simply what is drawn, and nothing may ease into
+     it either. .mk's live ring goes with them: no card is ever .live under
+     reduced motion, because the row's own script returns before it can add
+     the class, so this is belt and braces rather than the mechanism. */
+  .ustage *,.ustage{animation:none!important;transition:none!important}
+  .mk{transition:none!important}
   .caret,.go.pulse,.mk.live *,.mk.live,.point .arrow{animation:none!important}
   /* the rail still tracks the row; it just stops easing to the new position */
   .swrail i,.swipe b{transition:none}
@@ -1561,7 +1968,23 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
     <img src="lockup.png" alt="Knili">
     <nav class="barnav">
       <a href="#install">How to install</a>
+      <a href="#use">How to use</a>
     </nav>
+    <!-- THE BAR CARRIES THE ASK AGAIN, AND THIS REVERSES AN EARLIER DELETION
+         RATHER THAN FORGETTING IT. The CTA was stripped from here when the bar
+         was always visible: it then stood beside the hero's own button and a
+         third one below, three asks on one screen. The bar is position:fixed
+         and translated off now, and only arrives once the hero has left the
+         viewport entirely — which is the exact moment the hero's button is
+         gone. It is the only ask on screen when it appears, which is what it
+         was not before.
+         And the phone gets a different one, deliberately. Chrome has no
+         extensions on a phone; an ADD TO CHROME there downloads a zip the
+         device cannot use, which is the defect the deleted COPY THE LINK
+         button had. The phone keeps the position and the prominence and
+         changes the promise. -->
+    <a class="barcta ondesk" href="knili-extension.zip" download>Add to Chrome</a>
+    <a class="barcta onmob" href="#install">How to install</a>
   </div>
 </header>
 
@@ -1575,8 +1998,20 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
       <p class="kicker">A new Chrome <span class="nb">extension<span class="pz"><svg viewBox="3.35 1.75 17.3 18.9" preserveAspectRatio="xMidYMax meet" width="15.6" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M8.4 5.2 a2.6 2.6 0 0 1 5.2 0 h4.4 a1.8 1.8 0 0 1 1.8 1.8 v11 a1.8 1.8 0 0 1 -1.8 1.8 h-12 a1.8 1.8 0 0 1 -1.8 -1.8 v-3.6 a2.6 2.6 0 0 0 0 -5.2 v-2.2 a1.8 1.8 0 0 1 1.8 -1.8 z"/></svg></span></span></p>
       </div>
       <h1>It does the shopping.<em>You do the buying.</em></h1>
-      <p class="lede">One sentence in. A filled checkout.</p>
+      <!-- THE ASK COMES BEFORE THE QUALIFIER, AND THIS IS A FINDABILITY FIX
+           WITH NUMBERS BEHIND IT. A reader shown this page said it took him a
+           moment to work out how to install it. Measured at 1440 in a 723px
+           viewport, the button was the fourth object in a four-object column
+           with its centre at y=498.6 — 151.6px BELOW the hero's own centre at
+           347, and 181.8px below the centre of the demo window, which is a
+           512x537 object that moves. Motion wins that competition every time,
+           and what the eye came back to was the headline, 80.6px above the
+           button with a line of body copy in between.
+           So the ask now follows the promise directly and the qualifier
+           becomes its caption, which is what it reads as anyway. Nothing got
+           louder: same button, same 197x58, same acid on cobalt at 7.5:1. -->
       <a class="btn ondesk" href="knili-extension.zip" download>Add to Chrome</a>
+      <p class="lede">One sentence in. A filled checkout.</p>
     </div>
 
     <div class="demo">
@@ -1669,10 +2104,14 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
             <span class="icons"><span>profile</span><span>close</span></span>
           </div>
           <div class="bd">
+            <!-- No ASK heading. A box with a sentence typing into it and a GO
+                 beside it does not need a label telling you it is where you
+                 ask; the label was 11px of type spending 39 design px of the
+                 tightest framing on the page. Removed from THIS MOCK only —
+                 the extension's own panel is not this file's to change. -->
             <div class="ztop">
-              <h3>Ask</h3>
               <div class="composer">
-                <div class="ask">hot sauce gift set under $35, shipped to Jerusalem, Israel</div>
+                <div class="ask">hot sauce gift set under $35 to Jerusalem</div>
                 <div class="go">Go</div>
               </div>
             </div>
@@ -1725,7 +2164,19 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
     </div>
 
     <div class="loopbar" aria-hidden="true"><i id="loopfill"></i></div>
-    <p class="foot">Orders are placed on the shop, not inside Knili.</p>
+    <!-- THE QUESTION A ROOM OF FIRST-TIME VIEWERS ASKED WITHOUT BEING
+         PROMPTED: is that with delivery or not. The picture already shows a
+         Delivery line in the bill; nothing said what the figure at the bottom
+         of it was. It is the shop's own till — money.total is documented in
+         the extension's outcome contract as "at the till, postage included",
+         in "the till's own currency", and journey 21 ("inside the ceiling
+         until the postage is counted") exists to prove a listing under the
+         ceiling whose till is over it is not called a fit.
+         What it does NOT say, and must not, is "the cheapest": the run ranks
+         candidates and drives the best-ranked one that reaches a checkout. -->
+    <p class="foot">The total is the shop&rsquo;s own till &mdash; the item and
+      the delivery, in the shop&rsquo;s currency. Orders are placed on the
+      shop, not inside Knili.</p>
     </div>
     </div>
   </div>
@@ -1751,16 +2202,46 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
             <p class="ttl">Recent downloads</p>
             <div class="row">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h7l2 3h7v13H4z"/><path d="M11 7v10M9 9h4M9 13h4"/></svg>
-              <span><b>knili-extension.zip</b><span>93 KB &middot; unzip it</span></span>
+              <span><b>knili-extension.zip</b><span>148 KB &middot; unzip it</span></span>
               <svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M4 13l5 5L20 6"/></svg>
             </div>
           </div>
         </div>
       </figure>
 
+      <!-- 02 EXISTS BECAUSE ITS ABSENCE BROKE THE FIRST INSTALL OUTSIDE THE
+           PROJECT. Unzipping was three words inside card 01's mock — "93 KB ·
+           unzip it", the smallest type in the section — and Chrome on macOS
+           does not expand a download, so the reader still had an archive when
+           they reached Load unpacked. They dragged it in and got "Could not
+           unzip extension for install".
+           A footnote could not carry that, so it is a numbered step: the
+           archive on one side, the knili folder on the other, and the arrow
+           between them is the whole instruction. This is where the reader
+           learns they now HAVE a folder, which is the object step 05 asks
+           them to drag. -->
       <figure>
-        <figcaption class="cap">02 &middot; Open extensions</figcaption>
+        <figcaption class="cap">02 &middot; Unzip it</figcaption>
         <div class="mk mk2">
+          <div class="becomes">
+            <span class="zipf">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h7l2 3h7v13H4z"/><path d="M11 7v10M9 9h4M9 13h4"/></svg>
+              knili-extension.zip
+            </span>
+            <svg class="arw" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v13M6 12l6 6 6-6"/></svg>
+            <span class="fold">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h7l2 3h9v11H3z"/></svg>
+              knili
+            </span>
+          </div>
+          <p class="mknote">Chrome does not unzip it for you. Double-click the
+            zip &mdash; on Windows, <b>Extract All</b>.</p>
+        </div>
+      </figure>
+
+      <figure>
+        <figcaption class="cap">03 &middot; Open extensions</figcaption>
+        <div class="mk mk3">
           <button class="mkomni" id="copyBtn" type="button"
                   aria-label="Copy chrome://extensions to the clipboard">
             chrome://extensions
@@ -1779,8 +2260,8 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
       </figure>
 
       <figure>
-        <figcaption class="cap">03 &middot; Switch it on</figcaption>
-        <div class="mk mk3">
+        <figcaption class="cap">04 &middot; Switch it on</figcaption>
+        <div class="mk mk4">
           <div class="xhead">
             <b>Extensions</b>
             <span class="devmode">Developer mode <span class="sw"><i></i></span></span>
@@ -1789,23 +2270,40 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
         </div>
       </figure>
 
+      <!-- THE OBJECT BEING DRAGGED IS A FOLDER, AND IT USED TO BE A ZIP.
+           This card drew a file chip labelled knili-extension.zip travelling
+           into the drop zone while the caption above it said "Load the
+           folder" — the words and the picture disagreed, and people follow
+           the picture. The first reader outside the project dragged the zip
+           in and Chrome answered "Could not unzip extension for install".
+           Load unpacked takes a FOLDER, never an archive, so the thing that
+           moves here is now the same knili folder card 01 ends on. The class
+           is .fold, shared with 01, because it is the same object in both. -->
       <figure>
-        <figcaption class="cap">04 &middot; Load the folder</figcaption>
-        <div class="mk mk4">
-          <span class="zip">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h7l2 3h7v13H4z"/><path d="M11 7v10M9 9h4M9 13h4"/></svg>
-            knili-extension.zip
+        <figcaption class="cap">05 &middot; Load the folder</figcaption>
+        <div class="mk mk5">
+          <span class="fold">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h7l2 3h9v11H3z"/></svg>
+            knili
           </span>
           <div class="drop">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h7l2 3h9v11H3z"/></svg>
             <span><b>knili</b><span>Drop to load</span></span>
           </div>
+          <!-- THE RESCUE LINE, AND IT SITS HERE BECAUSE THIS IS WHERE THE
+               ERROR HAPPENS. A stuck reader searches for the words on their
+               screen, so Chrome's own sentence is quoted exactly. Small and
+               plain: it is a way out, not a warning label, and the section
+               must not read as more fraught than it is. -->
+          <p class="mknote"><b>&ldquo;Could not unzip extension for
+            install&rdquo;</b> means you dragged the zip. Unzip it and drag
+            the <b>knili</b> folder.</p>
         </div>
       </figure>
 
       <figure>
-        <figcaption class="cap">05 &middot; Pin it</figcaption>
-        <div class="mk mk5">
+        <figcaption class="cap">06 &middot; Pin it</figcaption>
+        <div class="mk mk6">
           <div class="tbar">
             <svg class="puz" viewBox="3.35 1.75 17.3 18.9" preserveAspectRatio="xMidYMax meet" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M8.4 5.2 a2.6 2.6 0 0 1 5.2 0 h4.4 a1.8 1.8 0 0 1 1.8 1.8 v11 a1.8 1.8 0 0 1 -1.8 1.8 h-12 a1.8 1.8 0 0 1 -1.8 -1.8 v-3.6 a2.6 2.6 0 0 0 0 -5.2 v-2.2 a1.8 1.8 0 0 1 1.8 -1.8 z"/></svg>
             <img src="icon.png" alt="Knili">
@@ -1828,13 +2326,123 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
       <b>Swipe</b>
     </div>
 
+
+    </div>
+
+  </div>
+</section>
+
+<!-- ================================================================== use -->
+<!-- THREE SECTIONS, AND THE THIRD GROUND IS THE FIRST ONE AGAIN. The page
+     alternates: cobalt hero, paper install, cobalt use. Installing is a chore
+     printed on paper; using it is the product, and the product's ground is
+     the cobalt the demo already runs on.
+     The panel does NOT sit on that cobalt directly, and that is measured
+     rather than stylistic: .pnl's own body IS var(--g), so a panel on a
+     cobalt section is a panel with no edges. It gets what the hero's shot
+     gets instead — a light window with the same lift shadow.
+     What earns a whole section is not prose. It is the one thing the hero
+     cannot show: where the panel comes from. Two sentences underneath, and
+     they should stay two. -->
+<section class="usesec" id="use">
+  <div class="wrap">
+    <h2>How to use</h2>
+
+    <!-- WHAT THE HERO NEVER SHOWS: WHERE THE PANEL COMES FROM. The demo at
+         the top types the whole sentence, drives the shops and fills a
+         checkout — so this one deliberately stops after a few characters.
+         The keystroke and the entrance are the new information; the errand is
+         not, and running it twice on one page would teach the same thing
+         twice with the second telling being the quieter one.
+         Everything here is drawn in design pixels times --px, exactly as the
+         hero's shot is, so the whole scene scales as one object and nothing
+         inside it is pinned to a screen pixel. The panel is .pnl — the stage's
+         own rules at --u:var(--px) — so it cannot drift from the demo above
+         or from the extension itself. -->
+    <div class="ustagewin">
+      <div class="ustage" id="ustage">
+        <div class="cbar">
+          <span class="lights"><i></i><i></i><i></i></span>
+          <svg class="nav" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 5 8 12l7 7"/></svg>
+          <svg class="nav" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg>
+          <span class="omni">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+            <span class="udom">shopheathotsauce.com</span>
+          </span>
+          <img src="icon.png" alt="Knili">
+        </div>
+        <div class="ubody">
+          <!-- SCENERY, AND IT IS THE STAGE'S OWN SCENERY. This was a cream
+               page with white tiles of its own invention and it competed with
+               the keys, which are the subject of this frame. It is now drawn
+               with the exact classes the hero's six storefronts use — .hdr,
+               .mark, .wm, .pill, .nav, .body, .card, .blk, .ln — which exist
+               precisely because a shop on that stage has to be dull enough
+               that the panel wins. Same greys, same shapes, same weights, one
+               definition. Nothing here is a second placeholder style. -->
+          <div class="upage" aria-hidden="true">
+            <div class="hdr">
+              <span class="mark"></span><span class="wm">heat</span><span class="pill"></span>
+            </div>
+            <div class="nav"><i></i><i></i><i></i><i></i><i></i></div>
+            <div class="body">
+              <span class="sect"></span>
+              <div class="card"><span class="blk"></span><span class="ln"></span><span class="ln s"></span></div>
+              <div class="card"><span class="blk"></span><span class="ln"></span><span class="ln s"></span></div>
+              <div class="card"><span class="blk"></span><span class="ln"></span><span class="ln s"></span></div>
+              <div class="card"><span class="blk"></span><span class="ln"></span><span class="ln s"></span></div>
+              <div class="card"><span class="blk"></span><span class="ln"></span><span class="ln s"></span></div>
+              <div class="card"><span class="blk"></span><span class="ln"></span><span class="ln s"></span></div>
+            </div>
+          </div>
+          <div class="pnl upnl">
+            <div class="hd">
+              <img src="lockup.png" alt="">
+              <span class="icons"><span>profile</span><span>close</span></span>
+            </div>
+            <div class="bd">
+              <div class="ztop">
+                <h3>Ask</h3>
+                <div class="composer">
+                  <div class="ask" id="uask">hot sauce</div>
+                  <div class="go">Go</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- THE KEYS, FOR THE MACHINE LOOKING AT THE PAGE. Both sets are in
+             the markup so a page with no JavaScript is true for everyone, and
+             the script deletes the set the reader cannot press: a Mac reader
+             shown Ctrl presses Ctrl and nothing happens. -->
+        <div class="ukeys" id="ukeys" aria-hidden="true">
+          <b class="ukey kbwin">Ctrl</b><b class="ukey kbwin">Shift</b><b class="ukey kbwin">K</b>
+          <b class="ukey kbmac">&#8984;</b><b class="ukey kbmac">&#8679;</b><b class="ukey kbmac">K</b>
+        </div>
+        <svg class="ucur" viewBox="0 0 12 19" aria-hidden="true"><path d="M0 0v16l4.2-3.6 2.6 6 2.6-1.2-2.5-5.8h4.6z" fill="#fff" stroke="#0A1140" stroke-width="1.1" stroke-linejoin="round"/></svg>
+      </div>
+    </div>
+
+    <!-- THE PARAGRAPH THAT WAS HERE IS GONE, AND ONE FACT WENT WITH IT.
+         It read: "Clicking the pinned Knili icon opens the same panel, and
+         always works — Chrome drops the shortcut when those keys are already
+         taken. It fills the checkout and stops there. You pay." The owner
+         asked for this section to be minimalist twice and then asked for the
+         small type to go; a wall of mono under a picture that already shows
+         the gesture was the wrong half of the section.
+         WHAT THE PAGE NO LONGER SAYS: that clicking the pinned icon opens the
+         panel too. That matters, because ⌘⇧K is a suggested_key and Chrome
+         drops it without a word when those keys are already taken — a reader
+         whose shortcut collides now has no route on this page. It is recorded
+         here rather than lost, and a picture-only replacement is proposed in
+         the report rather than added unasked. -->
   </div>
 </section>
 
 <footer>
   <div class="wrap">
     <div class="spec">
-      <span>Free &middot; 93 KB &middot; No account &middot; Chrome</span>
+      <span>Free &middot; 148 KB &middot; No account &middot; Chrome</span>
       <span>Shopify &middot; WooCommerce &middot; OpenCart</span>
       <span><a href="https://github.com/RazK/knili">GitHub</a> &middot; Developed by Raz Karl</span>
     </div>
@@ -1925,10 +2533,16 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
   /* THE LOOP'S LENGTH, DECLARED ONCE. Everything else in play() is scheduled
      against beats; this is the number the pass ends on, and the loop track
      under the window is driven from it (see progress()) so the bar and the
-     wrap cannot disagree. It is 16750 because the last thing that moves — the
-     ORDER PLACED chip — settles at 15650 and beat 4 is then held for 1100ms;
-     see the note beside at(LOOP, play) for why that hold is 1100. */
-  var LOOP = 16750;
+     wrap cannot disagree. The last thing that moves — the ORDER PLACED chip —
+     settles at 11150 and beat 4 is then held for 1100ms; see the note beside
+     at(LOOP, play) for why that hold is 1100.
+     16750 -> 12250, and every millisecond of that is measured rather than
+     trimmed by feel. Beat 1 gives up 800 because the ask is 41 characters
+     instead of 58 and types in ~1370ms instead of 2326 — while the DWELL
+     after the last letter goes UP, from 1276ms to ~1440, which is what the
+     first outside reader was actually asking for. The scan gives up the other
+     3700: see beat 2. */
+  var LOOP = 12250;
   var T = [], raf = null;
 
   /* Where the cursor has to land is a fact about the rendered button, not a
@@ -2069,7 +2683,34 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
          air: 0 },
     2: { sel: ['.cbar', '.page'], fit: 'cover',   ax: 0,   ay: 0 },
     3: { sel: ['.cbar', '.page'], fit: 'cover',   ax: 0,   ay: 0 },
-    4: { sel: ['.csum', '.out'],   fit: 'contain', ax: 0.5, ay: 0.5 }
+    /* THE CLOSING FRAME HOLDS THE ASK, THE ANSWER AND THE BROWSER — and each
+       of those three was measured before it was let in.
+       THE ASK. .composer, not .ztop: the box of the text is what was asked
+       for. It costs the union 545x560 -> 545x640 and the fit .855 -> .769,
+       and it earns that by making the frame read "you asked for this, here it
+       is, ready to pay" instead of only showing the answer.
+       THE BROWSER, and this is why pinTop exists rather than a fourth
+       selector. The address bar is not an object that can join a union: it is
+       1072 design px wide, the full width of the shot, so including it drags
+       the frame out to the whole composition — measured, .40 of zoom, a 7.4px
+       pay label and 5.6px figures in the bill, which is the same refusal this
+       beat made once before at .29 and 4.7px. Pinning the top edge to y=0
+       instead grows the subject upward only: 545x640 -> 545x726, the fit goes
+       .707 -> .623, and the pay label lands at 11.45px against the ~11 this
+       page holds readable things to. Twelve per cent of zoom for a browser
+       frame across the top of the payoff.
+       WHAT IS NOT IN IT. The URL TEXT. .doms starts at x=194 and this frame
+       starts at 515, so what shows is the right of the address pill and the
+       Knili icon — a browser, not a readable address. Reaching the domain
+       means starting the frame at 194, which is a 866px union, a .496 fit and
+       a 9.1px pay label: under the floor, and reported rather than taken.
+       ay is 0 now, not .5: the subject's top IS the frame's top, so there is
+       nothing to centre. air drops to .03 for the same reason — three of the
+       edges are still crops and want their margin, but a 4.5% inset above a
+       pinned bar would have shown a band of the window's own cream above the
+       browser, which is the "mat" this file already refused once at beat 1. */
+    4: { sel: ['.csum', '.out', '.composer'], fit: 'contain', ax: 0.5, ay: 0,
+         pinTop: true, air: 0.03 }
   };
   /* The window is a size the CSS owns, and the driver MUST NOT touch it. An
      earlier version resized it per beat, which resized the very box the
@@ -2090,6 +2731,16 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
     var f = FRAME[n] || FRAME[1];
     var b = union(f.sel);
     if (!b) return;
+    /* THE TOP EDGE CAN BE PINNED TO THE COMPOSITION'S OWN TOP, which is where
+       the browser's address bar is. One beat uses it — see FRAME[4] — and it
+       exists because the alternative was putting .cbar in that beat's union,
+       and .cbar is 1072 design px wide: the WHOLE composition. Adding it as a
+       subject does not add an object to the frame, it widens the frame to the
+       entire shot. Measured at 1440: the union goes 545x640 -> 1072x726 and
+       the fit 0.71 -> 0.40, which renders the pay label at 7.4px and the
+       bill's figures at 5.6. Growing the subject UPWARDS instead keeps the
+       width the beat already had. */
+    if (f.pinTop) { b.h += b.y; b.y = 0; }
     var W = win.clientWidth, H = win.clientHeight;
     if (!W || !H || !b.w || !b.h) return;
     /* THE FRAME BREATHES. A contain fit that exactly fits is still a frame with
@@ -2277,7 +2928,38 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
     progress(LOOP);
 
     /* 01 — the sentence types itself. An even rate reads as a machine typing,
-       which is the wrong story, so the interval jitters and the comma breathes. */
+       which is the wrong story, so the interval jitters and the comma breathes.
+       (There is no comma left in the string to breathe on. The branch stays:
+       the string is content and the next one may have one.)
+
+       THE DWELL AFTER THE LAST LETTER IS THE NUMBER THAT MATTERED, and it is
+       not the same number as the beat's length. The first reader outside the
+       project asked for "another 2 seconds or so" here — "there isn't enough
+       time to read it" — and what he was feeling was the gap between the
+       caret stopping and the shop arriving.
+       Measured before any change, three passes at 1440 in a FOREGROUND tab
+       (a hidden tab clamps setTimeout to 1s and the same typing measures at
+       one character a second, which is not this page's behaviour): first
+       character at 200ms, last at 2491 / 2539 / 2551, beat 2 at 3802. The
+       settled sentence therefore held for 1276ms, and the type-out ran
+       2326ms for 58 characters — 299 words per minute, well above the
+       200-250 that unfamiliar text is read at, so a reader tracking the
+       caret is behind it rather than level with it.
+       The fix is not two more seconds of a motionless frame. The string is
+       41 characters now and set at 18 rather than 13.5, which is 8.2
+       standard words: a cold pass at 200wpm — the slow end of the band,
+       because this is condensed uppercase display type — is 2460ms, the
+       type-out is worth roughly the first half of that, and the remainder
+       plus a beat to register that the sentence is finished comes to about
+       1480ms.
+       So beat 2 moves to 3000 and the last character lands near 1520: the
+       dwell is ~1480ms, up from 1276, inside a beat that is 800ms SHORTER
+       than it was.
+       The other lever was slowing the type-out so the sentence is read while
+       it appears and no static frame is left sitting there. It is a real
+       option, it costs the same wall-clock, and it is in the report rather
+       than taken: the ask was about the hold, and a slower caret changes the
+       character of the beat. */
     var text = document.createTextNode(''), caret = document.createElement('span');
     caret.className = 'caret';
     if (ask) { ask.textContent = ''; ask.appendChild(text); ask.appendChild(caret); }
@@ -2307,18 +2989,44 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
        needed the two beats to be separated in time — only the log lines did,
        and they still start at 5400. The search now begins on the same frame
        the window arrives on: the shop flicks in as it slides in. */
-    at(3800, function () {
+    /* 02 — THE SCAN RUNS FOR 3300ms, WHERE IT USED TO RUN FOR 7000, AND NOT
+       ONE OF THOSE MILLISECONDS CAME OUT OF THE PER-SHOP RATE.
+       Beat 2 to beat 4 was 7000ms. It is 3300 — 47% of the original, and 59%
+       of the 5600 the first pass at this left it at. The owner asked twice
+       and asked for 50-70%, so this takes the low end.
+       WHERE IT CAME FROM. The flick itself gives up 800ms (3400 -> 2300,
+       seven storefronts instead of ten). The rest — 1500ms — comes out of the
+       phase AFTER the flick stops, which was 2200ms of ring, sweep, settle
+       and hold for four events and is now 1000: that stretch was the fat, not
+       the search. The log lines close from 970ms apart to 470.
+       WHAT DID NOT CHANGE, AND WHY. The per-shop interval is still 320ms and
+       the stagger is still -320i - 168ms. Both numbers are load-bearing: 168
+       rather than a round 160 because at 160 the step boundary lands on an
+       exact frame at 60Hz and two storefronts get painted together, and the
+       whole thing was scanned frame by frame at 60, 90 and 120Hz to prove it
+       does not. Change the interval and every one of those boundaries moves
+       and the proof has to be redone. Shortening the phase moves nothing:
+       the cycle, the offsets and the boundaries are identical, so the
+       doubled-frame guarantee holds unchanged.
+       AND 320 IS ALSO ABOUT THE FLOOR, WHICH IS THE OTHER REASON NOT TO TOUCH
+       IT. A storefront has to be on screen long enough to be seen as a page
+       rather than as a flash: one fixation is roughly 250-300ms, and below
+       about 200ms successive images fuse and read as flicker. 320ms is one
+       comfortable fixation per shop with a little to spare; 250 would be the
+       floor and there is nothing above it worth the risk. The way to make a
+       search look quicker is to show fewer shops, not to strobe them. */
+    at(3000, function () {
       if (ask) ask.textContent = full;
       el.setAttribute('data-beat', '2'); frameBeat(2);
       el.classList.add('flick');
     });
 
     /* 03 — shops flick past while the log fills, then the rejects are counted */
-    at(5100, function () {
+    at(3700, function () {
       el.setAttribute('data-beat', '3'); frameBeat(3);
     });
     lines.forEach(function (l, n) {
-      at(5400 + n * 970, function () {
+      at(3820 + n * 470, function () {
         l.classList.add('in');
         if (band) band.textContent = l.textContent;
       });
@@ -2326,10 +3034,10 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
     /* Four separate events, each long enough to be seen as one: the winning
        page simply sits there; then the sweep reads it once; then the ring
        closes on the tile; then it holds. */
-    at(8300, function () { el.classList.remove('flick'); ring(); });
-    at(8800, function () { el.classList.add('seek'); });
-    at(9600, function () { el.classList.remove('seek'); el.classList.add('found'); });
-    at(8400, function () {
+    at(5300, function () { el.classList.remove('flick'); ring(); });
+    at(5500, function () { el.classList.add('seek'); });
+    at(5950, function () { el.classList.remove('seek'); el.classList.add('found'); });
+    at(5350, function () {
       fills.forEach(function (f, n) { f.style.width = widths[n]; });
       var t0 = null;
       raf = requestAnimationFrame(function cnt(ts) {
@@ -2343,7 +3051,7 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
     /* 04 — the answer lands, and the reader's own cursor comes in from
        off-stage to buy it. Knili filled the checkout; the person clicks. */
     /* the winner is held, bars settled, before the page navigates */
-    at(10800, function () {
+    at(6300, function () {
       place(); flip();
       /* On a phone the shop arrives by sliding in, so the button's rect is only
          true once it has landed — measure again after the move. */
@@ -2351,7 +3059,7 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
       el.classList.remove('found');
       el.setAttribute('data-beat', '4'); frameBeat(4);
     });
-    at(13750, function () { el.classList.add('burst'); });
+    at(9250, function () { el.classList.add('burst'); });
 
     /* THE ENDING IS THE PAYOFF, HELD — and it used to be a title card. Beat 5
        faded a plate carrying the lockup and IT DOES THE SHOPPING. / YOU DO THE
@@ -2362,13 +3070,13 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
        page now (see .heromark) and the sequence ends on the thing only the
        sequence can show — a checkout with the order in it.
        So beat 4 keeps the ending instead, and the budget moves rather than
-       being deleted. .burst lands at 13750 and the ORDER PLACED chip's `chip`
-       animation runs 1.9s, so the last thing that MOVES stops at 15650.
+       being deleted. .burst lands at 9250 and the ORDER PLACED chip's `chip`
+       animation runs 1.9s, so the last thing that MOVES stops at 11150.
        Then 1100ms of nothing — the same hold the closing card was given,
        because the reader needs a beat on the filled bill and the pay bar, and
        an ending that cuts on the frame the motion stops reads as a dropped
-       shot rather than as an ending. 15650 + 1100 = 16750, and the loop runs
-       18.47s -> 16.75s.
+       shot rather than as an ending. 11150 + 1100 = 12250, and the loop runs
+       16.75s -> 12.25s.
        There is no fade left at the seam and there must not be one: with the
        card gone the only honest transition from a finished checkout back to an
        empty ask is a cut, and .cut above is what makes it one. */
@@ -2412,6 +3120,167 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
     if (ok && !live) { live = true; play(); }
     else if (!ok && live) { live = false; rest(); }
   }, { threshold: [0, OUT, IN] }).observe(win);
+})();
+</script>
+
+<script>
+/* WHICH SECTION YOU ARE IN, WITH THREE OF THEM TO BE IN. The bar's links used
+   to be one link to one place; there are two now and they are worth telling
+   apart. One observer over the two linked sections, and the LAST one whose
+   top has passed the bar wins — a ratio-based pick flickers between two
+   sections that are both half on screen, and this page's sections are taller
+   than a viewport. aria-current carries it, so the state is announced as well
+   as painted, and the stylesheet does the painting. Nothing here measures a
+   transformed element and nothing resizes anything. */
+(function () {
+  var links = [].slice.call(document.querySelectorAll('.barnav a[href^="#"]'));
+  if (!links.length || !('IntersectionObserver' in window)) return;
+  var pairs = links.map(function (a) {
+    return { a: a, sec: document.getElementById(a.getAttribute('href').slice(1)) };
+  }).filter(function (p) { return p.sec; });
+  if (!pairs.length) return;
+  function paint() {
+    var top = null;
+    pairs.forEach(function (p) {
+      /* 80 is the bar's own height plus a little; a section counts as "the one
+         you are in" from the moment its top goes under the bar. */
+      if (p.sec.getBoundingClientRect().top <= 80) top = p;
+    });
+    pairs.forEach(function (p) {
+      if (p === top) p.a.setAttribute('aria-current', 'true');
+      else p.a.removeAttribute('aria-current');
+    });
+  }
+  var pending = false;
+  function tick() {
+    if (pending) return;
+    pending = true;
+    requestAnimationFrame(function () { pending = false; paint(); });
+  }
+  window.addEventListener('scroll', tick, { passive: true });
+  window.addEventListener('resize', tick);
+  paint();
+})();
+</script>
+
+<script>
+/* ONE SHORTCUT, THE READER'S OWN. Both forms are in the markup so a page with
+   no JavaScript tells the truth to everybody; this deletes the one that would
+   not work on the machine looking at it. navigator.platform is deprecated and
+   still the only thing every browser answers, so the userAgent is checked too
+   and either is enough. Nothing here measures or moves anything: two nodes are
+   removed before first paint of that section, so there is no flash of the
+   wrong key. */
+(function () {
+  var mac = /Mac|iPhone|iPad|iPod/.test(navigator.platform || '') ||
+            /Mac OS X|iPhone|iPad/.test(navigator.userAgent || '');
+  var drop = document.querySelectorAll(mac ? '.kbwin' : '.kbmac');
+  [].forEach.call(drop, function (n) { n.parentNode.removeChild(n); });
+})();
+</script>
+
+<script>
+/* HOW TO USE, IN THREE AND A THIRD SECONDS. The hero's sequence is 16.75s and
+   is the page's loudest object; this one is deliberately shorter, calmer, and
+   it plays ONCE when it comes into view rather than looping. Two loops on one
+   page compete, and the one that should win is the one that carries the
+   argument.
+   It also stops early on purpose: the keystroke and the panel's entrance are
+   what this section knows that the hero does not. Running the errand again
+   here would be the same lesson told twice, the second time more quietly.
+   The markup is the LAST frame — panel in, keys up, cursor at the composer,
+   the first words typed — so with no JavaScript, or under reduced motion, the
+   section is a finished picture that carries the whole instruction. This only
+   ever winds it back and lets it run. */
+(function () {
+  var st = document.getElementById('ustage');
+  if (!st || !('IntersectionObserver' in window)) return;
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
+  var ask = document.getElementById('uask');
+  var full = ask ? ask.textContent : '';
+  /* the cycle, declared once — see the note beside at(ULOOP, play) */
+  var ULOOP = 5680;
+  var T = [];
+  function at(ms, fn) { T.push(setTimeout(fn, ms)); }
+  function clear() { T.forEach(clearTimeout); T = []; }
+
+  function rest() {
+    clear();
+    st.classList.remove('p1', 'p2', 'p3');
+    st.removeAttribute('data-u');
+    if (ask) ask.textContent = full;
+  }
+
+  function play() {
+    clear();
+    /* one frame with no transitions, so winding back to the start is a cut and
+       not a half-second of the panel sliding backwards out of the window */
+    st.classList.add('ucut');
+    st.classList.remove('p1', 'p2', 'p3');
+    st.setAttribute('data-u', '0');
+    if (ask) ask.textContent = '';
+    void st.offsetWidth;
+    st.classList.remove('ucut');
+
+    /* 520ms of a shop page and nothing else — the establishing beat. Then
+       the keys rise into it (340ms) and go down in the order a hand presses
+       them, not together. */
+    at(520,  function () { st.setAttribute('data-u', '1'); });
+    at(920,  function () { st.classList.add('p1'); });
+    at(1040, function () { st.classList.add('p2'); });
+    at(1160, function () { st.classList.add('p3'); });
+    at(1440, function () { st.classList.remove('p1', 'p2', 'p3'); });
+    /* released, and Knili comes in from the side — 500ms of transform */
+    at(1600, function () { st.setAttribute('data-u', '2'); });
+    /* then the reader's own cursor crosses to the composer — 600ms */
+    at(2220, function () { st.setAttribute('data-u', '3'); });
+    /* and types a few characters. Not the sentence: the hero types the
+       sentence, and this section is not about the sentence. */
+    at(2940, function () {
+      var i = 0;
+      (function tick() {
+        if (i >= full.length) { return; }
+        if (ask) ask.textContent = full.slice(0, ++i);
+        at(38 + Math.random() * 26, tick);
+      })();
+    });
+    /* and the gesture finishes where a gesture finishes: on the button. The
+       cursor crosses to GO (600ms), presses it, and that is the end — the
+       hero owns what happens next. */
+    at(3760, function () { st.setAttribute('data-u', '4'); });
+    at(4460, function () { st.classList.add('gopress'); });
+    at(4620, function () { st.classList.remove('gopress'); });
+    /* No rest() call here, and that was a real bug for one build: rest()
+       begins with clear(), which cancels every pending timeout — including
+       the at(ULOOP, play) below it. The sequence ran once and stopped. It is
+       not needed anyway: data-u="4" and the resting state paint the same
+       frame, so the picture simply holds until the wrap. rest() stays for the
+       path it is actually for — the scene scrolling out of view. */
+    /* AND IT COMES ROUND AGAIN. ULOOP is declared once, the way the hero's
+       LOOP is, and the restart goes through play(), which opens by hanging
+       .ucut on the stage for exactly one frame — transitions off, state set,
+       forced reflow, transitions back. So the wrap creates no transition and
+       never paints two scenes in one frame, which is the same guarantee the
+       hero's seam has and for the same reason.
+       900ms of the finished frame before it restarts. The hero loops with no
+       gap because it is the page's argument; this is the second animation on
+       the same screen and a hard immediate restart made it the busier of the
+       two, which it must not be. 4780 + 900 = 5680, so it comes round about
+       two and a half times for every one turn of the hero's 14550. */
+    at(ULOOP, play);
+  }
+
+  /* Two thresholds, for the reason the hero's observer has two: one edge with
+     no dead band restarts the scene every time a scroll dithers across it. */
+  var live = false, vis = false;
+  new IntersectionObserver(function (entries) {
+    var e = entries[entries.length - 1];
+    var r = e.isIntersecting ? e.intersectionRatio : 0;
+    vis = vis ? (r > 0.12) : (r >= 0.4);
+    var ok = vis && !(reduce && reduce.matches);
+    if (ok && !live) { live = true; play(); }
+    else if (!ok && live) { live = false; rest(); }
+  }, { threshold: [0, 0.12, 0.4] }).observe(st.parentNode);
 })();
 </script>
 
