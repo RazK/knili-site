@@ -2929,10 +2929,26 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
      against beats; this is the number the pass ends on, and the loop track
      under the window is driven from it (see progress()) so the bar and the
      wrap cannot disagree. The last thing that moves — the ORDER PLACED chip —
-     settles at 13640 and beat 4 is then held for 1100ms; see the note beside
+     settles at 14620 and beat 4 is then held for 1100ms; see the note beside
      at(LOOP, play) for why that hold is 1100.
-     13540 -> 14740, AND IT IS REPORTED RATHER THAN HIDDEN. The owner read the
-     timeline as a numbered list and said of the line "beat 4 — card arrives,
+     14740 -> 15720, AND THE 980 IS THE FOUND PRODUCT BEING HELD. The owner
+     read the timeline and said of the pick "this happens too fast". Measured,
+     he was righter than the line admitted: the ring's own `converge` runs
+     600ms and beat 4 was cutting it off at 53%, so the "320ms hold" was not a
+     hold, it was an interruption. 600 of the 980 lets the ring land; 380 —
+     the 700ms it is then held, less the 320 that was already there — is the
+     only genuinely new stillness. See the note above at(5000).
+     IT WAS NOT TAKEN OUT OF THE FLICK, AND HERE IS THAT NUMBER TOO. 320ms is
+     available there for exactly one storefront: the flick is 1100ms at the
+     fixed 320ms per shop, which is 3.4 pages, and funding a third of this
+     from it leaves 2.4. The owner has twice asked the search to feel quicker
+     and it has twice been paid for out of the scan, but he did not ask for it
+     this time — he asked for the opposite thing, at the moment the scan ends
+     — and 2.4 storefronts is one page short of reading as a scan at all. It
+     is offered in the report rather than taken.
+     13540 -> 14740 WAS THE CHECKOUT'S ARRIVAL BEING SPLIT FROM THE FLIGHT.
+     The owner read the timeline as a numbered list and said of the line
+     "beat 4 — card arrives,
      thumbnail flies in" that it needed to be slower and split into two steps.
      That is 1000ms of card-arrival-and-hold in front of a flight that is
      itself 200ms longer: +1200, exactly, and nothing downstream was
@@ -2942,9 +2958,12 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
      air and there is none left of any size: the typing dwell (~1430ms) was
      asked for by a reader; the 900ms before the flick is beat 2's arrival and
      was asked for; the flick is 1100ms at the fixed 320ms per shop, which is
-     3.4 storefronts and the floor (see beat 2); the 219/400/324ms of settle,
+     3.4 storefronts and the floor (see beat 2); the 219/400/1300ms of settle,
      sweep and hold on the winner are four separate events each sized to be
-     seen; the cursor's 451ms on the card and the 700ms landing hold are the
+     seen (that last one WAS 324 when this was written, and it was the one
+     number in the file that had never been checked against the animation it
+     was holding — see at(5000)); the cursor's 451ms on the card and the 700ms
+     landing hold are the
      two stillnesses the beat is built on; and the 1100ms at the end is the
      reader's beat on the finished bill. The only slack in the file is the
      trailing 350ms of the handoff keyframes after the cursor's last stop, and
@@ -2974,7 +2993,7 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
      flash; at 1400 you can follow it filling. The 500 came out of the beat's
      own dead time, not off the loop — see the sub-phase list in beat 4. */
   var KWASH = 1400;
-  var LOOP = 14740;
+  var LOOP = 15720;
   var T = [], raf = null;
 
   /* Where the cursor has to land is a fact about the rendered button, not a
@@ -3615,6 +3634,21 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
     /* Four separate events, each long enough to be seen as one: the winning
        page simply sits there; then the sweep reads it once; then the ring
        closes on the tile; then it holds.
+       AND UNTIL NOW THE LAST TWO OF THOSE WERE A CLAIM RATHER THAN A FACT.
+       `.stage.found .pickring` runs `converge` for 600ms — the ring starts at
+       1.9x and decelerates onto the tile — so from .found at 5620 it lands at
+       6220. Beat 4 used to arrive at 5940. The camera therefore cut to the
+       checkout 280ms BEFORE the ring had finished closing, at 53% of its own
+       convergence, and `.stage[data-beat="4"] .pickring{opacity:0}` then took
+       what was left of it away. There was no hold on the found product at
+       all; there was an interrupted animation. The owner's words were "this
+       happens too fast" and "we need a little bit more time after the product
+       is selected", and the stopwatch agrees with him twice over.
+       SO THE GAP IS 1300ms AND ONLY 700 OF IT IS NEW. 600 is the ring being
+       allowed to finish. The 700 that follows is the same number the
+       thumbnail's landing gets at beat 4, because it is the same kind of
+       event — a thing arrives in place and you look at it — and this one is
+       the answer to the whole search. Beat 4 moves 5940 -> 6920.
        AND THE SCAN IS WHERE THE TWO NEW HOLDS WERE PAID FOR. The flick ran
        1600ms and now runs 1100; the log lines were 470ms apart and are 330.
        Nothing was removed and nothing strobes — the pages simply stop being
@@ -3688,7 +3722,7 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
        of 3.4s = 5000) rather than carried along by hand, which is where the
        drift came from. Reclaiming those 575ms is why the loop grows by 700
        and not by 1275. */
-    at(5940, function () {
+    at(6920, function () {
       place(); flip();
       /* On a phone the shop arrives by sliding in, so the button's rect is only
          true once it has landed — measure again after the move. */
@@ -3729,12 +3763,12 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
          the button are one event rather than two overlapping ones */
       at(5550, function () { el.classList.remove('fill', 'filled', 'pay', 'paid'); });
     });
-    /* 5940 + 6200: the frame the button is at the bottom of its press. Read
+    /* 6920 + 6200: the frame the button is at the bottom of its press. Read
        off the handoff/press stops (3.3s delay + 85.3% of 3.4s), not guessed —
        see the sub-phase list above for the 575ms of drift that guessing
        accumulated. The delay moved with the two new holds in front of it and
        this number moved with the delay, because it is derived from it. */
-    at(12140, function () { el.classList.add('burst'); });
+    at(13120, function () { el.classList.add('burst'); });
 
     /* THE ENDING IS THE PAYOFF, HELD — and it used to be a title card. Beat 5
        faded a plate carrying the lockup and IT DOES THE SHOPPING. / YOU DO THE
@@ -3745,15 +3779,16 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
        page now (see .heromark) and the sequence ends on the thing only the
        sequence can show — a checkout with the order in it.
        So beat 4 keeps the ending instead, and the budget moves rather than
-       being deleted. .burst lands at 12140 and the ORDER PLACED chip's `chip`
-       animation runs 1.5s, so the last thing that MOVES stops at 13640.
+       being deleted. .burst lands at 13120 and the ORDER PLACED chip's `chip`
+       animation runs 1.5s, so the last thing that MOVES stops at 14620.
        Then 1100ms of nothing — the same hold the closing card was given,
        because the reader needs a beat on the filled bill and the pay bar, and
        an ending that cuts on the frame the motion stops reads as a dropped
-       shot rather than as an ending. 13640 + 1100 = 14740, and the loop runs
-       16.75s -> 14.74s. It was 12.84s before the cart flight and the cursor
-       were slowed and 13.54s before the checkout's arrival was split off from
-       the flight; the 1100 hold is the one number at this end that has NEVER
+       shot rather than as an ending. 14620 + 1100 = 15720, and the loop runs
+       16.75s -> 15.72s. It was 12.84s before the cart flight and the cursor
+       were slowed, 13.54s before the checkout's arrival was split off from
+       the flight, and 14.74s before the found product was allowed to land;
+       the 1100 hold is the one number at this end that has NEVER
        moved, because it is the reader's beat on the finished bill and it was
        already the minimum that reads as an ending rather than a cut.
        There is no fade left at the seam and there must not be one: with the
@@ -3859,7 +3894,7 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
 </script>
 
 <script>
-/* HOW TO USE, IN THREE AND A THIRD SECONDS. The hero's sequence is 14.74s and
+/* HOW TO USE, IN THREE AND A THIRD SECONDS. The hero's sequence is 15.72s and
    is the page's loudest object; this one is deliberately shorter, calmer, and
    it plays ONCE when it comes into view rather than looping. Two loops on one
    page compete, and the one that should win is the one that carries the
@@ -3950,7 +3985,7 @@ footer{background:var(--paper);border-top:1px solid #E2E5F0;padding:20px 0}
        gap because it is the page's argument; this is the second animation on
        the same screen and a hard immediate restart made it the busier of the
        two, which it must not be. 4780 + 900 = 5680, so it comes round about
-       two and a half times for every one turn of the hero's 14740. */
+       two and three quarter times for every one turn of the hero's 15720. */
     at(ULOOP, play);
   }
 
